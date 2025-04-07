@@ -59,3 +59,6 @@ logs/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Augment agent configuration
+.augment-agent
