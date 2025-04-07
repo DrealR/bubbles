@@ -13,23 +13,36 @@
         --accent-color: #ffde00; /* Pikachu Yellow */
         --accent-dark: #e6c900;
 
-        --bg-color: #f8f9fa;
+        --bg-color: #f0f4f8; /* Lighter, softer background */
         --card-bg: #ffffff;
         --text-color: #333333;
         --muted-text-color: #6c757d;
         --success-color: #4caf50;
         --error-color: #f44336;
         --disabled-color: #bdbdbd;
+        --border-color: #e5e7eb;
+
+        /* Bubble specific */
+        --bubble-pop-button-bg: rgba(255, 255, 255, 0.7);
+        --bubble-pop-button-bg-hover: rgba(255, 255, 255, 0.9);
+        --bubble-pop-button-icon-color: var(--secondary-color);
+        --bubble-pop-button-icon-color-hover: var(--secondary-dark);
+        --bubble-border-radius: 30px; /* Larger radius for bubble feel */
+        --bubble-pop-duration: 0.4s;
 
         --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
           Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
           sans-serif;
+        --mono-font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono",
+          monospace;
         --base-font-size: 16px;
-        --border-radius: 12px;
+        --border-radius: 12px; /* Standard border radius */
         --card-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
         --focus-ring: 0 0 0 3px rgba(59, 76, 202, 0.4);
         --transition-speed: 0.3s;
         --transition-func: ease;
+
+        --container-max-width: 1200px;
       }
 
       /* Basic Reset & Body Styles */
@@ -51,11 +64,116 @@
         color: var(--text-color);
         font-family: var(--font-family);
         line-height: 1.6;
-        display: flex;
-        flex-direction: column;
         min-height: 100vh;
         padding: 1.5rem;
-        align-items: center; /* Center the game container */
+        position: relative; /* Needed for fixed elements relative to body if required */
+        overflow-x: hidden; /* Prevent horizontal scroll */
+      }
+
+      /* Bubble Wrapper Styling */
+      #bubble-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Center content */
+        width: 100%;
+        min-height: calc(100vh - 3rem); /* Account for body padding */
+        background-color: var(
+          --bg-color
+        ); /* Match body or slightly different */
+        border-radius: var(--bubble-border-radius);
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.5),
+          0 10px 30px rgba(0, 0, 0, 0.1); /* Outer glow and shadow */
+        padding: 1rem; /* Internal padding for wrapper */
+        transition: transform var(--bubble-pop-duration) ease-out,
+          opacity var(--bubble-pop-duration) ease-out;
+        transform-origin: center center;
+        overflow: hidden; /* Clip content during pop */
+      }
+
+      @media (min-width: 600px) {
+        #bubble-wrapper {
+          padding: 2rem;
+        }
+      }
+
+      /* Pop Out Animation */
+      #bubble-wrapper.popping-out {
+        transform: scale(1.3);
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      @keyframes pop-out-animation {
+        0% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1.3);
+          opacity: 0;
+        }
+      }
+
+      /* Apply animation only if not reduced motion */
+      @media (prefers-reduced-motion: no-preference) {
+        #bubble-wrapper.popping-out {
+          animation: pop-out-animation var(--bubble-pop-duration) ease-out
+            forwards;
+        }
+      }
+
+      /* Pop Bubble Button */
+      #pop-bubble-button {
+        position: fixed;
+        top: 1.5rem;
+        left: 1.5rem;
+        z-index: 1000;
+        width: 44px;
+        height: 44px;
+        background-color: var(--bubble-pop-button-bg);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        transition: background-color var(--transition-speed)
+            var(--transition-func),
+          transform var(--transition-speed) var(--transition-func),
+          box-shadow var(--transition-speed) var(--transition-func);
+        appearance: none;
+        padding: 0;
+      }
+
+      #pop-bubble-button svg {
+        width: 24px;
+        height: 24px;
+        color: var(--bubble-pop-button-icon-color);
+        transition: color var(--transition-speed) var(--transition-func);
+      }
+
+      #pop-bubble-button:hover {
+        background-color: var(--bubble-pop-button-bg-hover);
+        transform: scale(1.1);
+        box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
+      }
+      #pop-bubble-button:hover svg {
+        color: var(--bubble-pop-button-icon-color-hover);
+      }
+
+      #pop-bubble-button:focus {
+        outline: none;
+      }
+      #pop-bubble-button:focus-visible {
+        box-shadow: 0 0 0 3px var(--focus-ring), 0 3px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      #pop-bubble-button:active {
+        transform: scale(1);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
       }
 
       /* Game Title */
@@ -66,6 +184,8 @@
         font-size: clamp(2rem, 5vw, 2.8rem);
         font-weight: 700;
         text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        /* Added margin top to space from potential top of wrapper */
+        margin-top: 1rem;
       }
 
       /* Main Game Layout */
@@ -73,7 +193,7 @@
         display: flex;
         flex-direction: column;
         gap: 2rem;
-        max-width: 1200px;
+        max-width: var(--container-max-width);
         width: 100%;
       }
 
@@ -107,11 +227,8 @@
         width: 100%;
         max-width: 400px;
         padding: 1.5rem;
-        background-color: var(
-          --card-bg
-        ); /* Re-declare for specificity if needed */
+        background-color: var(--card-bg);
         border-radius: var(--border-radius);
-        /* No shadow here, shadow is on game-area */
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -163,7 +280,7 @@
         font-weight: 600;
         margin-bottom: 0.75rem;
         text-transform: capitalize;
-        min-height: 1.9rem * 1.2; /* Prevent layout shift */
+        min-height: calc(1.9rem * 1.2); /* Prevent layout shift */
         display: flex;
         align-items: center;
         justify-content: center;
@@ -171,6 +288,7 @@
 
       .pokemon-types {
         display: flex;
+        flex-wrap: wrap; /* Allow wrapping if many types */
         gap: 0.5rem;
         justify-content: center;
         margin-bottom: 1.25rem;
@@ -214,7 +332,7 @@
         font-weight: 700;
         font-size: 1.3rem;
         color: var(--secondary-color);
-        min-height: 1.3rem * 1.2; /* Prevent layout shift */
+        min-height: calc(1.3rem * 1.2); /* Prevent layout shift */
       }
 
       /* Catch Button */
@@ -375,7 +493,7 @@
         gap: 0.6rem;
         margin-bottom: 0.5rem; /* Add margin bottom */
         font-weight: 600;
-        border-bottom: 2px solid var(--bg-color);
+        border-bottom: 2px solid var(--border-color);
         padding-bottom: 0.5rem;
       }
       .collection-title svg {
@@ -411,8 +529,14 @@
         overflow-y: auto;
         max-height: 550px; /* Slightly increased */
         padding: 0.75rem;
-        background-color: var(--bg-color); /* Light background for contrast */
+        background-color: rgba(
+          255,
+          255,
+          255,
+          0.5
+        ); /* Slightly transparent BG */
         border-radius: var(--border-radius);
+        border: 1px solid var(--border-color);
         min-height: 150px; /* Ensure it has some height even when empty */
       }
 
@@ -452,6 +576,7 @@
         font-weight: 600;
         text-transform: capitalize;
         line-height: 1.3;
+        word-break: break-word; /* Prevent overflow */
       }
 
       /* Empty Collection State */
@@ -571,7 +696,7 @@
         background-color: #f8d030;
         color: #333;
         text-shadow: none;
-      } /* Adjusted contrast */
+      }
       .type-ice {
         background-color: #98d8d8;
       }
@@ -615,6 +740,52 @@
       /* Hidden SVG definitions */
       .hidden-svgs {
         display: none;
+      }
+
+      /* Visually Hidden Utility Class */
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      /* Prompt Info Footer */
+      .prompt-info {
+        text-align: center;
+        margin-top: 3rem; /* Space above */
+        padding: 1.5rem 1rem; /* Padding top/bottom and left/right */
+        border-top: 1px solid var(--border-color); /* Subtle separator */
+        width: 100%;
+        max-width: var(
+          --container-max-width
+        ); /* Match game container max-width */
+        box-sizing: border-box; /* Include padding in width */
+      }
+
+      .prompt-info p {
+        font-size: 0.85rem;
+        color: var(--muted-text-color);
+        line-height: 1.5;
+      }
+
+      .prompt-info code {
+        background-color: rgba(
+          59,
+          76,
+          202,
+          0.08
+        ); /* Use secondary color with alpha */
+        color: var(--secondary-dark);
+        padding: 0.2em 0.5em;
+        border-radius: 6px;
+        font-family: var(--mono-font-family);
+        font-size: 0.9em; /* Slightly smaller than surrounding text */
       }
     </style>
   </head>
@@ -691,147 +862,172 @@
           ></path>
           <circle cx="12" cy="12" r="2.5"></circle>
         </svg>
+        <!-- Icon for Pop Bubble Button -->
+        <svg
+          id="icon-pop-bubble"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6.758 17.243L12.001 12m5.243-5.243L12 12m0 0L6.758 6.757M12.001 12l5.243 5.243"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
       </defs>
     </svg>
 
-    <h1 class="game-title">Pokémon Catch Adventure</h1>
+    <!-- Pop Bubble Button -->
+    <button id="pop-bubble-button" aria-label="Pop bubble and return home">
+      <svg aria-hidden="true" focusable="false">
+        <use xlink:href="#icon-pop-bubble" />
+      </svg>
+    </button>
 
-    <div class="game-container">
-      <!-- Game Area: Encounter -->
-      <section class="game-area" aria-labelledby="encounter-heading">
-        <h2 id="encounter-heading" class="visually-hidden">
-          Pokémon Encounter
-        </h2>
-        <div class="message-area" role="alert" aria-live="polite">
-          <div id="message" class="message"></div>
-        </div>
-        <div class="pokemon-card" id="pokemon-card" aria-busy="false">
-          <div
-            class="pokeball-animation-container"
-            id="pokeball-animation-container"
-          >
-            <!-- Animation injected here -->
+    <!-- Main Content Wrapper -->
+    <div id="bubble-wrapper">
+      <h1 class="game-title">Pokémon Catch Adventure</h1>
+
+      <div class="game-container">
+        <!-- Game Area: Encounter -->
+        <section class="game-area" aria-labelledby="encounter-heading">
+          <h2 id="encounter-heading" class="visually-hidden">
+            Pokémon Encounter
+          </h2>
+          <div class="message-area" role="alert" aria-live="polite">
+            <div id="message" class="message"></div>
           </div>
-          <div class="pokemon-image-container">
-            <img
-              id="pokemon-image"
-              class="pokemon-image hidden"
-              src=""
-              alt="A wild Pokémon appears!"
-            />
-            <!-- Initial alt text -->
-          </div>
-          <div class="pokemon-info">
-            <h3 id="pokemon-name" class="pokemon-name">???</h3>
-            <div id="pokemon-types" class="pokemon-types">
-              <span
-                class="pokemon-type"
-                style="background-color: var(--muted-text-color)"
-                >???</span
-              >
-            </div>
-            <div id="pokemon-stats" class="pokemon-stats">
-              <div class="stat">
-                <p>HP</p>
-                <p id="stat-hp" class="stat-value">?</p>
-              </div>
-              <div class="stat">
-                <p>Attack</p>
-                <p id="stat-attack" class="stat-value">?</p>
-              </div>
-              <div class="stat">
-                <p>Defense</p>
-                <p id="stat-defense" class="stat-value">?</p>
-              </div>
-              <div class="stat">
-                <p>Speed</p>
-                <p id="stat-speed" class="stat-value">?</p>
-              </div>
-            </div>
-          </div>
-          <button id="catch-button" class="catch-button" disabled>
-            <!-- Initially disabled until Pokemon loads -->
-            <svg
-              class="pokeball-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+          <div class="pokemon-card" id="pokemon-card" aria-busy="false">
+            <div
+              class="pokeball-animation-container"
+              id="pokeball-animation-container"
             >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="2"
+              <!-- Animation injected here -->
+            </div>
+            <div class="pokemon-image-container">
+              <img
+                id="pokemon-image"
+                class="pokemon-image hidden"
+                src=""
+                alt="Silhouette of an unknown Pokémon"
               />
-              <line
-                x1="2"
-                y1="12"
-                x2="22"
-                y2="12"
-                stroke="currentColor"
-                stroke-width="2"
-              />
-              <circle cx="12" cy="12" r="3" fill="currentColor" />
-            </svg>
-            <span id="catch-button-text">Catch Pokémon</span>
-          </button>
-        </div>
-        <div class="game-controls">
-          <button id="new-pokemon-button" class="control-button">
-            Find New Pokémon
-          </button>
-          <button id="reset-game-button" class="control-button">
-            Reset Game
-          </button>
-        </div>
-      </section>
+              <!-- Initial alt text -->
+            </div>
+            <div class="pokemon-info">
+              <h3 id="pokemon-name" class="pokemon-name">???</h3>
+              <div id="pokemon-types" class="pokemon-types">
+                <span
+                  class="pokemon-type"
+                  style="background-color: var(--muted-text-color)"
+                  >???</span
+                >
+              </div>
+              <div id="pokemon-stats" class="pokemon-stats">
+                <div class="stat">
+                  <p>HP</p>
+                  <p id="stat-hp" class="stat-value">?</p>
+                </div>
+                <div class="stat">
+                  <p>Attack</p>
+                  <p id="stat-attack" class="stat-value">?</p>
+                </div>
+                <div class="stat">
+                  <p>Defense</p>
+                  <p id="stat-defense" class="stat-value">?</p>
+                </div>
+                <div class="stat">
+                  <p>Speed</p>
+                  <p id="stat-speed" class="stat-value">?</p>
+                </div>
+              </div>
+            </div>
+            <button id="catch-button" class="catch-button" disabled>
+              <!-- Initially disabled until Pokemon loads -->
+              <svg
+                class="pokeball-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+                <line
+                  x1="2"
+                  y1="12"
+                  x2="22"
+                  y2="12"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+                <circle cx="12" cy="12" r="3" fill="currentColor" />
+              </svg>
+              <span id="catch-button-text">Catch Pokémon</span>
+            </button>
+          </div>
+          <div class="game-controls">
+            <button id="new-pokemon-button" class="control-button">
+              Find New Pokémon
+            </button>
+            <button id="reset-game-button" class="control-button">
+              Reset Game
+            </button>
+          </div>
+        </section>
 
-      <!-- Collection Area -->
-      <section class="collection-area" aria-labelledby="collection-heading">
-        <h2 class="collection-title" id="collection-heading">
-          <svg aria-hidden="true" focusable="false">
-            <use xlink:href="#icon-collection" />
-          </svg>
-          Your Collection
-        </h2>
-        <div class="collection-stats">
-          <div class="collection-stat">
-            Caught: <span id="caught-count">0</span>
-          </div>
-          <div class="collection-stat">
-            Encounters: <span id="encounter-count">0</span>
-          </div>
-          <div class="collection-stat">
-            Success Rate: <span id="success-rate">0%</span>
-          </div>
-        </div>
-        <div id="collection-grid" class="collection-grid">
-          <!-- Collection items will be added here -->
-          <div class="empty-collection" id="empty-collection-message">
+        <!-- Collection Area -->
+        <section class="collection-area" aria-labelledby="collection-heading">
+          <h2 class="collection-title" id="collection-heading">
             <svg aria-hidden="true" focusable="false">
-              <use xlink:href="#icon-pokeball-empty" />
+              <use xlink:href="#icon-collection" />
             </svg>
-            <span>Your collection is empty. Go catch some Pokémon!</span>
+            Your Collection
+          </h2>
+          <div class="collection-stats">
+            <div class="collection-stat">
+              Caught: <span id="caught-count">0</span>
+            </div>
+            <div class="collection-stat">
+              Encounters: <span id="encounter-count">0</span>
+            </div>
+            <div class="collection-stat">
+              Success Rate: <span id="success-rate">0%</span>
+            </div>
           </div>
-        </div>
-      </section>
-    </div>
+          <div id="collection-grid" class="collection-grid">
+            <!-- Collection items will be added here -->
+            <div class="empty-collection" id="empty-collection-message">
+              <svg aria-hidden="true" focusable="false">
+                <use xlink:href="#icon-pokeball-empty" />
+              </svg>
+              <span>Your collection is empty. Go catch some Pokémon!</span>
+            </div>
+          </div>
+        </section>
+      </div>
 
-    <!-- Visually Hidden Utility Class -->
-    <style>
-      .visually-hidden {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-      }
-    </style>
+      <footer class="prompt-info">
+        <p>
+          This Bubble was generated from the prompt:
+          <code>Create a pokemon game</code> with refinement:
+          <code
+            >add a way to go back to the index.html file, it could be a basic
+            home button but i would rather it be like a bubble thing where you
+            burst it and get popped out of this experience and back to the home
+            page</code
+          >
+        </p>
+      </footer>
+    </div>
+    <!-- End of bubble-wrapper -->
 
     <script>
       (function () {
@@ -839,9 +1035,9 @@
 
         /**
          * Simplified local Pokémon database.
-         * In a real scenario, this might come from an API, but here it's embedded.
          */
         const pokemonDatabase = [
+          // ... (Pokemon database remains the same)
           {
             id: 1,
             name: "bulbasaur",
@@ -983,15 +1179,14 @@
         const gameState = {
           currentPokemon: null,
           collection: [], // Stores { id, name, sprite, types }
-          stats: {
-            encounters: 0,
-            caught: 0,
-          },
+          stats: { encounters: 0, caught: 0 },
           isCatching: false, // Prevent multiple catch attempts simultaneously
         };
 
         // DOM Elements Cache
         const DOMElements = {
+          bubbleWrapper: document.getElementById("bubble-wrapper"),
+          popBubbleButton: document.getElementById("pop-bubble-button"),
           pokemonCard: document.getElementById("pokemon-card"),
           pokemonImage: document.getElementById("pokemon-image"),
           pokemonName: document.getElementById("pokemon-name"),
@@ -1047,7 +1242,9 @@
           gameState.isCatching = false;
           updateStatsDisplay();
           updateCollectionDisplay();
-          DOMElements.message.classList.remove("visible"); // Hide any lingering messages
+          DOMElements.message.classList.remove("visible", "success", "error"); // Hide any lingering messages
+          DOMElements.catchButton.disabled = true; // Start disabled
+          DOMElements.catchButtonText.textContent = "Catch Pokémon";
         }
 
         /**
@@ -1062,7 +1259,7 @@
           displayCurrentPokemon(false); // Display as hidden initially
           DOMElements.catchButton.disabled = false; // Enable catch button
           DOMElements.pokemonCard.setAttribute("aria-busy", "false");
-          DOMElements.message.classList.remove("visible"); // Hide previous message
+          DOMElements.message.classList.remove("visible", "success", "error"); // Hide previous message
         }
 
         /**
@@ -1071,7 +1268,7 @@
          */
         function displayCurrentPokemon(reveal = false) {
           const pokemon = gameState.currentPokemon;
-          if (!pokemon) return; // Should not happen in normal flow
+          if (!pokemon) return;
 
           DOMElements.pokemonCard.setAttribute("aria-busy", "true"); // Indicate loading/updating
 
@@ -1079,14 +1276,18 @@
           DOMElements.pokemonImage.src = pokemon.sprite;
           if (reveal) {
             DOMElements.pokemonImage.classList.remove("hidden");
-            DOMElements.pokemonImage.alt = `Artwork of ${pokemon.name}`;
+            DOMElements.pokemonImage.alt = `Artwork of ${capitalize(
+              pokemon.name
+            )}`;
           } else {
             DOMElements.pokemonImage.classList.add("hidden");
             DOMElements.pokemonImage.alt = "Silhouette of an unknown Pokémon";
           }
 
           // --- Update Name ---
-          DOMElements.pokemonName.textContent = reveal ? pokemon.name : "???";
+          DOMElements.pokemonName.textContent = reveal
+            ? capitalize(pokemon.name)
+            : "???";
 
           // --- Update Types ---
           DOMElements.pokemonTypes.innerHTML = ""; // Clear previous types
@@ -1123,11 +1324,8 @@
             : "Catch Pokémon";
           DOMElements.catchButton.disabled = reveal || gameState.isCatching; // Disable if revealed or currently catching
 
-          // Ensure the card is marked as not busy after updates (slight delay for visual effect)
-          setTimeout(
-            () => DOMElements.pokemonCard.setAttribute("aria-busy", "false"),
-            100
-          );
+          // Ensure the card is marked as not busy after updates
+          DOMElements.pokemonCard.setAttribute("aria-busy", "false");
         }
 
         /**
@@ -1145,7 +1343,7 @@
           gameState.isCatching = true;
           DOMElements.catchButton.disabled = true;
           DOMElements.pokemonCard.setAttribute("aria-busy", "true");
-          DOMElements.message.classList.remove("visible"); // Hide previous message
+          DOMElements.message.classList.remove("visible", "success", "error"); // Hide previous message
 
           // --- Pokeball Animation ---
           const pokeballGraphic = document
@@ -1154,14 +1352,16 @@
           pokeballGraphic.classList.add("pokeball-animation");
           DOMElements.pokeballAnimationContainer.innerHTML = ""; // Clear previous animation
           DOMElements.pokeballAnimationContainer.appendChild(pokeballGraphic);
-          // Trigger animation by adding class after insertion
+
+          // Trigger animation using requestAnimationFrame for reliability
           requestAnimationFrame(() => {
-            pokeballGraphic.classList.add("throw");
+            requestAnimationFrame(() => {
+              // Double request ensures it happens after DOM update
+              pokeballGraphic.classList.add("throw");
+            });
           });
 
           // --- Calculate Catch Chance ---
-          // More complex calculation could involve level, HP, status, ball type etc.
-          // Simple rarity-based chance for this demo.
           let catchChance;
           switch (gameState.currentPokemon.rarity) {
             case "common":
@@ -1182,7 +1382,6 @@
           const isCaught = Math.random() < catchChance;
 
           // --- Process Catch Result (after animation) ---
-          // Timeout duration matches the pokeball animation duration
           setTimeout(() => {
             if (isCaught) {
               handleCatchSuccess();
@@ -1190,16 +1389,20 @@
               handleCatchFailure();
             }
 
-            // Clean up animation element after a short delay
+            // Clean up animation element safely
             setTimeout(() => {
-              if (pokeballGraphic.parentNode) {
-                DOMElements.pokeballAnimationContainer.innerHTML = "";
+              if (
+                DOMElements.pokeballAnimationContainer.contains(pokeballGraphic)
+              ) {
+                DOMElements.pokeballAnimationContainer.removeChild(
+                  pokeballGraphic
+                );
               }
-            }, 500);
+            }, 500); // Give fade out time
 
             gameState.isCatching = false;
             DOMElements.pokemonCard.setAttribute("aria-busy", "false");
-            // Re-enable catch button ONLY if the catch failed
+            // Re-enable catch button ONLY if the catch failed AND pokemon wasn't revealed
             if (!isCaught) {
               DOMElements.catchButton.disabled = false;
             }
@@ -1211,12 +1414,15 @@
          */
         function handleCatchSuccess() {
           const caughtPokemon = { ...gameState.currentPokemon }; // Clone data
-          gameState.collection.push({
-            id: caughtPokemon.id,
-            name: caughtPokemon.name,
-            sprite: caughtPokemon.sprite,
-            types: caughtPokemon.types,
-          });
+          // Avoid adding duplicates if already caught (simple check by ID)
+          if (!gameState.collection.some((p) => p.id === caughtPokemon.id)) {
+            gameState.collection.push({
+              id: caughtPokemon.id,
+              name: caughtPokemon.name,
+              sprite: caughtPokemon.sprite,
+              types: caughtPokemon.types,
+            });
+          }
           gameState.stats.caught++;
           updateStatsDisplay();
           updateCollectionDisplay();
@@ -1253,16 +1459,15 @@
          * @param {'success' | 'error'} type - The type of message.
          */
         function showMessage(text, type) {
-          // Sanitize text before displaying (though it's internally generated here)
-          DOMElements.message.textContent = text;
+          DOMElements.message.textContent = text; // textContent is safer
           DOMElements.message.className = `message ${type}`; // Reset classes first
 
-          // Trigger reflow before adding 'visible' for transition
+          // Force reflow to ensure transition plays
           void DOMElements.message.offsetWidth;
 
           DOMElements.message.classList.add("visible");
 
-          // Hide the message after a delay
+          // Automatically hide after a delay
           setTimeout(() => {
             DOMElements.message.classList.remove("visible");
           }, 3500);
@@ -1275,15 +1480,17 @@
           DOMElements.collectionGrid.innerHTML = ""; // Clear grid
 
           if (gameState.collection.length === 0) {
-            // Show the empty message (already in HTML, just ensure it's visible)
+            // Ensure the empty message is properly displayed
             const emptyMsg =
               DOMElements.emptyCollectionMessage ||
-              createEmptyCollectionMessage(); // Defensive check
+              createEmptyCollectionMessage();
+            emptyMsg.style.display = "flex"; // Ensure it's visible
             DOMElements.collectionGrid.appendChild(emptyMsg);
           } else {
-            // Hide empty message if it exists dynamically (though it's static here)
-            if (DOMElements.emptyCollectionMessage)
+            // Hide empty message if it exists
+            if (DOMElements.emptyCollectionMessage) {
               DOMElements.emptyCollectionMessage.style.display = "none";
+            }
 
             // Sort collection alphabetically for consistency
             const sortedCollection = [...gameState.collection].sort((a, b) =>
@@ -1305,6 +1512,8 @@
               image.src = pokemon.sprite;
               image.alt = ""; // Decorative within the item context
               image.loading = "lazy"; // Improve initial load
+              image.width = 70; // Explicit size helps rendering
+              image.height = 70;
 
               const name = document.createElement("p");
               name.textContent = capitalize(pokemon.name);
@@ -1316,11 +1525,17 @@
           }
         }
 
-        /** Creates the empty collection message element (fallback if not in HTML) */
+        /** Creates the empty collection message element if needed */
         function createEmptyCollectionMessage() {
+          // Check if it already exists in the hidden DOM or somewhere else
+          if (document.getElementById("empty-collection-message")) {
+            return document.getElementById("empty-collection-message");
+          }
+          // Otherwise create it (should ideally be in the initial HTML)
           const emptyMessage = document.createElement("div");
           emptyMessage.className = "empty-collection";
           emptyMessage.id = "empty-collection-message";
+          emptyMessage.style.display = "flex"; // Set default display
 
           const iconSvg = document.createElementNS(
             "http://www.w3.org/2000/svg",
@@ -1345,6 +1560,7 @@
 
           emptyMessage.appendChild(iconSvg);
           emptyMessage.appendChild(textSpan);
+          DOMElements.emptyCollectionMessage = emptyMessage; // Cache it
           return emptyMessage;
         }
 
@@ -1374,6 +1590,59 @@
           return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
+        /**
+         * Gets animation duration from CSS Custom Property or uses fallback.
+         * @param {string} propertyName - The CSS custom property name.
+         * @param {number} fallbackMs - The fallback duration in milliseconds.
+         * @returns {number} Duration in milliseconds.
+         */
+        function getCssVariableDuration(propertyName, fallbackMs) {
+          try {
+            const durationStr = getComputedStyle(document.documentElement)
+              .getPropertyValue(propertyName)
+              .trim();
+            if (durationStr) {
+              const match = durationStr.match(/^(\d*\.?\d+)(m?s)?$/i);
+              if (match) {
+                const value = parseFloat(match[1]);
+                const unit = match[2]?.toLowerCase();
+                if (unit === "s") return value * 1000;
+                if (unit === "ms" || !unit) return value;
+              }
+            }
+          } catch (e) {
+            console.warn(
+              `Could not parse CSS variable ${propertyName} as duration:`,
+              e
+            );
+          }
+          return fallbackMs;
+        }
+
+        /**
+         * Handles the 'Pop Bubble' button click.
+         */
+        function handlePopBubble() {
+          const animationDuration = getCssVariableDuration(
+            "--bubble-pop-duration",
+            400
+          );
+          const prefersReducedMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+          ).matches;
+          const destination = "index.html"; // Assume it's in the same directory
+
+          if (prefersReducedMotion) {
+            window.location.href = destination;
+          } else {
+            DOMElements.bubbleWrapper.classList.add("popping-out");
+            // Use animation duration for timeout
+            setTimeout(() => {
+              window.location.href = destination;
+            }, animationDuration);
+          }
+        }
+
         // --- Event Listeners ---
         DOMElements.catchButton.addEventListener("click", tryToCatch);
         DOMElements.newPokemonButton.addEventListener(
@@ -1381,16 +1650,17 @@
           generateNewPokemon
         );
         DOMElements.resetGameButton.addEventListener("click", () => {
-          // Optional: Add a confirmation dialog later if desired
           if (
             confirm(
               "Are you sure you want to reset the game? Your collection will be lost."
             )
           ) {
             initGame();
-            showMessage("Game reset successfully!", "success"); // Use success color for reset confirmation
+            showMessage("Game reset successfully!", "success");
           }
         });
+        // Add listener for the pop bubble button
+        DOMElements.popBubbleButton.addEventListener("click", handlePopBubble);
 
         // --- Initialisation ---
         document.addEventListener("DOMContentLoaded", initGame);

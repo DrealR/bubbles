@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pokémon Battle Simulator V3</title>
+    <title>Pokémon Battle Simulator Bubble</title>
     <style>
       :root {
         /* Color Palette (iOS Inspired) */
@@ -75,12 +75,28 @@
         --status-slp-text: white;
         --status-frz-bg: var(--info-color);
         --status-frz-text: var(--text-dark);
+
+        /* Bubble Specific */
+        --bubble-pop-button-bg: rgba(
+          242,
+          242,
+          247,
+          0.8
+        ); /* light-gray with alpha */
+        --bubble-pop-button-bg-hover: rgba(242, 242, 247, 0.95);
+        --bubble-pop-button-icon-color: var(--primary-color);
+        --bubble-pop-button-icon-color-hover: #0056b3; /* Darker blue */
+        --bubble-border-radius: 28px; /* Match battlefield */
+        --bubble-pop-duration: 0.4s;
+        --focus-ring: 0 0 0 3px rgba(0, 122, 255, 0.4); /* primary-color with alpha */
       }
 
       *,
       *::before,
       *::after {
         box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
 
       html {
@@ -108,7 +124,6 @@
           );
         background-size: 60px 60px;
         background-position: 0 0, 30px 30px;
-        margin: 0;
         padding: 1rem;
         display: flex;
         flex-direction: column;
@@ -117,7 +132,128 @@
         color: var(--text-dark);
         line-height: 1.6;
         min-height: 100vh;
-        overflow-x: hidden; /* Prevent horizontal scroll during animations */
+        overflow-x: hidden;
+        position: relative; /* For fixed elements */
+      }
+
+      /* Bubble Wrapper Styling */
+      #bubble-wrapper {
+        width: 100%;
+        max-width: 900px; /* Slightly larger than battle container */
+        min-height: 85vh; /* Ensure decent height */
+        background: rgba(255, 255, 255, 0.7); /* Semi-transparent white base */
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-radius: var(--bubble-border-radius);
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.3),
+          0 15px 40px rgba(0, 0, 0, 0.12), 0 5px 15px rgba(0, 0, 0, 0.08); /* Glow + Existing Shadows */
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start; /* Align content to top */
+        transition: transform var(--bubble-pop-duration)
+            cubic-bezier(0.6, -0.28, 0.735, 0.045),
+          /* EaseInBack */ opacity var(--bubble-pop-duration) ease-out;
+        transform-origin: center center;
+        overflow: hidden;
+        position: relative; /* For pseudo-elements or inner absolute positioning */
+        z-index: 1; /* Above body background */
+      }
+      @media (min-width: 768px) {
+        #bubble-wrapper {
+          padding: 1.5rem;
+        }
+      }
+
+      /* Pop Out Animation */
+      #bubble-wrapper.popping-out {
+        transform: scale(1.5); /* Slightly larger pop */
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      @keyframes pop-out-animation {
+        0% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1.5);
+          opacity: 0;
+        }
+      }
+
+      /* Apply animation only if not reduced motion */
+      @media (prefers-reduced-motion: no-preference) {
+        #bubble-wrapper.popping-out {
+          animation: pop-out-animation var(--bubble-pop-duration)
+            cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+        }
+      }
+
+      /* Pop Bubble Button */
+      #pop-bubble-button {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 1000; /* Above everything */
+        width: 44px;
+        height: 44px;
+        background-color: var(--bubble-pop-button-bg);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: background-color 0.2s ease, transform 0.2s ease,
+          box-shadow 0.2s ease;
+        appearance: none;
+        padding: 0;
+      }
+
+      #pop-bubble-button svg {
+        width: 22px; /* Slightly smaller icon */
+        height: 22px;
+        color: var(--bubble-pop-button-icon-color);
+        transition: color 0.2s ease;
+      }
+
+      #pop-bubble-button:hover {
+        background-color: var(--bubble-pop-button-bg-hover);
+        transform: scale(1.1);
+        box-shadow: 0 5px 12px rgba(0, 0, 0, 0.18);
+      }
+      #pop-bubble-button:hover svg {
+        color: var(--bubble-pop-button-icon-color-hover);
+      }
+
+      #pop-bubble-button:focus {
+        outline: none;
+      }
+      #pop-bubble-button:focus-visible {
+        box-shadow: var(--focus-ring), 0 3px 8px rgba(0, 0, 0, 0.12);
+      }
+
+      #pop-bubble-button:active {
+        transform: scale(1);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+      }
+      @media (max-width: 640px) {
+        #pop-bubble-button {
+          top: 0.75rem;
+          left: 0.75rem;
+          width: 40px;
+          height: 40px;
+        }
+        #pop-bubble-button svg {
+          width: 20px;
+          height: 20px;
+        }
       }
 
       .battle-container {
@@ -125,8 +261,10 @@
         flex-direction: column;
         align-items: center;
         width: 100%;
-        max-width: 700px; /* Slightly wider */
+        max-width: 700px; /* Keep original max-width */
         gap: 1rem;
+        /* Added margin top to space from bubble edge */
+        margin-top: 1rem;
       }
 
       .battlefield {
@@ -166,14 +304,13 @@
         display: flex;
         align-items: flex-end;
         gap: 1rem;
-        margin-bottom: 3rem; /* Increased space between sides */
+        margin-bottom: 3rem; /* Increased space */
         min-height: 120px; /* Taller */
         position: relative;
       }
       .side:last-child {
         margin-bottom: 0;
       }
-
       .left {
         justify-content: flex-start;
       }
@@ -186,7 +323,7 @@
         width: 120px; /* Larger avatar */
         height: 120px;
         position: relative;
-        flex-shrink: 0; /* Prevent shrinking */
+        flex-shrink: 0;
         transform: translateY(100%);
         opacity: 0;
         transition: transform 0.7s cubic-bezier(0.25, 1, 0.5, 1),
@@ -207,8 +344,8 @@
         align-items: center;
         justify-content: center;
         overflow: hidden;
-        image-rendering: pixelated; /* Keep pixel art sharp */
-        image-rendering: crisp-edges; /* Better compatibility */
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
         transition: transform 0.3s ease-out, filter 0.5s ease-out,
           border-color 0.3s ease;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -218,14 +355,13 @@
         height: 100%;
         object-fit: contain;
         transition: transform 0.15s ease-in-out, opacity 0.5s ease-out;
-        opacity: 0; /* Start hidden, fade in via JS */
+        opacity: 0;
       }
       .avatar.placeholder {
         border: 4px dashed #a0a0a5;
         background: var(--light-gray);
       }
 
-      /* Active/Idle state */
       .active .avatar {
         animation: active-bounce 1.3s infinite ease-in-out;
       }
@@ -239,16 +375,15 @@
         }
       }
 
-      /* Stat Change Indicator */
       .stat-change-indicator {
         position: absolute;
-        top: -12px; /* Slightly higher */
+        top: -12px;
         left: 50%;
         transform: translateX(-50%);
-        font-size: 1.8rem; /* Larger */
+        font-size: 1.8rem;
         font-weight: bold;
         opacity: 0;
-        animation: stat-float 1.3s ease-out forwards; /* Longer duration */
+        animation: stat-float 1.3s ease-out forwards;
         z-index: 5;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
       }
@@ -258,7 +393,6 @@
       .stat-down {
         color: var(--danger-color);
       }
-
       @keyframes stat-float {
         0% {
           opacity: 1;
@@ -266,22 +400,21 @@
         }
         20% {
           transform: translate(-50%, -15px) scale(1.1);
-        } /* Bounce up */
+        }
         100% {
           opacity: 0;
           transform: translate(-50%, -40px) scale(0.6);
-        } /* Fade out higher */
+        }
       }
 
-      /* Hit animation */
       .hit .avatar img {
         animation: hit-shake 0.3s linear;
       }
       .opponent.hit .avatar img {
         animation: hit-shake-opponent 0.3s linear;
-      } /* Use specific class for opponent */
+      }
       @keyframes hit-shake {
-        /* Player (sprite faces right, needs scaleX(-1)) */
+        /* Player */
         0%,
         100% {
           transform: translateX(0) scaleX(-1);
@@ -295,7 +428,7 @@
         }
       }
       @keyframes hit-shake-opponent {
-        /* Opponent (sprite faces left) */
+        /* Opponent */
         0%,
         100% {
           transform: translateX(0);
@@ -303,17 +436,16 @@
         25%,
         75% {
           transform: translateX(7px);
-        } /* Opposite direction shake */
+        }
         50% {
           transform: translateX(-7px);
         }
       }
 
-      /* Faint animation */
       .fainted .avatar-container {
         animation: faint-fall 1.1s cubic-bezier(0.6, -0.28, 0.735, 0.045)
           forwards;
-      } /* EaseInBack */
+      }
       .fainted .avatar img {
         filter: grayscale(1) opacity(0.4);
         transition: filter 0.9s ease-out;
@@ -336,15 +468,14 @@
         font-size: 1rem;
         flex-grow: 1;
         padding-bottom: 8px;
-        position: relative; /* For stat indicator positioning */
+        position: relative;
       }
-      /* Position stat indicator relative to info box instead of name */
       .info .stat-change-indicator {
-        top: -15px; /* Adjust position relative to info box top */
+        top: -15px;
         left: 50%;
       }
       .right .info .stat-change-indicator {
-        left: 50%; /* Keep centered */
+        left: 50%;
       }
 
       .name-status {
@@ -352,17 +483,15 @@
         align-items: center;
         gap: 0.7rem;
         margin-bottom: 0.3rem;
-        /* position: relative; Remove relative positioning here */
       }
       .right .name-status {
         justify-content: flex-end;
       }
 
       .name {
-        font-weight: 700; /* Bolder */
+        font-weight: 700;
         font-size: 1.4rem;
       }
-
       .status-badge {
         font-size: 0.8rem;
         font-weight: bold;
@@ -405,22 +534,20 @@
         font-size: 0.9rem;
         color: var(--secondary-color);
       }
-
       .hp-bar {
         background: var(--medium-gray);
         border-radius: 999px;
         overflow: hidden;
         height: 16px; /* Thicker */
         width: 100%;
-        max-width: 240px; /* Max width */
-        border: 1px solid #bbb; /* Slightly darker border */
+        max-width: 240px;
+        border: 1px solid #bbb;
         position: relative;
         box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
       }
       .right .hp-bar {
         margin-left: auto;
       }
-
       .hp-fill {
         background: var(--success-color);
         height: 100%;
@@ -441,7 +568,6 @@
         line-height: 1;
         z-index: 1;
       }
-
       .hp-text {
         font-size: 0.9rem;
         color: var(--secondary-color);
@@ -468,7 +594,7 @@
         border: 1px solid #444;
         scrollbar-width: thin;
         scrollbar-color: var(--primary-color) #3a3a3c;
-        scroll-behavior: smooth; /* Smooth scrolling */
+        scroll-behavior: smooth;
       }
       .console::-webkit-scrollbar {
         width: 8px;
@@ -482,11 +608,10 @@
         border-radius: 4px;
         border: 2px solid #3a3a3c;
       }
-
       .console > div {
         padding-bottom: 0.4rem;
         margin-bottom: 0.4rem;
-        border-bottom: 1px solid #4a4a4c; /* Lighter separator */
+        border-bottom: 1px solid #4a4a4c;
         transition: background-color 0.5s ease;
       }
       .console > div:last-child {
@@ -495,7 +620,6 @@
       .console > div.highlight {
         background-color: rgba(255, 255, 255, 0.1);
       }
-
       .console .effectiveness {
         font-style: italic;
         color: #a0a0a5;
@@ -536,15 +660,14 @@
       }
       .console .player-choice {
         color: #87cefa;
-      } /* LightSkyBlue */
+      }
       .console .opponent-choice {
         color: #ff7f7f;
-      } /* LightCoral */
+      }
       .console .immune {
         font-style: italic;
         color: var(--secondary-color);
       }
-
       @keyframes pulse-yellow {
         0%,
         100% {
@@ -566,21 +689,20 @@
 
       .attack-icon {
         position: absolute;
-        font-size: 45px; /* Even larger */
+        font-size: 45px;
         pointer-events: none;
         z-index: 10;
         opacity: 1;
         transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-          opacity 0.8s ease-out; /* EaseOutBack */
+          opacity 0.8s ease-out;
         text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        will-change: transform, opacity; /* Performance hint */
+        will-change: transform, opacity;
       }
 
-      /* Player Controls */
       .player-controls {
         background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px); /* Safari */
+        -webkit-backdrop-filter: blur(10px);
         border: 1px solid rgba(0, 0, 0, 0.07);
         border-radius: 20px;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -591,7 +713,7 @@
         gap: 1rem;
         transition: opacity 0.5s ease-out, transform 0.5s ease-out;
         position: relative;
-        will-change: opacity, transform; /* Performance hint */
+        will-change: opacity, transform;
       }
       .player-controls.hidden {
         opacity: 0;
@@ -615,31 +737,27 @@
         box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
         border: 1px solid rgba(0, 0, 0, 0.1);
       }
-
       .move-button:hover:not(:disabled) {
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
         transform: translateY(-3px);
-        filter: brightness(1.05); /* Slight brighten */
+        filter: brightness(1.05);
       }
-
       .move-button:active:not(:disabled) {
         transform: scale(0.95) translateY(0);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        filter: brightness(0.95); /* Slight darken */
+        filter: brightness(0.95);
       }
-
       .move-button:disabled {
         opacity: 0.4;
         cursor: not-allowed;
-        background-color: var(--medium-gray) !important; /* Ensure override */
+        background-color: var(--medium-gray) !important;
         box-shadow: none;
-        color: var(--secondary-color) !important; /* Ensure override */
+        color: var(--secondary-color) !important;
         filter: grayscale(50%);
       }
       .move-button:disabled .move-pp {
         color: var(--secondary-color) !important;
       }
-
       .move-pp {
         font-size: 0.75rem;
         color: rgba(0, 0, 0, 0.55);
@@ -648,7 +766,7 @@
         font-weight: 500;
       }
 
-      /* Type-specific button styling (using CSS variables for text color) */
+      /* Type-specific button styling */
       .move-button[data-type="Normal"] {
         background-color: var(--type-normal);
         color: var(--type-normal-text);
@@ -744,8 +862,6 @@
         color: var(--type-status-text);
         --button-text-color: var(--type-status-text);
       }
-
-      /* Use text color variable for PP */
       .move-button[data-type] .move-pp,
       .move-button[data-category="Status"] .move-pp {
         color: color-mix(
@@ -767,10 +883,10 @@
         cursor: pointer;
         transition: all 0.25s ease;
         box-shadow: 0 5px 12px rgba(0, 122, 255, 0.35);
-        display: inline-block; /* Allow margin top */
+        display: inline-block;
       }
       .restart-button:hover {
-        background-color: #005fcc; /* Darker blue */
+        background-color: #005fcc;
         box-shadow: 0 7px 15px rgba(0, 122, 255, 0.45);
         transform: translateY(-2px);
       }
@@ -783,13 +899,41 @@
         display: none;
       }
 
+      /* Prompt Info Footer */
+      .prompt-info {
+        text-align: center;
+        margin-top: 1.5rem; /* Space above */
+        padding-top: 1rem;
+        border-top: 1px solid var(--medium-gray);
+        width: 100%;
+        max-width: 700px;
+        font-size: 0.8rem;
+        color: var(--secondary-color);
+        line-height: 1.5;
+        position: relative; /* Ensure it's within the flow */
+        z-index: 1; /* Above background overlay */
+      }
+      .prompt-info code {
+        background-color: rgba(0, 122, 255, 0.1); /* primary-color with alpha */
+        color: var(--primary-color);
+        padding: 0.2em 0.5em;
+        border-radius: 4px;
+        font-family: var(--font-mono);
+        font-size: 0.9em;
+      }
+
       /* Media Query for smaller screens */
       @media (max-width: 640px) {
         body {
           padding: 0.5rem;
         }
+        #bubble-wrapper {
+          padding: 0.75rem;
+          min-height: 90vh;
+        }
         .battle-container {
           gap: 0.75rem;
+          margin-top: 0.5rem;
         }
         .battlefield {
           padding: 1rem 1.25rem;
@@ -859,59 +1003,105 @@
           font-size: 1rem;
           margin-top: 1rem;
         }
+        .prompt-info {
+          font-size: 0.75rem;
+          margin-top: 1rem;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="battle-container">
-      <div class="battlefield" id="battlefield">
-        <!-- Opponent Side -->
-        <div class="side right opponent" id="opponent-side">
-          <div class="info">
-            <div class="name-status">
-              <span class="status-badge hidden" id="pokemon1-status"></span>
-              <div class="name" id="pokemon1-name">Opponent</div>
+    <!-- Pop Bubble Button -->
+    <button id="pop-bubble-button" aria-label="Pop bubble and return home">
+      <svg
+        aria-hidden="true"
+        focusable="false"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M6.758 17.243L12.001 12m5.243-5.243L12 12m0 0L6.758 6.757M12.001 12l5.243 5.243"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
+
+    <!-- Main Content Wrapper -->
+    <div id="bubble-wrapper">
+      <div class="battle-container">
+        <div class="battlefield" id="battlefield">
+          <!-- Opponent Side -->
+          <div class="side right opponent" id="opponent-side">
+            <div class="info">
+              <div class="name-status">
+                <span class="status-badge hidden" id="pokemon1-status"></span>
+                <div class="name" id="pokemon1-name">Opponent</div>
+              </div>
+              <div class="level" id="pokemon1-level">Lv. ?</div>
+              <div class="hp-bar">
+                <div class="hp-fill" id="pokemon1-hp"></div>
+              </div>
+              <div class="hp-text" id="pokemon1-hp-text">? / ? HP</div>
             </div>
-            <div class="level" id="pokemon1-level">Lv. ?</div>
-            <div class="hp-bar">
-              <div class="hp-fill" id="pokemon1-hp"></div>
+            <div class="avatar-container" id="pokemon1-avatar-container">
+              <div class="avatar placeholder" id="pokemon1-avatar"></div>
             </div>
-            <div class="hp-text" id="pokemon1-hp-text">? / ? HP</div>
           </div>
-          <div class="avatar-container" id="pokemon1-avatar-container">
-            <div class="avatar placeholder" id="pokemon1-avatar"></div>
+
+          <!-- Player Side -->
+          <div class="side left player" id="player-side">
+            <div class="avatar-container" id="pokemon2-avatar-container">
+              <div class="avatar placeholder" id="pokemon2-avatar"></div>
+            </div>
+            <div class="info">
+              <div class="name-status">
+                <div class="name" id="pokemon2-name">Player</div>
+                <span class="status-badge hidden" id="pokemon2-status"></span>
+              </div>
+              <div class="level" id="pokemon2-level">Lv. ?</div>
+              <div class="hp-bar">
+                <div class="hp-fill" id="pokemon2-hp"></div>
+              </div>
+              <div class="hp-text" id="pokemon2-hp-text">? / ? HP</div>
+            </div>
           </div>
         </div>
 
-        <!-- Player Side -->
-        <div class="side left player" id="player-side">
-          <div class="avatar-container" id="pokemon2-avatar-container">
-            <div class="avatar placeholder" id="pokemon2-avatar"></div>
-          </div>
-          <div class="info">
-            <div class="name-status">
-              <div class="name" id="pokemon2-name">Player</div>
-              <span class="status-badge hidden" id="pokemon2-status"></span>
-            </div>
-            <div class="level" id="pokemon2-level">Lv. ?</div>
-            <div class="hp-bar">
-              <div class="hp-fill" id="pokemon2-hp"></div>
-            </div>
-            <div class="hp-text" id="pokemon2-hp-text">? / ? HP</div>
-          </div>
+        <div class="console" id="console">
+          Initializing Battle Environment...
         </div>
+
+        <div class="player-controls hidden" id="player-controls">
+          <!-- Move buttons will be generated here -->
+        </div>
+
+        <button id="restart-button" class="restart-button hidden">
+          Battle Again!
+        </button>
       </div>
+      <!-- End .battle-container -->
 
-      <div class="console" id="console">Initializing Battle Environment...</div>
-
-      <div class="player-controls hidden" id="player-controls">
-        <!-- Move buttons will be generated here -->
-      </div>
-
-      <button id="restart-button" class="restart-button hidden">
-        Battle Again!
-      </button>
+      <footer class="prompt-info">
+        <p>
+          This Bubble was generated from the prompt:
+          <code
+            >Generate JavaScript code for a turn-based Pokémon battle simulator
+            engine...[details omitted]...Style it as if it's an apple expert
+            designer...[details omitted]...</code
+          >
+          with refinement:
+          <code
+            >add a way to go back to the index.html file...[details
+            omitted]...like a bubble thing where you burst it...</code
+          >
+        </p>
+      </footer>
     </div>
+    <!-- End #bubble-wrapper -->
 
     <script>
       // ********* MODULE: GLOBAL STATE & CONSTANTS **************
@@ -921,10 +1111,10 @@
         isPlayerTurn: false,
         waitingForPlayer: false,
         gameOver: false,
-        playerMoveResolver: null, // Promise resolver for player input
+        playerMoveResolver: null,
         turnCounter: 0,
-        battleLog: [], // Keep track of log messages if needed later
-        isProcessing: false, // Flag to prevent multiple actions during animations/processing
+        battleLog: [],
+        isProcessing: false,
       };
 
       const STATUS_EFFECTS = {
@@ -951,7 +1141,7 @@
           badgeText: "SLP",
           cssClass: "status-SLP",
           turnStartEffect: true,
-        }, // Counter handled in Pokemon class
+        },
         FRZ: {
           name: "FRZ",
           badgeText: "FRZ",
@@ -969,11 +1159,10 @@
         FAINT: 1100,
         TURN_TRANSITION: 600,
         STATUS_EFFECT: 800,
-        STAT_CHANGE: 1300, // Increased to match new animation duration
-        ENTRY: 700, // Corresponds to avatar-container transition
+        STAT_CHANGE: 1300,
+        ENTRY: 700,
       };
 
-      // Accuracy/Evasion Stages (Simplified: Multiplier applied to move accuracy)
       const ACC_EVA_MULTIPLIERS = {
         "-6": 3 / 9,
         "-5": 3 / 8,
@@ -989,7 +1178,6 @@
         5: 8 / 3,
         6: 9 / 3,
       };
-      // Stat Stage Multipliers (Atk, Def, SpA, SpD, Spe)
       const STAT_STAGE_MULTIPLIERS = {
         "-6": 2 / 8,
         "-5": 2 / 7,
@@ -1006,8 +1194,8 @@
         6: 8 / 2,
       };
 
-      // Simplified Type Chart (Gen VI+)
       const TYPE_CHART = {
+        /* ... Type chart data remains the same ... */
         Normal: { Rock: 0.5, Ghost: 0, Steel: 0.5 },
         Fire: {
           Fire: 0.5,
@@ -1153,7 +1341,7 @@
       };
 
       const ATTACK_ICONS = {
-        Fire: "🔥",
+        /* ... Attack icons data remains the same ... */ Fire: "🔥",
         Water: "💧",
         Grass: "🌿",
         Electric: "⚡",
@@ -1174,29 +1362,26 @@
         Status: "💫",
       };
 
-      // Chance Constants
       const CRIT_CHANCE = 1 / 24;
-      const PARALYSIS_CHANCE = 0.25; // Chance of being fully paralyzed
-      const THAW_CHANCE = 0.2; // Chance of thawing from Freeze
+      const PARALYSIS_CHANCE = 0.25;
+      const THAW_CHANCE = 0.2;
 
       // ********* MODULE: POKEMON DATA & CLASS **************
       class Pokemon {
+        /* ... Pokemon class remains the same ... */
         constructor(name, level, types, stats, moves, sprite) {
           this.name = name;
           this.level = level;
-          this.types = Array.isArray(types) ? types : [types]; // Ensure array
-          this.baseStats = stats; // { hp, atk, def, spa, spd, spe }
+          this.types = Array.isArray(types) ? types : [types];
+          this.baseStats = stats;
           this.moves = moves.map((m) => ({ ...m, currentPP: m.pp }));
           this.sprite = sprite;
-          this.id = Math.random().toString(36).substring(7); // Unique ID for tracking if needed
+          this.id = Math.random().toString(36).substring(7);
           this.reset();
         }
-
         reset() {
-          // Use base stats provided, do not recalculate here, calculate during battle init
-          this.currentStats = { ...this.baseStats }; // Store base stats for calculation
-          this.level = this.level; // Keep original level
-
+          this.currentStats = { ...this.baseStats };
+          this.level = this.level;
           this.maxHp = this.calculateStatValue(
             this.baseStats.hp,
             this.level,
@@ -1204,7 +1389,7 @@
           );
           this.hp = this.maxHp;
           this.status = null;
-          this.statusCounter = 0; // For SLP/PSN (toxic) turns primarily
+          this.statusCounter = 0;
           this.isFainted = false;
           this.statStages = {
             atk: 0,
@@ -1215,23 +1400,16 @@
             accuracy: 0,
             evasion: 0,
           };
-          this.moves.forEach((m) => (m.currentPP = m.pp)); // Reset PP
+          this.moves.forEach((m) => (m.currentPP = m.pp));
         }
-
         calculateStatValue(base, level, isHp = false) {
-          // Simplified stat calculation (Gen 3+, ignoring IVs/EVs)
           if (isHp) {
-            if (base === 1) return 1; // Shedinja case
-            // Formula: floor(((Base * 2 + IV + floor(EV/4)) * Level) / 100) + Level + 10
-            // Simplified: floor(((Base * 2) * Level) / 100) + Level + 10
+            if (base === 1) return 1;
             return Math.floor((base * 2 * level) / 100 + level + 10);
           } else {
-            // Formula: floor( (floor(((Base * 2 + IV + floor(EV/4)) * Level) / 100) + 5) * Nature )
-            // Simplified: floor(((Base * 2 * Level) / 100) + 5)
             return Math.floor((base * 2 * level) / 100 + 5);
           }
         }
-
         getModifiedStat(
           statName,
           ignorePositiveStages = false,
@@ -1241,46 +1419,31 @@
             this.currentStats[statName],
             this.level
           );
-          if (!baseStatValue) return 1; // Safety check
-
+          if (!baseStatValue) return 1;
           let stage = this.statStages[statName];
-
-          // Critical hits ignore positive Def/SpD stages of the defender
           if (
             (statName === "def" || statName === "spd") &&
             ignorePositiveStages &&
             stage > 0
           )
             stage = 0;
-          // Critical hits ignore negative Atk/SpA stages of the attacker
           if (
             (statName === "atk" || statName === "spa") &&
             ignoreNegativeStages &&
             stage < 0
           )
             stage = 0;
-
           const multiplier = STAT_STAGE_MULTIPLIERS[stage] || 1.0;
-
           let finalStat = baseStatValue * multiplier;
-
-          // Apply status conditions AFTER stages
-          // Burn halves physical attack stat (critical hits ignore this via ignoreNegativeStages)
           if (
             statName === "atk" &&
             this.status === "BRN" &&
             !ignoreNegativeStages
-          ) {
+          )
             finalStat *= 0.5;
-          }
-          // Paralysis halves speed stat (Gen 7+ effect)
-          if (statName === "spe" && this.status === "PAR") {
-            finalStat *= 0.5;
-          }
-
-          return Math.max(1, Math.floor(finalStat)); // Minimum stat value is 1
+          if (statName === "spe" && this.status === "PAR") finalStat *= 0.5;
+          return Math.max(1, Math.floor(finalStat));
         }
-
         applyStatus(status, sourcePokemon = null) {
           if (this.status || this.isFainted) {
             if (this.status)
@@ -1290,32 +1453,26 @@
                 }!`,
                 "immune"
               );
-            return false; // Already statused or fainted
+            return false;
           }
-
-          // Type immunities
           if (status === "BRN" && this.types.includes("Fire")) return false;
           if (
             status === "PSN" &&
             (this.types.includes("Poison") || this.types.includes("Steel"))
           )
             return false;
-          if (status === "PAR" && this.types.includes("Electric")) return false; // Ground immunity handled by move accuracy/typing check for electric moves
+          if (status === "PAR" && this.types.includes("Electric")) return false;
           if (status === "FRZ" && this.types.includes("Ice")) return false;
-          // Add safeguard check later if implemented
-
           this.status = status;
-          this.statusCounter = 0; // Reset counter on new status
+          this.statusCounter = 0;
           let statusMsg = `${this.name} was afflicted with ${STATUS_EFFECTS[status].badgeText}!`;
-
           if (status === "SLP") {
-            this.statusCounter = Math.floor(Math.random() * 3) + 1; // Sleep for 1-3 turns (simplified)
+            this.statusCounter = Math.floor(Math.random() * 3) + 1;
             statusMsg = `${this.name} fell asleep!`;
           }
           log(statusMsg, "status-change");
           return true;
         }
-
         clearStatus() {
           if (this.status) {
             log(
@@ -1330,15 +1487,12 @@
           }
           return false;
         }
-
         changeStatStage(statName, change, showIndicator = true) {
           if (!this.statStages.hasOwnProperty(statName) || this.isFainted)
             return false;
-
           const currentStage = this.statStages[statName];
           const newStage = Math.max(-6, Math.min(6, currentStage + change));
-          const actualChange = newStage - currentStage; // How much it actually changed
-
+          const actualChange = newStage - currentStage;
           if (actualChange === 0) {
             log(
               `${this.name}'s ${statName.toUpperCase()} won't go any ${
@@ -1349,16 +1503,14 @@
             return false;
           } else {
             this.statStages[statName] = newStage;
-            let changeText = "";
-            if (Math.abs(actualChange) >= 2)
-              changeText = `sharply ${change > 0 ? "rose" : "fell"}`;
-            else changeText = `${change > 0 ? "rose" : "fell"}`;
+            let changeText =
+              Math.abs(actualChange) >= 2
+                ? `sharply ${change > 0 ? "rose" : "fell"}`
+                : `${change > 0 ? "rose" : "fell"}`;
             log(
               `${this.name}'s ${statName.toUpperCase()} ${changeText}!`,
               "stat-change"
             );
-
-            // Trigger visual indicator
             if (showIndicator) {
               const targetSide =
                 this === BATTLE_STATE.playerPokemon
@@ -1369,23 +1521,20 @@
             return true;
           }
         }
-
         heal(percent) {
           if (this.isFainted || this.hp >= this.maxHp) return false;
           const healAmount = Math.floor(this.maxHp * percent);
           const healedHp = Math.min(this.maxHp, this.hp + healAmount);
           const actualHeal = healedHp - this.hp;
-
           if (actualHeal <= 0) return false;
-
           this.hp = healedHp;
-          log(`${this.name} recovered ${actualHeal} HP!`, "status-change"); // Using status-change style for heal
+          log(`${this.name} recovered ${actualHeal} HP!`, "status-change");
           return true;
         }
       }
 
       const MOVES = {
-        // Physical
+        /* ... Moves data remains the same ... */
         Tackle: {
           name: "Tackle",
           type: "Normal",
@@ -1443,7 +1592,6 @@
             chance: 0.3,
           },
         },
-        // Special
         VineWhip: {
           name: "Vine Whip",
           type: "Grass",
@@ -1523,7 +1671,6 @@
             chance: 0.1,
           },
         },
-        // Status
         Growl: {
           name: "Growl",
           type: "Normal",
@@ -1598,7 +1745,7 @@
             stat: "atk",
             stages: 2,
           },
-        }, // Accuracy null = always hits self
+        },
         Recover: {
           name: "Recover",
           type: "Normal",
@@ -1608,8 +1755,7 @@
           category: "Status",
           priority: 0,
           effect: { type: "heal_percent", target: "self", amount: 0.5 },
-        }, // Heal 50% max HP
-        // Struggle
+        },
         Struggle: {
           name: "Struggle",
           type: "Normal",
@@ -1625,6 +1771,7 @@
       };
 
       const POKEMON_DATA = {
+        /* ... Pokemon data remains the same ... */
         Bulbasaur: {
           name: "Bulbasaur",
           level: 5,
@@ -1692,35 +1839,32 @@
       };
 
       function clonePokemon(baseData) {
-        // Create a new Pokemon instance, letting the constructor handle setup
         return new Pokemon(
           baseData.name,
           baseData.level,
-          [...baseData.types], // Deep copy types array
-          { ...baseData.stats }, // Shallow copy base stats object (values are numbers)
-          baseData.moves.map((m) => ({ ...m })), // Deep copy moves array and each move object
+          [...baseData.types],
+          { ...baseData.stats },
+          baseData.moves.map((m) => ({ ...m })),
           baseData.sprite
         );
       }
 
       // ********* MODULE: BATTLE LOGIC **************
-
       function calculateTypeEffectiveness(
         moveType,
         targetTypes,
         ignoreImmunity = false
       ) {
+        /* ... unchanged ... */
         let multiplier = 1;
-        if (!moveType || moveType === "Status") return 1; // Status moves don't use this directly
-
+        if (!moveType || moveType === "Status") return 1;
         targetTypes.forEach((targetType) => {
           const effectivenessMap = TYPE_CHART[moveType];
           if (effectivenessMap && effectivenessMap[targetType] !== undefined) {
             multiplier *= effectivenessMap[targetType];
           }
-          // Check specific hardcoded immunities only if not ignoring them
           if (!ignoreImmunity) {
-            if (multiplier === 0) return; // Already immune from type chart
+            if (multiplier === 0) return; // Already immune
             if (moveType === "Ground" && targetType === "Flying")
               multiplier = 0;
             if (moveType === "Electric" && targetType === "Ground")
@@ -1731,26 +1875,20 @@
             if (moveType === "Normal" && targetType === "Ghost") multiplier = 0;
             if (moveType === "Fighting" && targetType === "Ghost")
               multiplier = 0;
-            // Ghost immunity handled by TYPE_CHART
           }
         });
-
         return multiplier;
       }
-
       function calculateAccuracy(attacker, move, defender) {
-        // Null or undefined accuracy means it always hits (e.g., status moves on self, Swift)
+        /* ... unchanged ... */
         if (move.accuracy === null || move.accuracy === undefined) return true;
-        // Accuracy 1 or higher should generally hit, but stages can affect it
         if (
           move.accuracy >= 1 &&
           attacker.statStages.accuracy <= 0 &&
           defender.statStages.evasion >= 0
         )
           return true;
-
         const baseAccuracy = move.accuracy;
-        // Apply stages clamp between -6 and +6
         const attackerAccStage = Math.max(
           -6,
           Math.min(6, attacker.statStages.accuracy)
@@ -1759,30 +1897,20 @@
           -6,
           Math.min(6, defender.statStages.evasion)
         );
-
         const accMultiplier = ACC_EVA_MULTIPLIERS[attackerAccStage];
-        const evaMultiplier = ACC_EVA_MULTIPLIERS[-defenderEvaStage]; // Use inverted evasion stage
-
+        const evaMultiplier = ACC_EVA_MULTIPLIERS[-defenderEvaStage];
         const finalAccuracy = baseAccuracy * accMultiplier * evaMultiplier;
-
-        // Add check for status modifiers (e.g., Paralysis accuracy drop - not implemented here)
-
         return Math.random() < finalAccuracy;
       }
-
       function calculateDamage(attacker, move, defender) {
+        /* ... unchanged ... */
         if (move.power <= 0 || move.category === "Status")
           return { damage: 0, effectiveness: 1, crit: false, recoilDamage: 0 };
-
         const isCritical = Math.random() < CRIT_CHANCE;
-        const critMultiplier = isCritical ? 1.5 : 1; // Gen 6+ crit multiplier
-
-        // Critical hits ignore attacker's negative Atk/SpA stages & Burn, and defender's positive Def/SpD stages
+        const critMultiplier = isCritical ? 1.5 : 1;
         const ignoreNegativeAtk = isCritical;
         const ignorePositiveDef = isCritical;
-
         let attackStatValue, defenseStatValue;
-
         if (move.category === "Physical") {
           attackStatValue = attacker.getModifiedStat(
             "atk",
@@ -1806,18 +1934,14 @@
             false
           );
         } else {
-          return { damage: 0, effectiveness: 1, crit: false, recoilDamage: 0 }; // Should not happen
+          return { damage: 0, effectiveness: 1, crit: false, recoilDamage: 0 };
         }
-
-        // Base Damage Calculation (Simplified Gen V+ formula component)
         let damage =
           (((2 * attacker.level) / 5 + 2) *
             move.power *
             (attackStatValue / defenseStatValue)) /
             50 +
           2;
-
-        // Modifiers
         const isSTAB = attacker.types.includes(move.type);
         const stabMultiplier = isSTAB ? 1.5 : 1;
         const typeEffectiveness = calculateTypeEffectiveness(
@@ -1825,35 +1949,24 @@
           defender.types,
           move.ignoresTypeImmunity
         );
-        const randomVariance = Math.random() * (1.0 - 0.85) + 0.85; // 85% - 100% variance
-        // Burn penalty applied via getModifiedStat
-
+        const randomVariance = Math.random() * (1.0 - 0.85) + 0.85;
         damage *= stabMultiplier;
         damage *= typeEffectiveness;
         damage *= critMultiplier;
         damage *= randomVariance;
-
-        // Ensure damage is at least 1 if it hits and isn't immune, otherwise 0
         damage = typeEffectiveness === 0 || damage < 1 ? 0 : Math.floor(damage);
-        // Make sure damage is at least 1 if effectiveness > 0
         if (typeEffectiveness > 0 && damage === 0) damage = 1;
-
-        // Calculate recoil damage
         let recoilDamage = 0;
-        if (move.effect?.type === "recoil_damage_percent" && damage > 0) {
-          // Recoil based on damage dealt
+        if (move.effect?.type === "recoil_damage_percent" && damage > 0)
           recoilDamage = Math.max(
             1,
             Math.floor(damage * (move.effect.amount || 0))
           );
-        } else if (move.effect?.type === "recoil_user_maxhp_percent") {
-          // Recoil based on user's max HP (Struggle)
+        else if (move.effect?.type === "recoil_user_maxhp_percent")
           recoilDamage = Math.max(
             1,
             Math.floor(attacker.maxHp * (move.effect.amount || 0))
           );
-        }
-
         return {
           damage: Math.floor(damage),
           effectiveness: typeEffectiveness,
@@ -1863,71 +1976,54 @@
       }
 
       // ********* MODULE: UI & ANIMATION **************
-
       function log(msg, type = "") {
+        /* ... unchanged ... */
         const consolePanel = document.getElementById("console");
         if (!consolePanel) return;
         const logEntry = document.createElement("div");
-        logEntry.innerHTML = msg; // Use innerHTML for simple formatting (bold, etc.)
-        if (type) {
-          logEntry.classList.add(type);
-        }
+        logEntry.innerHTML = msg;
+        if (type) logEntry.classList.add(type);
         consolePanel.appendChild(logEntry);
         BATTLE_STATE.battleLog.push({ msg, type });
-
-        // Highlight the new entry briefly
         logEntry.classList.add("highlight");
         setTimeout(() => logEntry.classList.remove("highlight"), 800);
-
-        // Auto-scroll smoothly
         consolePanel.scrollTop = consolePanel.scrollHeight;
-
-        // Log plain text to browser console for debugging
         console.log(msg.replace(/<[^>]*>/g, ""));
       }
-
       function updateHPDisplay(pokemon, elPrefix) {
+        /* ... unchanged ... */
         const fill = document.getElementById(`${elPrefix}-hp`);
         const hpText = document.getElementById(`${elPrefix}-hp-text`);
         const sideContainer = document.getElementById(
           elPrefix === "pokemon1" ? "opponent-side" : "player-side"
         );
         const statusBadge = document.getElementById(`${elPrefix}-status`);
-
-        if (!fill || !hpText || !sideContainer || !statusBadge) return; // Safety check
-
+        if (!fill || !hpText || !sideContainer || !statusBadge) return;
         const currentHp = Math.max(0, pokemon.hp);
         const percent = (currentHp / pokemon.maxHp) * 100;
         fill.style.width = percent + "%";
-
-        // HP Bar Color Transitions
         if (percent < 20) fill.style.backgroundColor = "var(--danger-color)";
         else if (percent < 50)
           fill.style.backgroundColor = "var(--warning-color)";
         else fill.style.backgroundColor = "var(--success-color)";
-
         hpText.textContent = `${currentHp} / ${pokemon.maxHp} HP`;
-
-        // Update Status Badge
-        statusBadge.className = "status-badge hidden"; // Reset classes
+        statusBadge.className = "status-badge hidden";
         if (pokemon.status && STATUS_EFFECTS[pokemon.status]) {
           const statusInfo = STATUS_EFFECTS[pokemon.status];
           statusBadge.textContent = statusInfo.badgeText;
           statusBadge.classList.add(statusInfo.cssClass);
           statusBadge.classList.remove("hidden");
         }
-
-        // Update fainted visual state
         if (pokemon.isFainted) {
           sideContainer.classList.add("fainted");
-          sideContainer.classList.remove("active"); // Ensure not active if fainted
-          statusBadge.classList.add("hidden"); // Hide status on faint
+          sideContainer.classList.remove("active");
+          statusBadge.classList.add("hidden");
         } else {
           sideContainer.classList.remove("fainted");
         }
       }
-
       async function playFaintAnimation(pokemonId) {
+        /* ... unchanged ... */
         const sideContainer = document.getElementById(
           pokemonId === "pokemon1" ? "opponent-side" : "player-side"
         );
@@ -1937,47 +2033,35 @@
           await delay(ANIMATION_DELAY.FAINT);
         }
       }
-
       function animateAttack(attackerElId, defenderElId, moveType) {
+        /* ... unchanged ... */
         const battlefield = document.querySelector(".battlefield");
         const attackerAvatar = document.getElementById(attackerElId);
         const defenderAvatar = document.getElementById(defenderElId);
-
         if (!attackerAvatar || !defenderAvatar || !battlefield) return;
-
         const attackerSide = attackerAvatar.closest(".side");
         const defenderSide = defenderAvatar.closest(".side");
-
         const attRect = attackerAvatar.getBoundingClientRect();
         const defRect = defenderAvatar.getBoundingClientRect();
         const bfRect = battlefield.getBoundingClientRect();
-
         const icon = document.createElement("div");
         icon.className = "attack-icon";
         icon.textContent = ATTACK_ICONS[moveType] || ATTACK_ICONS["Status"];
         battlefield.appendChild(icon);
-
-        // Start near the center of the attacker
         const startX = attRect.left + attRect.width / 2 - bfRect.left;
         const startY = attRect.top + attRect.height / 2 - bfRect.top;
         icon.style.left = `${startX}px`;
         icon.style.top = `${startY}px`;
-        icon.style.transform = "translate(-50%, -50%) scale(0.6)"; // Center icon and start smaller
+        icon.style.transform = "translate(-50%, -50%) scale(0.6)";
         icon.style.opacity = "1";
-
-        // Target the center of the defender
         const endX = defRect.left + defRect.width / 2 - bfRect.left;
         const endY = defRect.top + defRect.height / 2 - bfRect.top;
-
-        // Trigger animation using requestAnimationFrame for smoother start
         requestAnimationFrame(() => {
           icon.style.transform = `translate(${
             endX - startX - icon.offsetWidth / 2
           }px, ${endY - startY - icon.offsetHeight / 2}px) scale(1)`;
           icon.style.opacity = "0";
         });
-
-        // Add hit class to defender's side for visual feedback
         if (defenderSide) {
           defenderSide.classList.add("hit");
           setTimeout(
@@ -1985,44 +2069,35 @@
             ANIMATION_DELAY.SHORT
           );
         }
-
-        // Remove icon after animation
         setTimeout(() => icon.remove(), ANIMATION_DELAY.ATTACK_ICON);
       }
-
       function showStatChangeIndicator(sideId, isIncrease) {
+        /* ... unchanged ... */
         const sideElement = document.getElementById(sideId);
-        const infoElement = sideElement?.querySelector(".info"); // Attach to info box
+        const infoElement = sideElement?.querySelector(".info");
         if (!infoElement) return;
-
-        // Remove any existing indicator first
         const existingIndicator = infoElement.querySelector(
           ".stat-change-indicator"
         );
         if (existingIndicator) existingIndicator.remove();
-
         const indicator = document.createElement("div");
         indicator.className = `stat-change-indicator ${
           isIncrease ? "stat-up" : "stat-down"
         }`;
         indicator.textContent = isIncrease ? "▲" : "▼";
-
         infoElement.appendChild(indicator);
-
-        // Remove after animation
-        setTimeout(() => indicator.remove(), ANIMATION_DELAY.STAT_CHANGE); // Match animation duration
+        setTimeout(() => indicator.remove(), ANIMATION_DELAY.STAT_CHANGE);
       }
-
       function triggerScreenShake() {
+        /* ... unchanged ... */
         const battlefield = document.getElementById("battlefield");
         battlefield.classList.add("shake");
-        setTimeout(() => battlefield.classList.remove("shake"), 300); // Match animation duration
+        setTimeout(() => battlefield.classList.remove("shake"), 300);
       }
-
       function updatePlayerControls(pokemon) {
+        /* ... unchanged ... */
         const controlsContainer = document.getElementById("player-controls");
-        controlsContainer.innerHTML = ""; // Clear previous buttons
-
+        controlsContainer.innerHTML = "";
         if (
           BATTLE_STATE.gameOver ||
           !BATTLE_STATE.isPlayerTurn ||
@@ -2031,14 +2106,11 @@
           controlsContainer.classList.add("hidden");
           return;
         }
-
         const usableMoves = pokemon.moves.filter((m) => m.currentPP > 0);
-        // Show Struggle only if NO moves have PP left
         const movesToDisplay =
           usableMoves.length > 0
             ? usableMoves
-            : [{ ...MOVES.Struggle, currentPP: Infinity }]; // Clone Struggle for display
-
+            : [{ ...MOVES.Struggle, currentPP: Infinity }];
         movesToDisplay.forEach((move) => {
           const button = document.createElement("button");
           button.classList.add("move-button");
@@ -2048,13 +2120,8 @@
             move.pp === Infinity || move.isStruggle ? "--" : move.currentPP;
           const maxPPLabel =
             move.pp === Infinity || move.isStruggle ? "--" : move.pp;
-          button.innerHTML = `
-            ${move.name}
-            <span class="move-pp">${currentPPLabel} / ${maxPPLabel} PP</span>
-        `;
-          // Disable check ensures Struggle is never disabled here
+          button.innerHTML = `${move.name}<span class="move-pp">${currentPPLabel} / ${maxPPLabel} PP</span>`;
           button.disabled = move.currentPP <= 0 && !move.isStruggle;
-
           button.onclick = () => {
             if (
               BATTLE_STATE.waitingForPlayer &&
@@ -2062,51 +2129,41 @@
               !button.disabled &&
               !BATTLE_STATE.isProcessing
             ) {
-              BATTLE_STATE.waitingForPlayer = false; // Input received
-              controlsContainer.classList.add("hidden"); // Hide controls immediately
-              // Find the actual move object from the pokemon's moveset, or use Struggle if needed
+              BATTLE_STATE.waitingForPlayer = false;
+              controlsContainer.classList.add("hidden");
               const chosenMove =
                 pokemon.moves.find((m) => m.name === move.name) ||
                 MOVES.Struggle;
-              BATTLE_STATE.playerMoveResolver(chosenMove); // Resolve the promise
+              BATTLE_STATE.playerMoveResolver(chosenMove);
             }
           };
           controlsContainer.appendChild(button);
         });
-
         controlsContainer.classList.remove("hidden");
-        BATTLE_STATE.waitingForPlayer = true; // Ready for input
-        log("Choose your move!", "player-prompt"); // Prompt player
+        BATTLE_STATE.waitingForPlayer = true;
+        log("Choose your move!", "player-prompt");
       }
 
       // ********* MODULE: AI LOGIC **************
-
       function chooseOpponentMove(attacker, defender) {
+        /* ... unchanged ... */
         const usableMoves = attacker.moves.filter((m) => m.currentPP > 0);
         if (usableMoves.length === 0) return MOVES.Struggle;
-
         let potentialMoves = [];
-
         usableMoves.forEach((move) => {
           let score = 0;
           const moveEffect = move.effect || {};
-
-          // --- Pre-checks for Viability ---
           let isViable = true;
-
-          // Check type immunity for damaging moves
           if (move.category !== "Status") {
             const effectiveness = calculateTypeEffectiveness(
               move.type,
               defender.types
             );
             if (effectiveness === 0) isViable = false;
-          }
-          // Check specific immunities/conditions for status moves
-          else if (move.category === "Status") {
+          } else if (move.category === "Status") {
             if (moveEffect.type?.includes("apply_status")) {
               const status = moveEffect.status;
-              if (defender.status) isViable = false; // Already statused
+              if (defender.status) isViable = false;
               if (status === "BRN" && defender.types.includes("Fire"))
                 isViable = false;
               if (
@@ -2120,129 +2177,95 @@
               if (status === "FRZ" && defender.types.includes("Ice"))
                 isViable = false;
               if (move.type === "Electric" && defender.types.includes("Ground"))
-                isViable = false; // e.g., Thunder Wave vs Ground
+                isViable = false;
               if (
                 defender.types.includes("Grass") &&
                 move.name === "Sleep Powder"
               )
-                isViable = false; // Grass immune to powders
+                isViable = false;
             } else if (moveEffect.type === "lower_stat") {
-              if (defender.statStages[moveEffect.stat] <= -6) isViable = false; // Cannot lower further
+              if (defender.statStages[moveEffect.stat] <= -6) isViable = false;
             } else if (moveEffect.type === "raise_stat") {
-              if (attacker.statStages[moveEffect.stat] >= 6) isViable = false; // Cannot raise further
+              if (attacker.statStages[moveEffect.stat] >= 6) isViable = false;
             } else if (moveEffect.type === "heal_percent") {
-              if (attacker.hp >= attacker.maxHp) isViable = false; // Cannot heal if full HP
+              if (attacker.hp >= attacker.maxHp) isViable = false;
             }
           }
-
-          // If not viable, give very low score and skip detailed scoring
           if (!isViable) {
-            potentialMoves.push({ move, score: -100 + Math.random() }); // Add random noise to break ties among bad choices
+            potentialMoves.push({ move, score: -100 + Math.random() });
             return;
           }
-
-          // --- Scoring Logic for Viable Moves ---
           if (move.category === "Physical" || move.category === "Special") {
             const { damage, effectiveness } = calculateDamage(
               attacker,
               move,
               defender
-            ); // Use calc for estimate
-            score = (move.power || 10) * effectiveness; // Base score on power * effectiveness (use 10 for 0 power edge cases)
-
-            if (effectiveness > 1) score *= 1.8; // Strong bonus for super effective
-            if (effectiveness < 1) score *= 0.4; // Penalty for not very effective
-
-            // Check for potential KO (use a margin for random variance)
-            const estimatedDamageHigh = damage * (1 / 0.85); // Estimate max possible damage
-            if (defender.hp > 0 && defender.hp <= estimatedDamageHigh) {
-              score *= 3; // Highly prioritize potential KOs
-            }
+            );
+            score = (move.power || 10) * effectiveness;
+            if (effectiveness > 1) score *= 1.8;
+            if (effectiveness < 1) score *= 0.4;
+            const estimatedDamageHigh = damage * (1 / 0.85);
+            if (defender.hp > 0 && defender.hp <= estimatedDamageHigh)
+              score *= 3;
           } else if (move.category === "Status") {
-            // Apply Status
             if (moveEffect.type?.includes("apply_status")) {
-              score = 45; // Good score for applying status
+              score = 45;
               if (moveEffect.status === "SLP" || moveEffect.status === "FRZ")
-                score += 15; // Higher value for sleep/freeze
-            }
-            // Lower Stat
-            else if (moveEffect.type === "lower_stat") {
-              score = 30 + Math.abs(moveEffect.stages * 10); // Value based on stage drops
-              if (defender.statStages[moveEffect.stat] < -2) score *= 0.5; // Less valuable if already debuffed
-            }
-            // Raise Stat
-            else if (moveEffect.type === "raise_stat") {
-              score = 25 + moveEffect.stages * 10; // Base value
-              // Prioritize boosting main attacking stat or speed
+                score += 15;
+            } else if (moveEffect.type === "lower_stat") {
+              score = 30 + Math.abs(moveEffect.stages * 10);
+              if (defender.statStages[moveEffect.stat] < -2) score *= 0.5;
+            } else if (moveEffect.type === "raise_stat") {
+              score = 25 + moveEffect.stages * 10;
               if (
                 moveEffect.stat === "atk" ||
                 moveEffect.stat === "spa" ||
                 moveEffect.stat === "spe"
-              ) {
+              )
                 score += 15;
-              }
-              if (attacker.statStages[moveEffect.stat] > 2) score *= 0.5; // Less valuable if already buffed
-            }
-            // Heal
-            else if (moveEffect.type === "heal_percent") {
-              // More value the lower the HP
+              if (attacker.statStages[moveEffect.stat] > 2) score *= 0.5;
+            } else if (moveEffect.type === "heal_percent") {
               score = 55 + (1 - attacker.hp / attacker.maxHp) * 50;
-              if (attacker.hp > attacker.maxHp * 0.7) score *= 0.3; // Less valuable if HP is high
+              if (attacker.hp > attacker.maxHp * 0.7) score *= 0.3;
             }
           }
-
-          // Add slight penalty for low accuracy moves
-          if (move.accuracy < 1 && move.accuracy !== null) {
+          if (move.accuracy < 1 && move.accuracy !== null)
             score *= 0.7 + move.accuracy * 0.3;
-          }
-
-          // Add small randomness to break ties
           score += Math.random() * 5;
-
           potentialMoves.push({ move, score });
         });
-
-        // Filter out the truly non-viable moves unless they are the only option
         const viableMoves = potentialMoves.filter((pm) => pm.score > -50);
-
         if (viableMoves.length > 0) {
           viableMoves.sort((a, b) => b.score - a.score);
-          // console.log("AI Choices:", viableMoves.map(m => ({ name: m.move.name, score: m.score.toFixed(1) }))); // Debug AI choices
-          return viableMoves[0].move; // Choose the best viable move
+          return viableMoves[0].move;
         } else if (potentialMoves.length > 0) {
-          // Fallback if all moves were heavily penalized (e.g., only immune moves left) - pick the least bad one
           potentialMoves.sort((a, b) => b.score - a.score);
           return potentialMoves[0].move;
         } else {
-          // Should only happen if usableMoves was empty initially, safety fallback
           return MOVES.Struggle;
         }
       }
 
       // ********* MODULE: TURN & BATTLE FLOW **************
-
       async function delay(ms) {
-        // Utility to pause execution without blocking the main thread
         return new Promise((resolve) => setTimeout(resolve, ms));
       }
-
       async function handleStatusEffectsAtTurnStart(pokemon, pokemonId) {
-        if (pokemon.isFainted || !pokemon.status) return { canMove: true }; // Continue turn
-
+        /* ... unchanged ... */
+        if (pokemon.isFainted || !pokemon.status) return { canMove: true };
         const status = pokemon.status;
         let canMove = true;
         let message = "";
         let clearedStatus = false;
-
         if (status === "PAR") {
           message = `${pokemon.name} is paralyzed!`;
           if (Math.random() < PARALYSIS_CHANCE) {
-            message += ` It may be unable to move!`; // Changed message slightly
-            log(message); // Log initial paralysis message
+            message += ` It may be unable to move!`;
+            log(message);
             await delay(ANIMATION_DELAY.STATUS_EFFECT / 2);
-            log(`It couldn't move!`); // Separate message for clarity
+            log(`It couldn't move!`);
             canMove = false;
-            message = ""; // Clear message to avoid double logging
+            message = "";
           }
         } else if (status === "SLP") {
           if (pokemon.statusCounter > 0) {
@@ -2251,60 +2274,51 @@
             canMove = false;
           } else {
             message = `${pokemon.name} woke up!`;
-            pokemon.clearStatus(); // clearStatus logs its own message
-            clearedStatus = true; // Flag used below
-            updateHPDisplay(pokemon, pokemonId); // Update badge immediately
-            message = ""; // Clear message as clearStatus handles it
+            pokemon.clearStatus();
+            clearedStatus = true;
+            updateHPDisplay(pokemon, pokemonId);
+            message = "";
           }
         } else if (status === "FRZ") {
           message = `${pokemon.name} is frozen solid!`;
           if (Math.random() < THAW_CHANCE) {
-            // Use constant
             message = `${pokemon.name} thawed out!`;
             pokemon.clearStatus();
             clearedStatus = true;
-            updateHPDisplay(pokemon, pokemonId); // Update badge immediately
-            message = ""; // Clear message as clearStatus handles it
+            updateHPDisplay(pokemon, pokemonId);
+            message = "";
           } else {
             canMove = false;
           }
         }
-
         if (message) {
-          // Log only if message wasn't cleared
           log(message, clearedStatus ? "status-change" : "");
           await delay(ANIMATION_DELAY.STATUS_EFFECT);
         }
-
         return { canMove };
       }
-
       async function handleStatusEffectsAtTurnEnd(pokemon, pokemonId) {
+        /* ... unchanged ... */
         if (pokemon.isFainted || !pokemon.status)
           return { faintedFromStatus: false };
-
         const status = pokemon.status;
         let faintedFromStatus = false;
         let statusDamage = 0;
         let message = "";
-
         if (status === "BRN") {
-          statusDamage = Math.max(1, Math.floor(pokemon.maxHp / 16)); // Gen 7+ burn damage (1/16)
+          statusDamage = Math.max(1, Math.floor(pokemon.maxHp / 16));
           message = `${pokemon.name} was hurt by its burn!`;
         } else if (status === "PSN") {
-          statusDamage = Math.max(1, Math.floor(pokemon.maxHp / 8)); // Standard poison damage (1/8)
+          statusDamage = Math.max(1, Math.floor(pokemon.maxHp / 8));
           message = `${pokemon.name} was hurt by poison!`;
         }
-        // Add Badly Poisoned (Toxic) logic here later if needed (damage increases each turn)
-
         if (statusDamage > 0) {
           log(message, "status-change");
-          await delay(ANIMATION_DELAY.STATUS_EFFECT / 2); // Short pause after message
+          await delay(ANIMATION_DELAY.STATUS_EFFECT / 2);
           pokemon.hp -= statusDamage;
           updateHPDisplay(pokemon, pokemonId);
-          triggerScreenShake(); // Shake screen slightly for status damage
-          await delay(ANIMATION_DELAY.HP_BAR + ANIMATION_DELAY.SHORT); // Wait for HP bar visually + buffer
-
+          triggerScreenShake();
+          await delay(ANIMATION_DELAY.HP_BAR + ANIMATION_DELAY.SHORT);
           if (pokemon.hp <= 0) {
             log(`<b>${pokemon.name} fainted!</b>`);
             pokemon.isFainted = true;
@@ -2312,10 +2326,8 @@
             await playFaintAnimation(pokemonId);
           }
         }
-
-        return { faintedFromStatus }; // Return true if fainted
+        return { faintedFromStatus };
       }
-
       async function executeMove(
         attacker,
         defender,
@@ -2323,49 +2335,34 @@
         attackerId,
         defenderId
       ) {
+        /* ... unchanged ... */
         const attackerAvatarElId = attackerId + "-avatar";
         const defenderAvatarElId = defenderId + "-avatar";
-
-        // --- Use Move ---
         log(
           `<b>${attacker.name}</b> used <b>${move.name}</b>!`,
           attackerId === "pokemon2" ? "player-choice" : "opponent-choice"
         );
         if (move.pp !== Infinity && !move.isStruggle) {
           const moveInSet = attacker.moves.find((m) => m.name === move.name);
-          if (moveInSet) moveInSet.currentPP--; // Decrement PP on the actual move object
-        }
-        // Update player controls immediately if it was their turn to reflect PP change
-        // (This happens async, controls are hidden, but keeps data accurate for next turn)
-        if (attackerId === "pokemon2" && !move.isStruggle) {
-          // The updatePlayerControls function will read the updated PP when called next turn
+          if (moveInSet) moveInSet.currentPP--;
         }
         await delay(ANIMATION_DELAY.MEDIUM);
-
-        // --- Accuracy Check ---
         let hitTarget = calculateAccuracy(attacker, move, defender);
         if (!hitTarget) {
           log(`${attacker.name}'s attack missed!`);
           await delay(ANIMATION_DELAY.SHORT);
-          return { fainted: false }; // Move ends on miss
+          return { fainted: false };
         }
-
-        // --- Check Type/Status Immunities (Primary Check) ---
         let isImmune = false;
         let immuneMessage = `It doesn't affect ${defender.name}...`;
-
         if (move.category !== "Status") {
-          // Damage Move Type Immunity
           const effectiveness = calculateTypeEffectiveness(
             move.type,
             defender.types,
             move.ignoresTypeImmunity
           );
-          if (effectiveness === 0) {
-            isImmune = true;
-          }
+          if (effectiveness === 0) isImmune = true;
         } else {
-          // Status Move Specific Immunities
           const moveEffect = move.effect || {};
           if (moveEffect.type?.includes("apply_status")) {
             const statusToApply = moveEffect.status;
@@ -2401,42 +2398,31 @@
             )
               isImmune = true;
           }
-          // Add checks for other status effect immunities if needed (e.g. stat lowering vs Clear Body)
         }
-
         if (isImmune) {
           log(immuneMessage, "immune");
           await delay(ANIMATION_DELAY.SHORT);
-          return { fainted: false }; // Move ends on immunity
+          return { fainted: false };
         }
-
-        // --- Execute Move Effects ---
         let defenderFaintedThisTurn = false;
         let attackerFaintedThisTurn = false;
-
-        // Animate attack visual first
         animateAttack(
           attackerAvatarElId,
           defenderAvatarElId,
           move.type || move.category
         );
-        await delay(ANIMATION_DELAY.SHORT); // Short pause during animation travel
-
-        // --- Damage Calculation & Application ---
+        await delay(ANIMATION_DELAY.SHORT);
         if (move.category === "Physical" || move.category === "Special") {
           const { damage, effectiveness, crit, recoilDamage } = calculateDamage(
             attacker,
             move,
             defender
           );
-
           if (damage > 0) {
             defender.hp -= damage;
-            updateHPDisplay(defender, defenderId); // Update HP bar
-            // Trigger screen shake on hit, stronger on crit
+            updateHPDisplay(defender, defenderId);
             if (crit) triggerScreenShake();
-            await delay(ANIMATION_DELAY.HP_BAR); // Wait for HP bar animation
-
+            await delay(ANIMATION_DELAY.HP_BAR);
             if (crit) {
               log("✨ <b>Critical Hit!</b> ✨", "critical");
               await delay(ANIMATION_DELAY.SHORT);
@@ -2444,43 +2430,34 @@
             if (effectiveness > 1)
               log("It's super effective!", "effectiveness");
             else if (effectiveness < 1)
-              log("It's not very effective...", "effectiveness"); // Already checked effectiveness 0
+              log("It's not very effective...", "effectiveness");
             await delay(ANIMATION_DELAY.SHORT);
-
             if (defender.hp <= 0) {
               log(`<b>${defender.name} fainted!</b>`);
               defender.isFainted = true;
               defenderFaintedThisTurn = true;
               await playFaintAnimation(defenderId);
-              // No need for further effects/recoil if target fainted
               return { fainted: true };
             }
-
-            // Apply Recoil Damage (only if defender didn't faint)
             if (!defenderFaintedThisTurn && recoilDamage > 0) {
               log(`${attacker.name} took recoil damage!`);
               attacker.hp -= recoilDamage;
               updateHPDisplay(attacker, attackerId);
-              triggerScreenShake(); // Also shake slightly for recoil
+              triggerScreenShake();
               await delay(ANIMATION_DELAY.HP_BAR + ANIMATION_DELAY.SHORT);
               if (attacker.hp <= 0) {
                 log(`<b>${attacker.name} fainted from recoil!</b>`);
                 attacker.isFainted = true;
                 attackerFaintedThisTurn = true;
                 await playFaintAnimation(attackerId);
-                // Attacker fainted, turn ends for them
                 return { fainted: true };
               }
             }
           } else {
-            // Damage was 0, but not due to immunity (e.g. vs protect, or just 0 damage calc)
-            log("The attack had no effect."); // Or maybe "But it failed!" if vs Protect later
+            log("The attack had no effect.");
             await delay(ANIMATION_DELAY.SHORT);
           }
-        } // End Damage Phase
-
-        // --- Apply Move Secondary Effects (Status, Stat Changes, Heal) ---
-        // Only apply if defender didn't faint from the primary hit and attacker didn't faint from recoil
+        }
         if (
           !defenderFaintedThisTurn &&
           !attackerFaintedThisTurn &&
@@ -2490,8 +2467,6 @@
           let effectApplied = false;
           let targetPokemon = null;
           let targetId = null;
-
-          // Determine target of the effect
           if (effect.target === "self") {
             targetPokemon = attacker;
             targetId = attackerId;
@@ -2499,11 +2474,8 @@
             targetPokemon = defender;
             targetId = defenderId;
           }
-
           if (targetPokemon) {
             const meetsChance = !effect.chance || Math.random() < effect.chance;
-
-            // Apply Status Effect (Chance or Guaranteed) - immunity already checked
             if (
               (effect.type === "apply_status" ||
                 effect.type === "apply_status_chance") &&
@@ -2512,27 +2484,23 @@
               effectApplied = targetPokemon.applyStatus(
                 effect.status,
                 attacker
-              ); // applyStatus logs success/fail
-              if (effectApplied) updateHPDisplay(targetPokemon, targetId); // Update UI for status badge
-            }
-            // Stat Change Effect
-            else if (
+              );
+              if (effectApplied) updateHPDisplay(targetPokemon, targetId);
+            } else if (
               (effect.type === "lower_stat" ||
                 effect.type === "raise_stat" ||
                 effect.type === "lower_stat_chance" ||
                 effect.type === "raise_stat_chance") &&
               meetsChance
             ) {
-              // Check if stage change is possible before attempting
               const currentStage = targetPokemon.statStages[effect.stat];
               const potentialNewStage = currentStage + effect.stages;
-              if (potentialNewStage >= -6 && potentialNewStage <= 6) {
+              if (potentialNewStage >= -6 && potentialNewStage <= 6)
                 effectApplied = targetPokemon.changeStatStage(
                   effect.stat,
                   effect.stages
-                ); // changeStatStage logs success/fail
-              } else if (meetsChance) {
-                // Log failure if chance was met but stat was maxed/minned
+                );
+              else if (meetsChance)
                 log(
                   `${
                     targetPokemon.name
@@ -2541,30 +2509,17 @@
                   }!`,
                   "stat-change"
                 );
-              }
-            }
-            // Heal Effect
-            else if (effect.type === "heal_percent") {
+            } else if (effect.type === "heal_percent") {
               effectApplied = targetPokemon.heal(effect.amount);
-              if (effectApplied) updateHPDisplay(targetPokemon, targetId); // Update UI for HP bar
+              if (effectApplied) updateHPDisplay(targetPokemon, targetId);
             }
-            // Add other effect types here (e.g., flinch, confusion - not implemented)
-
-            if (effectApplied)
-              await delay(
-                ANIMATION_DELAY.STAT_CHANGE
-              ); // Pause after successful effect message/visual
-            else if (effect.chance && meetsChance && !effectApplied) {
-              // If an effect had a chance, met the chance, but failed (e.g. stat maxed), pause slightly
+            if (effectApplied) await delay(ANIMATION_DELAY.STAT_CHANGE);
+            else if (effect.chance && meetsChance && !effectApplied)
               await delay(ANIMATION_DELAY.SHORT);
-            }
           }
-        } // end if(!fainted && move.effect)
-
-        // Return fainted status based on events *within this move execution*
+        }
         return { fainted: defenderFaintedThisTurn || attackerFaintedThisTurn };
       }
-
       async function executeTurn(
         attacker,
         defender,
@@ -2572,39 +2527,30 @@
         defenderId,
         chosenMove
       ) {
-        // Double check faint status before starting
+        /* ... unchanged ... */
         if (attacker.isFainted || defender.isFainted || BATTLE_STATE.gameOver)
           return { battleEnded: BATTLE_STATE.gameOver };
-
-        // Deactivate the opponent side visually
         const defenderSide = document.getElementById(
           defenderId === "pokemon1" ? "opponent-side" : "player-side"
         );
         defenderSide?.classList.remove("active");
-
-        BATTLE_STATE.isProcessing = true; // Start processing lock for this action
-
-        // --- Check Pre-Move Status Effects (Paralysis, Sleep, Freeze) ---
+        BATTLE_STATE.isProcessing = true;
         const { canMove } = await handleStatusEffectsAtTurnStart(
           attacker,
           attackerId
         );
         if (!canMove) {
-          // Apply end-of-turn status effects for the non-moving Pokémon if applicable (BRN/PSN)
           const { faintedFromStatus } = await handleStatusEffectsAtTurnEnd(
             attacker,
             attackerId
           );
-          BATTLE_STATE.isProcessing = false; // End processing lock
+          BATTLE_STATE.isProcessing = false;
           return { battleEnded: faintedFromStatus || BATTLE_STATE.gameOver };
         }
-
-        // --- Activate Attacker Visually & Execute Move ---
         const attackerSide = document.getElementById(
           attackerId === "pokemon1" ? "opponent-side" : "player-side"
         );
-        attackerSide?.classList.add("active"); // Activate JUST before moving
-
+        attackerSide?.classList.add("active");
         const { fainted: moveCausedFaint } = await executeMove(
           attacker,
           defender,
@@ -2612,77 +2558,58 @@
           attackerId,
           defenderId
         );
-
-        // If move caused a faint (either attacker or defender), the turn sequence might end here
         if (moveCausedFaint) {
-          attackerSide?.classList.remove("active"); // Deactivate if fainted during move
-          BATTLE_STATE.gameOver = attacker.isFainted || defender.isFainted; // Update global game over state
-          BATTLE_STATE.isProcessing = false; // End processing lock
+          attackerSide?.classList.remove("active");
+          BATTLE_STATE.gameOver = attacker.isFainted || defender.isFainted;
+          BATTLE_STATE.isProcessing = false;
           return { battleEnded: BATTLE_STATE.gameOver };
         }
-
-        // --- Apply End-of-Turn Status Effects (Burn, Poison) ---
-        // Apply to the attacker *after* their successful move, unless they fainted from recoil already
         if (!attacker.isFainted) {
           const { faintedFromStatus } = await handleStatusEffectsAtTurnEnd(
             attacker,
             attackerId
           );
           if (faintedFromStatus) {
-            attackerSide?.classList.remove("active"); // Deactivate if fainted from status
-            BATTLE_STATE.gameOver = true; // Update global game over state
-            BATTLE_STATE.isProcessing = false; // End processing lock
+            attackerSide?.classList.remove("active");
+            BATTLE_STATE.gameOver = true;
+            BATTLE_STATE.isProcessing = false;
             return { battleEnded: true };
           }
         }
-
-        // Attacker remains 'active' visually until the start of the next pokemon's action
-        BATTLE_STATE.isProcessing = false; // End processing lock for this action
-        return { battleEnded: BATTLE_STATE.gameOver }; // Return current game over state
+        BATTLE_STATE.isProcessing = false;
+        return { battleEnded: BATTLE_STATE.gameOver };
       }
-
       async function startBattle(playerPokemonData, opponentPokemonData) {
-        // Prevent starting new battle while one is processing
+        /* ... mostly unchanged, ensure sequential UI setup with awaits ... */
         if (BATTLE_STATE.isProcessing) return;
-        BATTLE_STATE.isProcessing = true; // Lock processing during setup
-
-        // --- Reset State ---
+        BATTLE_STATE.isProcessing = true;
         BATTLE_STATE.gameOver = false;
         BATTLE_STATE.waitingForPlayer = false;
         BATTLE_STATE.isPlayerTurn = false;
         BATTLE_STATE.turnCounter = 0;
         BATTLE_STATE.battleLog = [];
-
-        // Clear console & hide controls/restart button
         const consoleEl = document.getElementById("console");
         consoleEl.innerHTML = "";
         document.getElementById("player-controls").classList.add("hidden");
         document.getElementById("player-controls").innerHTML = "";
         document.getElementById("restart-button").classList.add("hidden");
-        // Remove active/fainted classes from sides
         document
           .getElementById("opponent-side")
           ?.classList.remove("active", "fainted");
         document
           .getElementById("player-side")
           ?.classList.remove("active", "fainted");
-
         log(`✨ New Battle Starting! ✨`);
-
-        // --- Create Fresh Pokemon Instances ---
         BATTLE_STATE.playerPokemon = clonePokemon(playerPokemonData);
         BATTLE_STATE.opponentPokemon = clonePokemon(opponentPokemonData);
-
         log(`Opponent sent out <b>${BATTLE_STATE.opponentPokemon.name}</b>!`);
         await delay(ANIMATION_DELAY.SHORT);
         log(`Go! <b>${BATTLE_STATE.playerPokemon.name}</b>!`);
         await delay(ANIMATION_DELAY.SHORT);
 
-        // --- Setup UI ---
-        // Function to setup UI for one pokemon, returns a promise that resolves after animation
         function setupPokemonUI(pokemon, prefix) {
+          // Inner function now needs await inside
           return new Promise(async (resolve) => {
-            // Mark inner function async
             const avatarContainerEl = document.getElementById(
               `${prefix}-avatar-container`
             );
@@ -2692,7 +2619,6 @@
             const sideEl = document.getElementById(
               prefix === "pokemon1" ? "opponent-side" : "player-side"
             );
-
             if (
               !avatarContainerEl ||
               !avatarEl ||
@@ -2700,94 +2626,66 @@
               !levelEl ||
               !sideEl
             ) {
-              console.error("UI Element missing for prefix:", prefix);
-              resolve(); // Resolve anyway to not block the battle
+              console.error("UI Element missing:", prefix);
+              resolve();
               return;
             }
-
-            // Reset visual states before setup
             sideEl.classList.remove("fainted", "active", "hit");
-            avatarContainerEl.classList.remove("enter"); // Remove enter class first
-            avatarEl.innerHTML = ""; // Clear previous avatar content
-            avatarEl.classList.add("placeholder"); // Add placeholder class initially
-
-            // Set text content
+            avatarContainerEl.classList.remove("enter");
+            avatarEl.innerHTML = "";
+            avatarEl.classList.add("placeholder");
             nameEl.textContent = pokemon.name;
             levelEl.textContent = `Lv. ${pokemon.level}`;
-            updateHPDisplay(pokemon, prefix); // Set initial HP and status
-
-            // Load sprite
+            updateHPDisplay(pokemon, prefix);
             if (pokemon.sprite) {
               const img = document.createElement("img");
               img.alt = pokemon.name;
-              img.style.opacity = "0"; // Start transparent
-
-              // Preload image before animating entry
+              img.style.opacity = "0";
               img.onload = () => {
                 avatarEl.classList.remove("placeholder");
                 avatarEl.appendChild(img);
-                if (prefix === "pokemon2") {
-                  // Player sprite faces right
-                  img.style.transform = "scaleX(-1)";
-                }
-
-                // Force reflow before adding 'enter' class for animation start
+                if (prefix === "pokemon2") img.style.transform = "scaleX(-1)";
                 void avatarContainerEl.offsetWidth;
                 avatarContainerEl.classList.add("enter");
-
-                // Fade-in image slightly after container starts entry animation
                 setTimeout(() => {
                   img.style.opacity = "1";
                 }, 150);
-
-                // Resolve the promise after the entry animation duration
-                setTimeout(resolve, ANIMATION_DELAY.ENTRY);
+                setTimeout(resolve, ANIMATION_DELAY.ENTRY); // Resolve after entry animation
               };
               img.onerror = () => {
-                // Handle image loading error
-                console.error("Failed to load sprite:", pokemon.sprite);
-                // Keep placeholder visible
-                void avatarContainerEl.offsetWidth; // Still trigger entry animation
+                console.error("Failed sprite load:", pokemon.sprite);
+                void avatarContainerEl.offsetWidth;
                 avatarContainerEl.classList.add("enter");
-                setTimeout(resolve, ANIMATION_DELAY.ENTRY); // Resolve after duration
+                setTimeout(resolve, ANIMATION_DELAY.ENTRY);
               };
-              img.src = pokemon.sprite; // Start loading
+              img.src = pokemon.sprite;
             } else {
-              // No sprite provided, just animate entry with placeholder
               void avatarContainerEl.offsetWidth;
               avatarContainerEl.classList.add("enter");
-              setTimeout(resolve, ANIMATION_DELAY.ENTRY); // Resolve after duration
+              setTimeout(resolve, ANIMATION_DELAY.ENTRY);
             }
           });
         }
+        await setupPokemonUI(BATTLE_STATE.opponentPokemon, "pokemon1"); // Await completion
+        await setupPokemonUI(BATTLE_STATE.playerPokemon, "pokemon2"); // Await completion
 
-        // Run UI setup sequentially with awaits
-        await setupPokemonUI(BATTLE_STATE.opponentPokemon, "pokemon1");
-        await setupPokemonUI(BATTLE_STATE.playerPokemon, "pokemon2");
+        BATTLE_STATE.isProcessing = false;
 
-        BATTLE_STATE.isProcessing = false; // Unlock processing after setup animations complete
-
-        // --- Main Battle Loop ---
         while (
           !BATTLE_STATE.playerPokemon.isFainted &&
           !BATTLE_STATE.opponentPokemon.isFainted &&
           !BATTLE_STATE.gameOver
         ) {
-          // Prevent loop iteration if still processing previous turn
           if (BATTLE_STATE.isProcessing) {
-            await delay(50); // Short pause before checking again
+            await delay(50);
             continue;
           }
-
           BATTLE_STATE.turnCounter++;
           log(`--- Turn ${BATTLE_STATE.turnCounter} ---`, "turn-divider");
           await delay(ANIMATION_DELAY.SHORT);
-
-          // --- Move Selection Phase ---
-          // Player selects move
-          BATTLE_STATE.isPlayerTurn = true; // Enable controls via updatePlayerControls
+          BATTLE_STATE.isPlayerTurn = true;
           const playerMovePromise = new Promise((resolve) => {
-            BATTLE_STATE.playerMoveResolver = resolve; // Store resolver
+            BATTLE_STATE.playerMoveResolver = resolve;
             const usablePlayerMoves = BATTLE_STATE.playerPokemon.moves.filter(
               (m) => m.currentPP > 0
             );
@@ -2796,50 +2694,41 @@
               BATTLE_STATE.playerPokemon.hp > 0
             ) {
               log(`Player has no moves with PP left! Using <b>Struggle</b>.`);
-              // No need to show controls, resolve immediately with Struggle
               setTimeout(() => resolve(MOVES.Struggle), ANIMATION_DELAY.SHORT);
             } else {
-              updatePlayerControls(BATTLE_STATE.playerPokemon); // Show move buttons and set waitingForPlayer = true
+              updatePlayerControls(BATTLE_STATE.playerPokemon);
             }
           });
           const playerChosenMove = await playerMovePromise;
-          // --- Player choice logged inside executeMove ---
-          BATTLE_STATE.isPlayerTurn = false; // Turn flag off after selection
-          BATTLE_STATE.waitingForPlayer = false; // Not waiting anymore
-          BATTLE_STATE.playerMoveResolver = null; // Clear resolver
-          // Controls are already hidden by the button click handler
-
-          // Opponent selects move
+          BATTLE_STATE.isPlayerTurn = false;
+          BATTLE_STATE.waitingForPlayer = false;
+          BATTLE_STATE.playerMoveResolver = null;
           const opponentChosenMove = chooseOpponentMove(
             BATTLE_STATE.opponentPokemon,
             BATTLE_STATE.playerPokemon
           );
-          // --- Opponent choice logged inside executeMove ---
-          // await delay(ANIMATION_DELAY.SHORT); // Short pause after selections are made internally
-
-          // --- Determine Turn Order ---
-          let firstAttacker, secondAttacker, firstDefender, secondDefender;
-          let firstAttackerId,
+          let firstAttacker,
+            secondAttacker,
+            firstDefender,
+            secondDefender,
+            firstAttackerId,
             secondAttackerId,
             firstDefenderId,
-            secondDefenderId;
-          let firstMove, secondMove;
-
+            secondDefenderId,
+            firstMove,
+            secondMove;
           const p1Priority = opponentChosenMove.priority || 0;
           const p2Priority = playerChosenMove.priority || 0;
-
           let p1GoesFirst;
           if (p1Priority > p2Priority) p1GoesFirst = true;
           else if (p2Priority > p1Priority) p1GoesFirst = false;
           else {
-            // Priorities are equal, check speed
             const p1Speed = BATTLE_STATE.opponentPokemon.getModifiedStat("spe");
             const p2Speed = BATTLE_STATE.playerPokemon.getModifiedStat("spe");
             if (p1Speed > p2Speed) p1GoesFirst = true;
             else if (p2Speed > p1Speed) p1GoesFirst = false;
-            else p1GoesFirst = Math.random() < 0.5; // Speed tie
+            else p1GoesFirst = Math.random() < 0.5;
           }
-
           if (p1GoesFirst) {
             [firstAttacker, firstDefender] = [
               BATTLE_STATE.opponentPokemon,
@@ -2865,8 +2754,6 @@
             [secondAttackerId, secondDefenderId] = ["pokemon1", "pokemon2"];
             [firstMove, secondMove] = [playerChosenMove, opponentChosenMove];
           }
-
-          // --- First Pokémon's Action ---
           let turnResult = await executeTurn(
             firstAttacker,
             firstDefender,
@@ -2874,18 +2761,12 @@
             firstDefenderId,
             firstMove
           );
-          if (turnResult.battleEnded) {
-            break; // Exit loop immediately if battle ended
-          }
+          if (turnResult.battleEnded) break;
           await delay(ANIMATION_DELAY.TURN_TRANSITION);
-
-          // --- Second Pokémon's Action ---
-          // Check faint status BEFORE attempting second move (e.g. fainted from status/recoil from first attack)
           if (secondAttacker.isFainted || firstDefender.isFainted) {
             BATTLE_STATE.gameOver = true;
             break;
           }
-
           turnResult = await executeTurn(
             secondAttacker,
             secondDefender,
@@ -2893,11 +2774,7 @@
             secondDefenderId,
             secondMove
           );
-          if (turnResult.battleEnded) {
-            break; // Exit loop
-          }
-
-          // Check faint status again at the very end of the turn (e.g., both fainted from status)
+          if (turnResult.battleEnded) break;
           if (
             BATTLE_STATE.playerPokemon.isFainted ||
             BATTLE_STATE.opponentPokemon.isFainted
@@ -2905,85 +2782,112 @@
             BATTLE_STATE.gameOver = true;
             break;
           }
-
-          await delay(ANIMATION_DELAY.TURN_TRANSITION); // End of round pause
-        } // End While Loop
-
-        // --- Battle End ---
+          await delay(ANIMATION_DELAY.TURN_TRANSITION);
+        }
         BATTLE_STATE.gameOver = true;
         BATTLE_STATE.isPlayerTurn = false;
-        BATTLE_STATE.isProcessing = false; // Ensure processing is unlocked
+        BATTLE_STATE.isProcessing = false;
         document.getElementById("player-controls").classList.add("hidden");
-
-        // Stop lingering 'active' animations
         document.getElementById("opponent-side")?.classList.remove("active");
         document.getElementById("player-side")?.classList.remove("active");
-
-        // Determine winner/loser only after the loop confirms faint status
         const playerFainted = BATTLE_STATE.playerPokemon.isFainted;
         const opponentFainted = BATTLE_STATE.opponentPokemon.isFainted;
-
-        let winnerMessage = "The battle ended in a draw?"; // Default case
-
-        if (playerFainted && !opponentFainted) {
+        let winnerMessage = "The battle ended in a draw?";
+        if (playerFainted && !opponentFainted)
           winnerMessage = `😭 You lost! <b>${BATTLE_STATE.opponentPokemon.name}</b> wins the battle! 😭`;
-        } else if (opponentFainted && !playerFainted) {
+        else if (opponentFainted && !playerFainted)
           winnerMessage = `✨🎉 <b>You Win!</b> ${BATTLE_STATE.playerPokemon.name} was victorious! 🎉✨`;
-        } else if (playerFainted && opponentFainted) {
+        else if (playerFainted && opponentFainted)
           winnerMessage = "💥 It's a Double Knockout! The battle is a draw! 💥";
-        }
-
         log(`--------------------`, "turn-divider");
         log(winnerMessage, "game-over");
-
-        // Show restart button
         document.getElementById("restart-button").classList.remove("hidden");
       }
 
-      // ********* MODULE: INITIALIZATION **************
+      // ********* MODULE: INITIALIZATION & BUBBLE POP **************
+
+      /** Gets animation duration from CSS Custom Property or uses fallback. */
+      function getCssVariableDuration(propertyName, fallbackMs) {
+        try {
+          const durationStr = getComputedStyle(document.documentElement)
+            .getPropertyValue(propertyName)
+            .trim();
+          if (durationStr) {
+            const match = durationStr.match(/^(\d*\.?\d+)(m?s)?$/i);
+            if (match) {
+              const value = parseFloat(match[1]);
+              const unit = match[2]?.toLowerCase();
+              if (unit === "s") return value * 1000;
+              if (unit === "ms" || !unit) return value;
+            }
+          }
+        } catch (e) {
+          console.warn(`Could not parse ${propertyName}:`, e);
+        }
+        return fallbackMs;
+      }
+
+      /** Handles the 'Pop Bubble' button click. */
+      function handlePopBubble() {
+        const bubbleWrapper = document.getElementById("bubble-wrapper");
+        if (!bubbleWrapper) return;
+
+        const animationDuration = getCssVariableDuration(
+          "--bubble-pop-duration",
+          400
+        );
+        const prefersReducedMotion = window.matchMedia(
+          "(prefers-reduced-motion: reduce)"
+        ).matches;
+        const destination = "index.html"; // Assume index is in the same directory
+
+        if (prefersReducedMotion) {
+          window.location.href = destination;
+        } else {
+          bubbleWrapper.classList.add("popping-out");
+          setTimeout(() => {
+            window.location.href = destination;
+          }, animationDuration);
+        }
+      }
+
       document.addEventListener("DOMContentLoaded", () => {
         const restartButton = document.getElementById("restart-button");
+        const popBubbleButton = document.getElementById("pop-bubble-button");
 
         const initiateBattle = () => {
-          // Ensure not already processing before starting a new battle via button
+          /* ... initiateBattle function remains the same ... */
           if (BATTLE_STATE.isProcessing && !BATTLE_STATE.gameOver) {
-            // Allow restart if game is over
             console.log("Battle already in progress, cannot restart yet.");
             return;
           }
-
-          // Select two different random Pokémon
           const pokemonKeys = Object.keys(POKEMON_DATA);
           if (pokemonKeys.length < 2) {
-            console.error("Not enough Pokémon data to start a battle!");
+            console.error("Not enough Pokémon data!");
             log("Error: Not enough Pokémon defined.", "danger-color");
             return;
           }
-
           let playerIndex = Math.floor(Math.random() * pokemonKeys.length);
           let opponentIndex;
           do {
             opponentIndex = Math.floor(Math.random() * pokemonKeys.length);
-          } while (opponentIndex === playerIndex); // Ensure different Pokémon
-
+          } while (opponentIndex === playerIndex);
           const playerPokemon = POKEMON_DATA[pokemonKeys[playerIndex]];
           const opponentPokemon = POKEMON_DATA[pokemonKeys[opponentIndex]];
-
-          // Start the battle asynchronously
           startBattle(playerPokemon, opponentPokemon).catch((error) => {
-            console.error("Battle execution failed:", error);
-            log("A critical error occurred during the battle.", "danger-color");
-            BATTLE_STATE.isProcessing = false; // Unlock processing on error
+            console.error("Battle failed:", error);
+            log("A critical error occurred.", "danger-color");
+            BATTLE_STATE.isProcessing = false;
             document
               .getElementById("restart-button")
-              .classList.remove("hidden"); // Show restart btn
+              .classList.remove("hidden");
           });
         };
 
         restartButton.addEventListener("click", initiateBattle);
+        popBubbleButton.addEventListener("click", handlePopBubble); // Add listener for pop button
 
-        // Start the first battle automatically after a short delay for elements to render
-        setTimeout(initiateBattle, 100); // Delay ensures smooth initial render
+        setTimeout(initiateBattle, 100); // Start first battle
       });
     </script>
   </body>

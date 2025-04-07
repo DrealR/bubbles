@@ -20,46 +20,25 @@
         --color-focus-ring: var(--color-secondary-accent);
 
         /* Bubble Specific Palette */
-        --color-bubble-bg-start: rgba(
-          55,
-          65,
-          81,
-          0.5
-        ); /* Dark Gray semi-transparent */
-        --color-bubble-bg-end: rgba(
-          31,
-          41,
-          55,
-          0.6
-        ); /* Darker Gray semi-transparent */
-        --color-bubble-border: rgba(
-          107,
-          114,
-          128,
-          0.3
-        ); /* Subtle Gray Border */
+        --color-bubble-bg-start: rgba(55, 65, 81, 0.5); /* Dark Gray semi-transparent */
+        --color-bubble-bg-end: rgba(31, 41, 55, 0.6); /* Darker Gray semi-transparent */
+        --color-bubble-border: rgba(107, 114, 128, 0.3); /* Subtle Gray Border */
         --color-bubble-border-hover: var(--color-primary-accent);
-        --color-bubble-highlight: rgba(
-          56,
-          189,
-          248,
-          0.15
-        ); /* Subtler blue highlight */
+        --color-bubble-highlight: rgba(56, 189, 248, 0.15); /* Subtler blue highlight */
         --color-bubble-placeholder-bg-start: var(--color-primary-accent);
         --color-bubble-placeholder-bg-end: var(--color-secondary-accent);
         --color-bubble-placeholder-text: rgba(255, 255, 255, 0.85);
-        --color-info-button-bg: rgba(
-          17,
-          24,
-          39,
-          0.5
-        ); /* Very dark semi-transparent */
+        --color-info-button-bg: rgba(17, 24, 39, 0.5); /* Very dark semi-transparent */
         --color-info-button-bg-hover: rgba(17, 24, 39, 0.8);
         --color-info-button-icon: var(--color-text-muted);
         --color-info-button-icon-hover: var(--color-heading);
         --color-tooltip-bg: #1f2937; /* Dark Gray 800 */
         --color-tooltip-text: var(--color-text);
         --color-tooltip-border: var(--color-bubble-border);
+        --color-scrollbar-thumb: #4b5563; /* Gray 600 */
+        --color-scrollbar-thumb-hover: #6b7280; /* Gray 500 */
+        --color-scrollbar-track: rgba(17, 24, 39, 0.5); /* Darker BG */
+
 
         /* Filter Controls Palette */
         --color-filter-bg: rgba(55, 65, 81, 0.6);
@@ -68,6 +47,8 @@
         --color-filter-active-bg: var(--color-primary-accent);
         --color-filter-active-text: var(--color-background);
         --color-filter-hover-bg: rgba(75, 85, 99, 0.8);
+        --color-search-bg: rgba(17, 24, 39, 0.5); /* Slightly darker for input */
+        --color-search-shadow: rgba(0, 0, 0, 0.3);
 
         /* Typography & Fonts */
         --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -97,9 +78,17 @@
 
         /* Bubble Dimensions & Animation */
         --bubble-size: clamp(200px, 22vw, 260px); /* Adjusted size range */
-        --bubble-pop-duration: 0.4s;
+        --bubble-pop-duration: 0.45s; /* FASTER duration for pop */
+        --bubble-pop-nav-delay-factor: 0.7; /* Navigate after 70% of pop duration */
+        --bubble-reduced-motion-nav-delay: 50ms; /* Navigation delay for reduced motion */
         --glitch-intensity: 1.5px; /* Reduced intensity */
         --tooltip-z-index: 100;
+        --pop-z-index: 1000; /* Ensure popping bubble is on top */
+
+        /* Tooltip Specific */
+        --tooltip-max-width: 350px;
+        --tooltip-max-height: 300px; /* Constrain height */
+        --tooltip-prompt-max-width: 450px; /* Slightly wider for prompts */
       }
 
       /* Optional: Load Poppins font if desired and connection available */
@@ -148,18 +137,12 @@
       }
 
       @keyframes noise-animation {
-        0% {
-          transform: translate(0, 0);
-        }
-        100% {
-          transform: translate(1px, 1px);
-        }
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(1px, 1px); }
       }
 
       /* Basic Elements */
-      h1,
-      h2,
-      h3 {
+      h1, h2, h3 {
         font-family: var(--font-heading);
         color: var(--color-heading);
         line-height: 1.2;
@@ -195,8 +178,7 @@
       a {
         color: var(--color-primary-accent);
         text-decoration: none;
-        transition: color var(--transition-duration-fast)
-          var(--transition-timing);
+        transition: color var(--transition-duration-fast) var(--transition-timing);
         border-radius: var(--border-radius-sm);
       }
 
@@ -207,9 +189,7 @@
         text-underline-offset: 4px;
       }
 
-      a:focus {
-        outline: none;
-      }
+      a:focus { outline: none; }
       a:focus-visible {
         outline: 2px solid var(--color-focus-ring);
         outline-offset: 3px;
@@ -234,13 +214,9 @@
         margin-bottom: var(--spacing-lg);
       }
 
-      main {
-        flex-grow: 1;
-      }
+      main { flex-grow: 1; }
 
-      .bubble-showcase-wrapper {
-        /* Added wrapper for potential future layout needs */
-      }
+      .bubble-showcase-wrapper { /* Wrapper for potential future needs */ }
 
       .bubble-showcase {
         display: flex;
@@ -259,28 +235,49 @@
         font-size: 0.9rem;
       }
 
-      /* Filter Controls */
+      /* Filter Controls - Refined Layout */
       .filter-controls {
         margin-bottom: var(--spacing-xl);
-        padding: var(--spacing-md);
+        padding: var(--spacing-lg);
         background-color: var(--color-filter-bg);
         border: 1px solid var(--color-filter-border);
         border-radius: var(--border-radius-md);
         backdrop-filter: blur(5px);
         -webkit-backdrop-filter: blur(5px);
         display: flex;
-        flex-wrap: wrap;
-        gap: var(--spacing-sm) var(--spacing-md); /* Row gap, Column gap */
-        justify-content: center;
-        align-items: center;
+        flex-direction: column; /* Stack groups vertically */
+        gap: var(--spacing-md); /* Gap between groups */
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       }
 
-      .filter-controls .filter-label {
+      .filter-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-sm) var(--spacing-md); /* Row gap, Column gap */
+        align-items: center;
+        justify-content: center; /* Center items within group */
+      }
+
+      .filter-group:not(:last-child) {
+         padding-bottom: var(--spacing-md); /* Space below group */
+         border-bottom: 1px solid var(--color-filter-border); /* Separator */
+      }
+
+      .filter-group .filter-label {
         font-weight: 600;
         color: var(--color-text);
-        margin-right: var(--spacing-sm); /* Reduced margin */
+        margin-right: var(--spacing-sm);
         flex-shrink: 0;
+        margin-bottom: var(--spacing-xs); /* Add space below label if wrapping */
+        width: 100%; /* Make label take full width initially */
+        text-align: center; /* Center label text */
+        margin-right: 0; /* Reset margin */
+      }
+
+      /* Center buttons/input below the label */
+      .filter-group > *:not(.filter-label) {
+        margin-left: auto;
+        margin-right: auto;
       }
 
       .filter-controls .filter-button {
@@ -292,8 +289,7 @@
         background-color: transparent;
         color: var(--color-filter-text);
         cursor: pointer;
-        transition: background-color var(--transition-duration-fast)
-            var(--transition-timing),
+        transition: background-color var(--transition-duration-fast) var(--transition-timing),
           color var(--transition-duration-fast) var(--transition-timing),
           border-color var(--transition-duration-fast) var(--transition-timing),
           transform var(--transition-duration-fast) var(--transition-timing);
@@ -308,9 +304,7 @@
         color: var(--color-heading);
       }
 
-      .filter-controls .filter-button:focus {
-        outline: none;
-      }
+      .filter-controls .filter-button:focus { outline: none; }
       .filter-controls .filter-button:focus-visible {
         outline: 2px solid var(--color-focus-ring);
         outline-offset: 2px;
@@ -324,31 +318,54 @@
         font-weight: 600;
       }
 
+      /* Prompt Search Input Styling */
+      .prompt-search-input {
+        padding: var(--spacing-xs) var(--spacing-md);
+        font-size: 0.9rem;
+        font-family: var(--font-body);
+        border: 1px solid var(--color-filter-border);
+        border-radius: var(--border-radius-pill);
+        background-color: var(--color-search-bg); /* Use specific search bg */
+        color: var(--color-filter-text);
+        transition: border-color var(--transition-duration-fast) var(--transition-timing),
+                    box-shadow var(--transition-duration-fast) var(--transition-timing);
+        flex-grow: 1; /* Allow it to take available space */
+        min-width: 200px; /* Prevent being too small */
+        max-width: 400px; /* Prevent being too large on wide screens */
+        appearance: none;
+        box-shadow: inset 0 1px 3px var(--color-search-shadow);
+      }
+      .prompt-search-input:focus {
+        outline: none;
+        border-color: var(--color-primary-accent);
+        box-shadow: inset 0 1px 3px var(--color-search-shadow), 0 0 0 2px var(--color-focus-ring);
+      }
+      .prompt-search-input::placeholder {
+        color: var(--color-text-muted);
+        opacity: 0.8;
+      }
+      .prompt-search-input::-webkit-search-cancel-button,
+      .prompt-search-input::-webkit-search-decoration { appearance: none; }
+
       /* Bubble Styling */
       .app-bubble {
         width: var(--bubble-size);
         height: var(--bubble-size);
         border-radius: var(--border-radius-bubble);
-        background: linear-gradient(
-          135deg,
-          var(--color-bubble-bg-start),
-          var(--color-bubble-bg-end)
-        );
+        background: linear-gradient(135deg, var(--color-bubble-bg-start), var(--color-bubble-bg-end));
         border: 1px solid var(--color-bubble-border);
         position: relative;
         overflow: visible; /* Allow info button/tooltip potentially outside */
         display: flex; /* Container for link content */
         cursor: pointer;
-        transition: transform var(--transition-duration-med)
-            var(--transition-timing),
+        transition: transform var(--transition-duration-med) var(--transition-timing),
           box-shadow var(--transition-duration-med) var(--transition-timing),
           border-color var(--transition-duration-med) var(--transition-timing),
           opacity var(--transition-duration-med) var(--transition-timing),
           visibility var(--transition-duration-med) linear;
         backdrop-filter: blur(6px);
         -webkit-backdrop-filter: blur(6px);
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25),
-          inset 0 1px 3px rgba(255, 255, 255, 0.05);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25), inset 0 1px 3px rgba(255, 255, 255, 0.05);
         will-change: transform, opacity;
         outline: none; /* Focus handled by focus-visible */
       }
@@ -357,8 +374,7 @@
       .app-bubble:focus-visible {
         transform: translateY(-6px) scale(1.04);
         border-color: var(--color-bubble-border-hover);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35),
-          inset 0 1px 4px rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 4px rgba(255, 255, 255, 0.08);
       }
       .app-bubble:focus-visible {
         outline: 3px solid var(--color-focus-ring);
@@ -373,17 +389,12 @@
         left: 15%;
         width: 60%;
         height: 30%;
-        background: radial-gradient(
-          ellipse at center,
-          var(--color-bubble-highlight) 0%,
-          transparent 70%
-        );
+        background: radial-gradient(ellipse at center, var(--color-bubble-highlight) 0%, transparent 70%);
         border-radius: 50%;
         opacity: 0.6;
         transform: rotate(-25deg);
         pointer-events: none;
-        transition: opacity var(--transition-duration-med) ease,
-          transform var(--transition-duration-med) ease;
+        transition: opacity var(--transition-duration-med) ease, transform var(--transition-duration-med) ease;
         filter: blur(8px);
         z-index: 1; /* Above background, below content */
       }
@@ -403,32 +414,24 @@
         border: 1.5px solid var(--color-secondary-accent);
         border-radius: inherit;
         opacity: 0;
-        transition: opacity var(--transition-duration-med) ease-in-out,
-          transform var(--transition-duration-med) ease-in-out;
+        transition: opacity var(--transition-duration-med) ease-in-out, transform var(--transition-duration-med) ease-in-out;
         pointer-events: none;
         z-index: 0;
         transform: translate(0, 0);
       }
       .app-bubble:hover::after,
-      .app-bubble:focus-within::after {
-        /* Trigger on focus within */
+      .app-bubble:focus-within::after { /* Trigger on focus within */
         opacity: 0.35; /* Slightly reduced opacity */
         animation: bubble-glitch 0.6s infinite alternate linear; /* Slightly slower */
       }
 
       @keyframes bubble-glitch {
         0% {
-          transform: translate(
-            var(--glitch-intensity),
-            calc(var(--glitch-intensity) * -1)
-          );
+          transform: translate(var(--glitch-intensity), calc(var(--glitch-intensity) * -1));
           clip-path: polygon(0% 0%, 100% 0%, 100% 45%, 0% 55%);
         }
         100% {
-          transform: translate(
-            calc(var(--glitch-intensity) * -1),
-            var(--glitch-intensity)
-          );
+          transform: translate(calc(var(--glitch-intensity) * -1), var(--glitch-intensity));
           clip-path: polygon(0% 55%, 100% 45%, 100% 100%, 0% 100%);
         }
       }
@@ -439,13 +442,11 @@
         transform: scale(0.8);
         pointer-events: none;
         visibility: hidden;
-        transition: opacity var(--transition-duration-med)
-            var(--transition-timing),
+        transition: opacity var(--transition-duration-med) var(--transition-timing),
           transform var(--transition-duration-med) var(--transition-timing),
           visibility 0s linear var(--transition-duration-med),
-          width 0s linear var(--transition-duration-med),
-          /* Immediate collapse */ height 0s linear
-            var(--transition-duration-med),
+          width 0s linear var(--transition-duration-med), /* Immediate collapse */
+          height 0s linear var(--transition-duration-med),
           padding 0s linear var(--transition-duration-med),
           margin 0s linear var(--transition-duration-med),
           border 0s linear var(--transition-duration-med),
@@ -484,11 +485,7 @@
         aspect-ratio: 1 / 1; /* Maintain square */
         height: auto; /* Let aspect-ratio define height */
         border-radius: 50%;
-        background: linear-gradient(
-          45deg,
-          var(--color-bubble-placeholder-bg-start),
-          var(--color-bubble-placeholder-bg-end)
-        );
+        background: linear-gradient(45deg, var(--color-bubble-placeholder-bg-start), var(--color-bubble-placeholder-bg-end));
         opacity: 0.65; /* Slightly more opaque */
         margin-bottom: var(--spacing-sm);
         display: flex;
@@ -499,8 +496,7 @@
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3),
-          0 2px 5px rgba(0, 0, 0, 0.2);
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3), 0 2px 5px rgba(0, 0, 0, 0.2);
         flex-shrink: 0;
       }
 
@@ -535,16 +531,12 @@
         text-decoration: underline dashed 1px;
         text-decoration-color: rgba(156, 163, 175, 0.5);
         text-underline-offset: 2px;
-        transition: color var(--transition-duration-fast),
-          text-decoration-color var(--transition-duration-fast),
-          opacity var(--transition-duration-fast);
+        transition: color var(--transition-duration-fast), text-decoration-color var(--transition-duration-fast), opacity var(--transition-duration-fast);
         border-radius: var(--border-radius-sm);
         padding: var(--spacing-xs);
         margin: var(--spacing-sm) calc(var(--spacing-xs) * -1) 0; /* Adjust margin for padding */
         line-height: 1.3;
-        max-width: calc(
-          100% - 50px
-        ); /* Prevent overlap with info button more reliably */
+        max-width: calc(100% - 50px); /* Prevent overlap with info button */
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -593,8 +585,8 @@
         outline: none; /* Focus handled by focus-visible */
       }
       .app-bubble:hover .info-button,
-        .app-bubble:focus-within .info-button,
-        .info-button:focus-visible /* Keep visible when focused itself */ {
+      .app-bubble:focus-within .info-button,
+      .info-button:focus-visible /* Keep visible when focused itself */ {
         opacity: 1;
         transform: scale(1);
       }
@@ -618,7 +610,7 @@
         transform: scale(1.1); /* Maintain scale on focus */
       }
 
-      /* Unified Tooltip Styling */
+      /* --- Unified Tooltip Styling --- */
       #bubble-tooltip {
         position: fixed; /* Relative to viewport */
         z-index: var(--tooltip-z-index);
@@ -627,30 +619,51 @@
         border: 1px solid var(--color-tooltip-border);
         border-radius: var(--border-radius-md);
         padding: var(--spacing-md);
+        /* Add right padding for scrollbar space */
+        padding-right: calc(var(--spacing-md) + var(--spacing-sm));
         font-size: 0.85rem;
         line-height: 1.5;
-        max-width: 350px;
+        max-width: var(--tooltip-max-width); /* Default max-width */
+        max-height: var(--tooltip-max-height); /* *** ADDED: Constrain height *** */
+        overflow-y: auto; /* *** ADDED: Enable scrolling *** */
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
         transform: translateY(10px) scale(0.95);
-        transition: opacity var(--transition-duration-fast)
-            var(--transition-timing),
+        transition: opacity var(--transition-duration-fast) var(--transition-timing),
           visibility 0s linear var(--transition-duration-fast),
           transform var(--transition-duration-fast) var(--transition-timing);
-        white-space: pre-wrap;
+        white-space: pre-wrap; /* Preserve line breaks and spaces */
         word-wrap: break-word;
         font-family: var(--font-body);
+        scrollbar-width: thin; /* Firefox */
+        scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track); /* Firefox */
       }
+
+      /* Webkit scrollbar styles */
+      #bubble-tooltip::-webkit-scrollbar {
+        width: 8px;
+      }
+      #bubble-tooltip::-webkit-scrollbar-track {
+        background: var(--color-scrollbar-track);
+        border-radius: var(--border-radius-md);
+      }
+      #bubble-tooltip::-webkit-scrollbar-thumb {
+        background-color: var(--color-scrollbar-thumb);
+        border-radius: 4px;
+        border: 2px solid var(--color-scrollbar-track);
+      }
+      #bubble-tooltip::-webkit-scrollbar-thumb:hover {
+        background-color: var(--color-scrollbar-thumb-hover);
+      }
+
 
       #bubble-tooltip[data-type="prompt"] {
         font-family: var(--font-mono);
-        max-width: 400px;
+        max-width: var(--tooltip-prompt-max-width); /* Wider for prompts */
       }
-      #bubble-tooltip[data-type="refinement"] {
-        max-width: 300px;
-      }
+      /* Refinement tooltips don't need specific styles, inherit default */
 
       #bubble-tooltip.visible {
         opacity: 1;
@@ -659,39 +672,46 @@
         transform: translateY(0) scale(1);
         transition-delay: 0s, 0s, 0s; /* Reset delays */
       }
-      #bubble-tooltip code {
-        background-color: rgba(0, 0, 0, 0.2);
-        padding: 0.1em 0.3em;
-        border-radius: var(--border-radius-sm);
-        font-size: 0.9em;
-        word-break: break-all; /* Force break very long code words */
+
+      /* --- FASTER Pop Animation --- */
+      @keyframes bubble-pop-fast {
+        0% { transform: scale(1) rotate(0deg); opacity: 1; }
+        20% {
+          transform: scale(0.8) rotate(-4deg); opacity: 0.95;
+          animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); /* Overshoot */
+        }
+        65% {
+          transform: scale(20) rotate(3deg); opacity: 1;
+          animation-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1); /* EaseOutQuad */
+        }
+        100% { transform: scale(25) rotate(0deg); opacity: 0; }
       }
 
-      /* Pop Animation */
       .app-bubble.popping {
-        animation: pop var(--bubble-pop-duration)
-          var(--transition-timing-bounce) forwards;
+        /* Position/size/zIndex/margin set dynamically by JS */
+        transform-origin: center center;
+        will-change: transform, opacity;
+        animation: bubble-pop-fast var(--bubble-pop-duration) forwards;
         cursor: default;
         pointer-events: none;
-        z-index: 5;
+        background: linear-gradient(135deg, var(--color-bubble-bg-start), var(--color-bubble-bg-end));
+        border: 1px solid var(--color-bubble-border); /* Keep border */
+        border-radius: var(--border-radius-bubble); /* Keep shape */
+        box-shadow: none; /* Remove original shadow */
+        backdrop-filter: none; /* Remove blur during pop */
+        -webkit-backdrop-filter: none;
+        overflow: hidden; /* Hide internal content cleanly */
       }
-
-      @keyframes pop {
-        0% {
-          transform: scale(1.04);
-          opacity: 1;
-          filter: blur(0px);
-        }
-        50% {
-          transform: scale(1.3);
-          opacity: 0.7;
-          filter: blur(3px);
-        }
-        100% {
-          transform: scale(0);
-          opacity: 0;
-          filter: blur(15px);
-        }
+      .app-bubble.popping > * {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        transition: none !important;
+      }
+      .app-bubble.popping::before,
+      .app-bubble.popping::after {
+        display: none !important;
+        content: none !important;
+        animation: none !important;
       }
 
       /* Empty state message */
@@ -705,9 +725,7 @@
         margin: var(--spacing-lg) auto;
         display: none; /* Hidden by default */
       }
-      .empty-state.visible {
-        display: block;
-      }
+      .empty-state.visible { display: block; }
 
       /* Accessibility */
       .sr-only {
@@ -724,108 +742,77 @@
 
       /* Media Queries */
       @media (max-width: 768px) {
-        h1 {
-          font-size: clamp(2rem, 8vw, 3rem);
-        }
-        .container {
-          width: 95%;
-        }
-        .bubble-showcase {
-          gap: var(--spacing-lg);
-        }
-        .filter-controls {
-          flex-direction: column;
-          align-items: stretch;
-          text-align: center;
-        }
-        .filter-controls .filter-label {
-          margin-right: 0;
-          margin-bottom: var(--spacing-sm);
-        }
+        h1 { font-size: clamp(2rem, 8vw, 3rem); }
+        .container { width: 95%; }
+        .bubble-showcase { gap: var(--spacing-lg); }
+
+        .filter-group { gap: var(--spacing-sm); }
+        .filter-group .filter-label { margin-bottom: var(--spacing-sm); }
+        .prompt-search-input { max-width: 90%; min-width: 180px; }
+
         .info-button {
           top: var(--spacing-sm);
           right: var(--spacing-sm);
           width: 24px;
           height: 24px;
         }
-        .info-button svg {
-          width: 14px;
-          height: 14px;
-        }
+        .info-button svg { width: 14px; height: 14px; }
+
         #bubble-tooltip {
-          max-width: 90vw;
+          max-width: 90vw; /* Allow tooltip to take more width */
           font-size: 0.8rem;
+          /* Adjust max-height slightly for smaller screens if needed */
+          --tooltip-max-height: 250px;
         }
-        #bubble-tooltip[data-type="prompt"],
-        #bubble-tooltip[data-type="refinement"] {
-          max-width: 90vw;
-        }
+        /* No need to override data-type specific max-width here, 90vw covers it */
       }
 
       @media (max-width: 480px) {
-        p.intro-text {
-          font-size: 1rem;
-        }
-        .app-bubble h3 {
-          font-size: 0.85rem;
-        }
-        .app-bubble .model-name {
-          font-size: 0.7rem;
-        }
+        p.intro-text { font-size: 1rem; }
+        .app-bubble h3 { font-size: 0.85rem; }
+        .app-bubble .model-name { font-size: 0.7rem; }
         .app-bubble .generation-refinements {
           font-size: 0.65rem;
           max-width: calc(100% - 40px);
         }
-        .bubble-image-placeholder {
-          width: 30%;
-        }
+        .bubble-image-placeholder { width: 30%; }
+        .filter-controls { padding: var(--spacing-md); }
+        .filter-group { gap: var(--spacing-xs) var(--spacing-sm); }
         .filter-controls .filter-button {
           font-size: 0.85rem;
           padding: var(--spacing-xs) var(--spacing-sm);
+        }
+        .prompt-search-input {
+          font-size: 0.85rem;
+          padding: var(--spacing-xs) var(--spacing-sm);
+          max-width: 100%; /* Allow full width */
+        }
+         /* Further reduce tooltip height on very small screens */
+        #bubble-tooltip {
+            --tooltip-max-height: 200px;
         }
       }
 
       @media (prefers-reduced-motion: reduce) {
         body::before,
-        .app-bubble::after,
-        .app-bubble.popping {
-          animation: none !important;
-        }
-        .app-bubble,
-        .filter-button,
-        .app-bubble::before,
-        .app-bubble::after,
-        .info-button,
-        #bubble-tooltip,
-        .generation-refinements {
+        .app-bubble::after { animation: none !important; }
+        .app-bubble, .filter-button, .app-bubble::before, .app-bubble::after,
+        .info-button, #bubble-tooltip, .generation-refinements {
           transition-duration: 0.01ms !important;
           transition-delay: 0ms !important;
         }
         .app-bubble.popping {
-          opacity: 0;
-          transform: scale(0);
+          animation: none !important;
+          opacity: 0 !important;
+          transform: scale(0) !important;
+          transition: opacity 0.05s linear, transform 0.05s linear !important;
         }
-        .app-bubble:hover,
-        .app-bubble:focus-visible,
-        .app-bubble:focus-within {
-          transform: none;
-        }
-        .app-bubble:hover::before {
-          transform: rotate(-25deg);
-        }
-        .info-button {
-          transform: scale(1);
-        }
-        .info-button:hover,
-        .info-button:focus {
-          transform: scale(1);
-        }
-        #bubble-tooltip {
-          transform: translateY(0) scale(1);
-        }
-        .filter-button:hover {
-          transform: none;
-        }
+        .app-bubble:hover, .app-bubble:focus-visible, .app-bubble:focus-within { transform: none; }
+        .app-bubble:hover::before { transform: rotate(-25deg); }
+        .info-button { transform: scale(1); }
+        .info-button:hover, .info-button:focus { transform: scale(1); }
+        #bubble-tooltip { transform: translateY(0) scale(1); }
+        .filter-button:hover { transform: none; }
       }
     </style>
   </head>
@@ -837,252 +824,209 @@
         HTML files – each a unique digital creation. Planted by a human prompt,
         they are grown and refined collaboratively with AI assistants. Click a
         bubble to pop it and explore! Use the
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          style="
-            width: 1em;
-            height: 1em;
-            vertical-align: -0.125em;
-            display: inline-block;
-            color: var(--color-info-button-icon);
-          "
-          aria-hidden="true"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-            clip-rule="evenodd"
-          />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width: 1em; height: 1em; vertical-align: -0.125em; display: inline-block; color: var(--color-info-button-icon);" aria-hidden="true">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
         </svg>
         icon for initial prompts and hover over or focus "Refinements" for
-        iteration details.
+        iteration details. Filter or search below.
       </p>
 
-      <div
-        class="filter-controls"
-        role="toolbar"
-        aria-label="Filter apps by AI Model"
-      >
-        <span class="filter-label" id="filter-label">Filter by Model:</span>
-        <button
-          type="button"
-          class="filter-button"
-          data-filter="all"
-          aria-pressed="true"
-          aria-describedby="filter-label"
-        >
-          All
-        </button>
-        <button
-          type="button"
-          class="filter-button"
-          data-filter="gemini-2.5-pro"
-          aria-pressed="false"
-          aria-describedby="filter-label"
-        >
-          Gemini 2.5 Pro
-        </button>
-        <button
-          type="button"
-          class="filter-button"
-          data-filter="claude-3.7-thinking"
-          aria-pressed="false"
-          aria-describedby="filter-label"
-        >
-          Claude 3.7 thinking
-        </button>
-        <button
-          type="button"
-          class="filter-button"
-          data-filter="nightwhisper"
-          aria-pressed="false"
-          aria-describedby="filter-label"
-        >
-          Nightwhisper
-        </button>
-        <!-- Add more filter buttons here as needed -->
+      <div class="filter-controls" role="toolbar" aria-label="Filter apps by AI Model and Search Prompts">
+        <div class="filter-group model-filters">
+          <span class="filter-label" id="filter-label-model">Filter by Model:</span>
+          <button type="button" class="filter-button" data-filter="all" aria-pressed="true" aria-describedby="filter-label-model">All</button>
+          <button type="button" class="filter-button" data-filter="gemini-2.5-pro" aria-pressed="false" aria-describedby="filter-label-model">Gemini 2.5 Pro</button>
+          <button type="button" class="filter-button" data-filter="claude-3.7-thinking" aria-pressed="false" aria-describedby="filter-label-model">Claude 3.7 thinking</button>
+          <button type="button" class="filter-button" data-filter="nightwhisper" aria-pressed="false" aria-describedby="filter-label-model">Nightwhisper</button>
+          <!-- Add more filter buttons here -->
+        </div>
+        <div class="filter-group prompt-filter">
+            <label for="prompt-search" class="filter-label">Search Prompts:</label>
+            <input type="search" id="prompt-search" class="prompt-search-input" placeholder="e.g., game, simulator, css..." aria-label="Search prompts">
+        </div>
       </div>
     </header>
 
     <main class="container">
-      <section
-        class="bubble-showcase-wrapper"
-        aria-labelledby="showcase-heading"
-      >
+      <section class="bubble-showcase-wrapper" aria-labelledby="showcase-heading">
         <h2 id="showcase-heading" class="sr-only">App Bubble Showcase</h2>
-        <div
-          class="bubble-showcase"
-          id="bubble-grid"
-          aria-live="polite"
-          aria-atomic="true"
-        >
+        <div class="bubble-showcase" id="bubble-grid" aria-live="polite" aria-atomic="true">
           <!-- Announce changes when filters are applied -->
 
           <!-- Bubble 1: Pokémon Battle Simulator -->
-          <article
-            class="app-bubble"
-            data-model="gemini-2.5-pro"
-            tabindex="0"
-            aria-labelledby="gemini-app1-title"
-          >
-            <a
-              href="pokemon-sim-gemini.html"
-              class="bubble-link-content"
-              tabindex="-1"
-              aria-hidden="true"
-            >
-              <!-- Link content, not directly focusable -->
+          <article class="app-bubble" data-model="gemini-2.5-pro" tabindex="0" aria-labelledby="gemini-app1-title">
+            <a href="pokemon-sim-gemini.html" class="bubble-link-content" tabindex="-1" aria-hidden="true">
               <div class="bubble-image-placeholder" aria-hidden="true">IMG</div>
               <h3 id="gemini-app1-title">Pokémon Battle Simulator</h3>
               <span class="model-name">Gemini 2.5 Pro</span>
-              <span
-                class="generation-refinements"
-                tabindex="0"
-                aria-describedby="bubble-tooltip"
-                data-tooltip-type="refinement"
-                data-tooltip-content="Developed over 3 refinement iterations with the AI."
-                >Refinements: 3</span
-              >
+              <span class="generation-refinements" tabindex="0" aria-describedby="bubble-tooltip" data-tooltip-type="refinement" data-tooltip-content="Developed over 3 refinement iterations with the AI.">Refinements: 3</span>
             </a>
-            <button
-              type="button"
-              class="info-button"
-              aria-label="View Prompt for Pokémon Battle Simulator"
-              aria-describedby="bubble-tooltip"
-              data-tooltip-type="prompt"
-              data-tooltip-content="Initial prompt: Create a turn-based Pokémon battle simulator in a single HTML file using vanilla JS/CSS. Include basic attack logic, HP display, and simple UI elements. Focus on core mechanics and expandability."
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                  clip-rule="evenodd"
-                />
+            <button type="button" class="info-button" aria-label="View Prompt for Pokémon Battle Simulator" aria-describedby="bubble-tooltip" data-tooltip-type="prompt" data-tooltip-content="Generate JavaScript code for a turn-based Pokémon battle simulator engine. Style it as if it's an apple expert designer. When the character is active, add a smooth animation bouncing on the avatar. Make it like a battle in a 2d map, left vs right, when a Pokémon attacks it will be animated in a cool way to attack the other character of the other side. Given the attack type, for example if its fire, we generate fire icons that start from the character and go smoothly attacking the enemy, it should look really flowing smoothly
+
+**Core Requirements:**
+
+1.  **Pokémon Representation:** Create a way to represent Pokémon using JavaScript objects. Each Pokémon must have at least:
+    *   `name` (string)
+    *   `hp` (number, current hit points)
+    *   `maxHp` (number, maximum hit points)
+    *   `types` (array of strings, e.g., `['Fire']`, `['Water', 'Rock']`)
+    *   `moves` (array of move objects)
+
+2.  **Move Representation:** Create a way to represent moves using JavaScript objects. Each move must have at least:
+    *   `name` (string)
+    *   `type` (string, e.g., 'Grass', 'Normal')
+    *   `power` (number, base damage)
+    *   `accuracy` (number between 0 and 1, chance to hit)
+
+3.  **Type Effectiveness:** Implement the classic Rock-Paper-Scissors elemental type effectiveness logic. Use the following basic chart (feel free to represent this efficiently, e.g., using an object or map):
+    *   Fire > Grass (2x damage)
+    *   Grass > Water (2x damage)
+    *   Water > Fire (2x damage)
+    *   Fire < Water (0.5x damage)
+    *   Grass < Fire (0.5x damage)
+    *   Water < Grass (0.5x damage)
+    *   *All other interactions are 1x damage.*
+    *   Handle dual types: If a target has two types, calculate the multiplier for each type against the move's type and multiply them together (e.g., Water move vs Fire/Rock target: Water vs Fire = 2x, Water vs Rock = 2x, total multiplier = 4x).
+
+4.  **Battle Flow:**
+    *   The simulation should take two Pokémon objects as input.
+    *   Implement a turn-based loop. On each turn, one Pokémon uses a move against the other. (For simplicity, assume a fixed turn order or alternate turns).
+    *   When a move is used:
+        *   Check if the move hits based on its `accuracy`.
+        *   If it hits, calculate damage: `damage = move.power * typeEffectivenessMultiplier`.
+        *   Subtract the damage from the target Pokémon's `hp`.
+        *   Ensure HP doesn't go below 0.
+    *   The battle ends when one Pokémon's `hp` reaches 0.
+
+5.  **Output:** Log the key events of the battle to the console (e.g., "Pikachu used Thunderbolt!", "It's super effective!", "Charizard took 35 damage.", "Charizard fainted!").
+
+**Novelty Element: Synergy Resonance**
+
+6.  **Implement 'Synergy Resonance':**
+    *   Each Pokémon object should also have a `resonance` property, starting at 0.
+    *   When a Pokémon lands a **super effective** hit, its `resonance` increases by 1.
+    *   When a Pokémon takes a **not very effective** hit (resists the attack), its `resonance` increases by 1.
+    *   When a Pokémon's `resonance` reaches 3 or more:
+        *   The *next* move it uses that matches one of its *own types* (STAB - Same Type Attack Bonus) gets an additional +10 power bonus *before* type effectiveness is calculated.
+        *   After using this boosted move, the Pokémon's `resonance` resets to 0.
+    *   Log console messages when resonance increases and when the boosted attack occurs.
+
+**Code Structure:**
+
+*   Aim for clear, well-commented functions (e.g., `calculateTypeEffectiveness(moveType, targetTypes)`, `calculateDamage(...)`, `executeTurn(...)`, `startBattle(...)`).
+*   Include example Pokémon and move data to run a sample battle.
+
+**Example Scenario to Test:**
+
+*   A pure 'Fire' type Pokémon (e.g., Charmander) vs a pure 'Grass' type Pokémon (e.g., Bulbasaur).
+*   Charmander uses a 'Fire' move, hits super effectively, gains 1 resonance.
+*   Bulbasaur uses a 'Grass' move, hits not very effectively, Charmander gains 1 resonance.
+*   Charmander uses another 'Fire' move, hits super effectively, gains 1 resonance (now at 3).
+*   The *next* 'Fire' move Charmander uses should activate Synergy Resonance, gain +10 power, deal damage, and reset Charmander's resonance to 0.">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
               </svg>
             </button>
-            <span class="sr-only"
-              >(Opens Pokémon Battle Simulator generated by Gemini 2.5
-              Pro)</span
-            >
+            <span class="sr-only">(Opens Pokémon Battle Simulator generated by Gemini 2.5 Pro)</span>
           </article>
 
           <!-- Bubble 2: Pokémon Catch Game -->
-          <article
-            class="app-bubble"
-            data-model="claude-3.7-thinking"
-            tabindex="0"
-            aria-labelledby="claude-app1-title"
-          >
-            <a
-              href="poke-catch-sonnet.html"
-              class="bubble-link-content"
-              tabindex="-1"
-              aria-hidden="true"
-            >
+          <article class="app-bubble" data-model="claude-3.7-thinking" tabindex="0" aria-labelledby="claude-app1-title">
+            <a href="poke-catch-sonnet.html" class="bubble-link-content" tabindex="-1" aria-hidden="true">
               <div class="bubble-image-placeholder" aria-hidden="true">IMG</div>
               <h3 id="claude-app1-title">Pokémon Catch Game</h3>
               <span class="model-name">Claude 3.7 thinking</span>
-              <span
-                class="generation-refinements"
-                tabindex="0"
-                aria-describedby="bubble-tooltip"
-                data-tooltip-type="refinement"
-                data-tooltip-content="Developed over 1 refinement iteration with the AI."
-                >Refinements: 0</span
-              >
+              <span class="generation-refinements" tabindex="0" aria-describedby="bubble-tooltip" data-tooltip-type="refinement" data-tooltip-content="Developed over 1 refinement iteration with the AI.">Refinements: 1</span>
             </a>
-            <button
-              type="button"
-              class="info-button"
-              aria-label="View Prompt for Pokémon Catch Game"
-              aria-describedby="bubble-tooltip"
-              data-tooltip-type="prompt"
-              data-tooltip-content="Initial prompt: Design a simple game mechanic for catching Pokémon within a single HTML file. Use basic JavaScript for interaction (e.g., clicking at the right time) and CSS for visual feedback."
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                  clip-rule="evenodd"
-                />
+            <button type="button" class="info-button" aria-label="View Prompt for Pokémon Catch Game" aria-describedby="bubble-tooltip" data-tooltip-type="prompt" data-tooltip-content="Create a pokemon game">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
               </svg>
             </button>
-            <span class="sr-only"
-              >(Opens Pokémon Catch Game generated by Claude 3.7 thinking)</span
-            >
+            <span class="sr-only">(Opens Pokémon Catch Game generated by Claude 3.7 thinking)</span>
           </article>
 
           <!-- Bubble 3: Pokémon Battle Arena -->
-          <article
-            class="app-bubble"
-            data-model="nightwhisper"
-            tabindex="0"
-            aria-labelledby="nightwhisper-app1-title"
-          >
-            <a
-              href="pokemon-sim-nightwhisper.html"
-              class="bubble-link-content"
-              tabindex="-1"
-              aria-hidden="true"
-            >
+          <article class="app-bubble" data-model="nightwhisper" tabindex="0" aria-labelledby="nightwhisper-app1-title">
+            <a href="pokemon-sim-nightwhisper.html" class="bubble-link-content" tabindex="-1" aria-hidden="true">
               <div class="bubble-image-placeholder" aria-hidden="true">IMG</div>
               <h3 id="nightwhisper-app1-title">Pokémon Battle Arena</h3>
               <span class="model-name">Nightwhisper</span>
-              <span
-                class="generation-refinements"
-                tabindex="0"
-                aria-describedby="bubble-tooltip"
-                data-tooltip-type="refinement"
-                data-tooltip-content="Developed over 1 refinement iteration with the AI."
-                >Refinements: 0</span
-              >
+              <span class="generation-refinements" tabindex="0" aria-describedby="bubble-tooltip" data-tooltip-type="refinement" data-tooltip-content="Developed over 1 refinement iteration with the AI.">Refinements: 1</span>
             </a>
-            <button
-              type="button"
-              class="info-button"
-              aria-label="View Prompt for Pokémon Battle Arena"
-              aria-describedby="bubble-tooltip"
-              data-tooltip-type="prompt"
-              data-tooltip-content="Initial prompt: Build an enhanced Pokémon battle interface in a single HTML file. Focus on visual presentation using CSS, potentially incorporating simple animations or dynamic layout adjustments during battle sequences."
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                  clip-rule="evenodd"
-                />
+            <button type="button" class="info-button" aria-label="View Prompt for Pokémon Battle Arena" aria-describedby="bubble-tooltip" data-tooltip-type="prompt" data-tooltip-content="Generate JavaScript code for a turn-based Pokémon battle simulator engine. Style it as if it's an apple expert designer. When the character is active, add a smooth animation bouncing on the avatar. Make it like a battle in a 2d map, left vs right, when a Pokémon attacks it will be animated in a cool way to attack the other character of the other side. Given the attack type, for example if its fire, we generate fire icons that start from the character and go smoothly attacking the enemy, it should look really flowing smoothly
+
+**Core Requirements:**
+
+1.  **Pokémon Representation:** Create a way to represent Pokémon using JavaScript objects. Each Pokémon must have at least:
+    *   `name` (string)
+    *   `hp` (number, current hit points)
+    *   `maxHp` (number, maximum hit points)
+    *   `types` (array of strings, e.g., `['Fire']`, `['Water', 'Rock']`)
+    *   `moves` (array of move objects)
+
+2.  **Move Representation:** Create a way to represent moves using JavaScript objects. Each move must have at least:
+    *   `name` (string)
+    *   `type` (string, e.g., 'Grass', 'Normal')
+    *   `power` (number, base damage)
+    *   `accuracy` (number between 0 and 1, chance to hit)
+
+3.  **Type Effectiveness:** Implement the classic Rock-Paper-Scissors elemental type effectiveness logic. Use the following basic chart (feel free to represent this efficiently, e.g., using an object or map):
+    *   Fire > Grass (2x damage)
+    *   Grass > Water (2x damage)
+    *   Water > Fire (2x damage)
+    *   Fire < Water (0.5x damage)
+    *   Grass < Fire (0.5x damage)
+    *   Water < Grass (0.5x damage)
+    *   *All other interactions are 1x damage.*
+    *   Handle dual types: If a target has two types, calculate the multiplier for each type against the move's type and multiply them together (e.g., Water move vs Fire/Rock target: Water vs Fire = 2x, Water vs Rock = 2x, total multiplier = 4x).
+
+4.  **Battle Flow:**
+    *   The simulation should take two Pokémon objects as input.
+    *   Implement a turn-based loop. On each turn, one Pokémon uses a move against the other. (For simplicity, assume a fixed turn order or alternate turns).
+    *   When a move is used:
+        *   Check if the move hits based on its `accuracy`.
+        *   If it hits, calculate damage: `damage = move.power * typeEffectivenessMultiplier`.
+        *   Subtract the damage from the target Pokémon's `hp`.
+        *   Ensure HP doesn't go below 0.
+    *   The battle ends when one Pokémon's `hp` reaches 0.
+
+5.  **Output:** Log the key events of the battle to the console (e.g., "Pikachu used Thunderbolt!", "It's super effective!", "Charizard took 35 damage.", "Charizard fainted!").
+
+**Novelty Element: Synergy Resonance**
+
+6.  **Implement 'Synergy Resonance':**
+    *   Each Pokémon object should also have a `resonance` property, starting at 0.
+    *   When a Pokémon lands a **super effective** hit, its `resonance` increases by 1.
+    *   When a Pokémon takes a **not very effective** hit (resists the attack), its `resonance` increases by 1.
+    *   When a Pokémon's `resonance` reaches 3 or more:
+        *   The *next* move it uses that matches one of its *own types* (STAB - Same Type Attack Bonus) gets an additional +10 power bonus *before* type effectiveness is calculated.
+        *   After using this boosted move, the Pokémon's `resonance` resets to 0.
+    *   Log console messages when resonance increases and when the boosted attack occurs.
+
+**Code Structure:**
+
+*   Aim for clear, well-commented functions (e.g., `calculateTypeEffectiveness(moveType, targetTypes)`, `calculateDamage(...)`, `executeTurn(...)`, `startBattle(...)`).
+*   Include example Pokémon and move data to run a sample battle.
+
+**Example Scenario to Test:**
+
+*   A pure 'Fire' type Pokémon (e.g., Charmander) vs a pure 'Grass' type Pokémon (e.g., Bulbasaur).
+*   Charmander uses a 'Fire' move, hits super effectively, gains 1 resonance.
+*   Bulbasaur uses a 'Grass' move, hits not very effectively, Charmander gains 1 resonance.
+*   Charmander uses another 'Fire' move, hits super effectively, gains 1 resonance (now at 3).
+*   The *next* 'Fire' move Charmander uses should activate Synergy Resonance, gain +10 power, deal damage, and reset Charmander's resonance to 0.">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
               </svg>
             </button>
-            <span class="sr-only"
-              >(Opens Pokémon Battle Arena generated by Nightwhisper)</span
-            >
+            <span class="sr-only">(Opens Pokémon Battle Arena generated by Nightwhisper)</span>
           </article>
 
-          <!-- Add more app bubbles here, following the pattern -->
-          <!-- Ensure unique IDs for titles (e.g., id="model-appN-title") -->
-          <!-- Update href, data-model -->
-          <!-- Update h3, model-name, Refinements text & tooltip -->
-          <!-- Update button aria-label and prompt tooltip content -->
+          <!-- Add more app bubbles here -->
         </div>
         <div class="empty-state" id="empty-state-message">
-          <p>No bubbles match the selected filter. Try another one!</p>
+          <p>No bubbles match the selected filters. Try adjusting them!</p>
         </div>
       </section>
     </main>
@@ -1104,6 +1048,7 @@
        * @property {string | null} link - The destination URL for the bubble.
        * @property {HTMLButtonElement | null} infoButton - The info button element.
        * @property {HTMLElement | null} refinementSpan - The refinement info span element.
+       * @property {string} prompt - The lowercase prompt text associated with the bubble.
        */
 
       /**
@@ -1116,33 +1061,28 @@
         constructor() {
           this.filterControls = document.querySelector(".filter-controls");
           this.bubbleGrid = document.getElementById("bubble-grid");
-          this.emptyStateMessage = document.getElementById(
-            "empty-state-message"
-          );
+          this.emptyStateMessage = document.getElementById("empty-state-message");
           this.tooltipElement = document.getElementById("bubble-tooltip");
+          this.promptSearchInput = document.getElementById('prompt-search');
+          this.popZIndex = this.getCssVariableValue("--pop-z-index", "1000"); // Get z-index for popping
 
-          if (
-            !this.filterControls ||
-            !this.bubbleGrid ||
-            !this.emptyStateMessage ||
-            !this.tooltipElement
-          ) {
-            console.error(
-              "Bubble Showcase Error: Required elements missing (controls, grid, empty state, or tooltip)."
-            );
+          if (!this.filterControls || !this.bubbleGrid || !this.emptyStateMessage || !this.tooltipElement || !this.promptSearchInput) {
+            console.error("Bubble Showcase Error: Required elements missing (controls, grid, empty state, tooltip, or search input).");
             return;
           }
 
           /** @type {AppBubbleData[]} */
           this.appBubbles = [];
+          this.activeModelFilter = 'all'; // Initial model filter
+          this.activePromptFilter = '';   // Initial prompt filter
+          this.searchTimeout = null;      // Timeout for debouncing search input
           this.initBubbles(); // Populate appBubbles array
 
-          this.filterButtons =
-            this.filterControls.querySelectorAll(".filter-button");
-          this.popAnimationDuration = this.getCssVariableDuration(
-            "--bubble-pop-duration",
-            400
-          );
+          this.filterButtons = this.filterControls.querySelectorAll(".filter-button");
+          this.popAnimationDuration = this.getCssVariableDuration("--bubble-pop-duration", 450); // Default: 0.45s
+          this.popNavDelayFactor = this.getCssVariableNumber("--bubble-pop-nav-delay-factor", 0.7); // Default: 70%
+          this.reducedMotionNavDelay = this.getCssVariableDuration("--bubble-reduced-motion-nav-delay", 50); // Default: 50ms
+
           /** @type {HTMLElement | null} */
           this.activeTooltipTrigger = null; // Track which element triggered the tooltip
           /** @type {number | null} */
@@ -1153,31 +1093,44 @@
           this.scrollListener = null; // Reference to the scroll listener
 
           this.addEventListeners();
-          this.filterBubbles("all"); // Apply initial filter ('all' is default active)
+          this.filterBubbles(); // Apply initial filters (all, empty search)
           this.initPositionObserver(); // Initialize observer for tooltip repositioning
-          // console.log("DrealR Imagineering Bubble Showcase Initialized.");
         }
 
         /**
          * Parses bubble elements from the DOM and populates the this.appBubbles array.
          */
         initBubbles() {
-          this.appBubbles = Array.from(
-            this.bubbleGrid.querySelectorAll(".app-bubble")
-          ).map((bubbleEl) => {
+          this.appBubbles = Array.from(this.bubbleGrid.querySelectorAll(".app-bubble")).map((bubbleEl) => {
             const linkContent = bubbleEl.querySelector("a.bubble-link-content");
             const infoButton = bubbleEl.querySelector(".info-button");
-            const refinementSpan = bubbleEl.querySelector(
-              ".generation-refinements"
-            );
+            const refinementSpan = bubbleEl.querySelector(".generation-refinements");
+            const promptContent = infoButton?.dataset.tooltipContent || '';
             return {
               element: bubbleEl,
               model: bubbleEl.dataset.model || "unknown",
-              link: linkContent?.getAttribute("href"), // Get link from <a> href
+              link: linkContent?.getAttribute("href"),
               infoButton: infoButton,
               refinementSpan: refinementSpan,
+              prompt: promptContent.toLowerCase() // Store lowercase prompt
             };
           });
+        }
+
+        /**
+         * Gets a raw CSS Custom Property value or fallback.
+         * @param {string} propertyName - The CSS custom property name.
+         * @param {string} fallbackValue - The fallback value.
+         * @returns {string} The property value or fallback.
+         */
+        getCssVariableValue(propertyName, fallbackValue) {
+          try {
+            const value = getComputedStyle(document.documentElement).getPropertyValue(propertyName).trim();
+            return value || fallbackValue;
+          } catch (e) {
+            console.warn(`Could not read CSS variable ${propertyName}:`, e);
+            return fallbackValue;
+          }
         }
 
         /**
@@ -1188,11 +1141,9 @@
          */
         getCssVariableDuration(propertyName, fallbackMs) {
           try {
-            const durationStr = getComputedStyle(
-              document.documentElement
-            ).getPropertyValue(propertyName);
+            const durationStr = this.getCssVariableValue(propertyName, "");
             if (durationStr) {
-              const match = durationStr.trim().match(/^(\d*\.?\d+)(m?s)?$/i);
+              const match = durationStr.match(/^(\d*\.?\d+)(m?s)?$/i);
               if (match) {
                 const value = parseFloat(match[1]);
                 const unit = match[2]?.toLowerCase();
@@ -1201,121 +1152,117 @@
               }
             }
           } catch (e) {
-            console.warn(`Could not parse CSS variable ${propertyName}:`, e);
+            console.warn(`Could not parse CSS variable ${propertyName} as duration:`, e);
           }
           return fallbackMs;
+        }
+
+        /**
+         * Gets a numeric value from CSS Custom Property or uses fallback.
+         * @param {string} propertyName - The CSS custom property name.
+         * @param {number} fallbackNumber - The fallback number.
+         * @returns {number} The number.
+         */
+        getCssVariableNumber(propertyName, fallbackNumber) {
+          try {
+            const valueStr = this.getCssVariableValue(propertyName, "");
+            if (valueStr) {
+              const value = parseFloat(valueStr);
+              if (!isNaN(value)) {
+                return value;
+              }
+            }
+          } catch (e) {
+            console.warn(`Could not parse CSS variable ${propertyName} as number:`, e);
+          }
+          return fallbackNumber;
         }
 
         /**
          * Adds event listeners for filters, bubbles, and tooltips.
          */
         addEventListeners() {
-          // --- Filter Controls ---
+          // Filter Controls
           this.filterControls.addEventListener("click", (event) => {
             const button = event.target.closest(".filter-button");
-            if (button) {
-              this.handleFilterChange(button);
-            }
+            if (button) this.handleModelFilterChange(button);
           });
           this.filterControls.addEventListener("keydown", (event) => {
             const button = event.target.closest(".filter-button");
             if (button && (event.key === "Enter" || event.key === " ")) {
               event.preventDefault();
-              this.handleFilterChange(button);
+              this.handleModelFilterChange(button);
             }
           });
 
-          // --- Bubble Interactions & Tooltips ---
+          // Prompt Search Input
+          this.promptSearchInput.addEventListener('input', this.handlePromptSearch.bind(this));
+          this.promptSearchInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+              this.promptSearchInput.value = '';
+              this.handlePromptSearch({ target: this.promptSearchInput });
+              event.preventDefault();
+            }
+          });
+
+          // Bubble Interactions & Tooltips
           this.appBubbles.forEach((bubbleData) => {
             const { element, link, infoButton, refinementSpan } = bubbleData;
 
-            // Main bubble activation (click or keypress) for navigation (pop effect)
+            // Main bubble activation (click/key) for pop effect/navigation
             element.addEventListener("click", (event) => {
-              // Prevent pop if click is on interactive inner elements
-              if (
-                event.target === infoButton ||
-                event.target === refinementSpan ||
-                infoButton?.contains(event.target) ||
-                refinementSpan?.contains(event.target)
-              ) {
-                return;
+              if (event.target === infoButton || event.target === refinementSpan || infoButton?.contains(event.target) || refinementSpan?.contains(event.target)) {
+                return; // Don't pop if clicking interactive elements inside
               }
               this.triggerPop(event, element, link);
             });
             element.addEventListener("keydown", (event) => {
-              // Allow triggering pop via Enter/Space on the parent bubble article
-              // We don't need to check for inner controls here because keydown bubbles
-              // and the interactive elements will handle their own keydown events first
-              // (and potentially stop propagation if needed).
               if (event.key === "Enter" || event.key === " ") {
-                // Check if focus is *directly* on the article itself
-                // or if it bubbled from the link (which we allow)
-                if (
-                  document.activeElement === element ||
-                  element.querySelector("a")?.contains(document.activeElement)
-                ) {
+                if (document.activeElement === element || element.querySelector("a")?.contains(document.activeElement)) {
+                  event.preventDefault(); // Prevent spacebar scroll
                   this.triggerPop(event, element, link);
                 }
               }
             });
 
-            // Info button listeners (prompt tooltip)
+            // Info button (prompt tooltip)
             if (infoButton) {
               this.addTooltipListeners(infoButton);
-              // Prevent bubble pop when clicking/activating info button
-              infoButton.addEventListener("click", (event) =>
-                event.stopPropagation()
-              );
-              infoButton.addEventListener("keydown", (event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.stopPropagation(); // Prevent triggering bubble pop
-                  this.showTooltip(infoButton); // Explicitly show tooltip on activate
+              infoButton.addEventListener("click", (e) => e.stopPropagation());
+              infoButton.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.stopPropagation();
+                  this.showTooltip(infoButton); // Explicitly show on activate
                 }
               });
             }
 
-            // Refinement span listeners (refinement tooltip)
+            // Refinement span (refinement tooltip)
             if (refinementSpan) {
               this.addTooltipListeners(refinementSpan);
-              // Prevent bubble pop when clicking/activating refinement span
-              refinementSpan.addEventListener("click", (event) =>
-                event.stopPropagation()
-              );
-              refinementSpan.addEventListener("keydown", (event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault(); // Prevent potential scroll
-                  event.stopPropagation(); // Prevent triggering bubble pop
-                  this.showTooltip(refinementSpan); // Ensure tooltip shows on activation
+              refinementSpan.addEventListener("click", (e) => e.stopPropagation());
+              refinementSpan.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  this.showTooltip(refinementSpan); // Ensure show on activate
                 }
               });
             }
           });
 
-          // Tooltip listeners (to keep it open when hovering over it)
-          this.tooltipElement.addEventListener("mouseenter", () =>
-            clearTimeout(this.hideTooltipTimeout)
-          );
-          this.tooltipElement.addEventListener("mouseleave", () =>
-            this.requestHideTooltip()
-          );
+          // Tooltip interaction (keep open on hover)
+          this.tooltipElement.addEventListener("mouseenter", () => clearTimeout(this.hideTooltipTimeout));
+          this.tooltipElement.addEventListener("mouseleave", () => this.requestHideTooltip());
 
           // Global listeners
           document.addEventListener("keydown", (event) => {
-            if (
-              event.key === "Escape" &&
-              this.tooltipElement.classList.contains("visible")
-            ) {
+            if (event.key === "Escape" && this.tooltipElement.classList.contains("visible")) {
               this.hideTooltip(true); // Hide and return focus
             }
           });
-          // Optional: Hide tooltip if user clicks outside the trigger/tooltip
           document.addEventListener("click", (event) => {
-            if (
-              this.tooltipElement.classList.contains("visible") &&
-              this.activeTooltipTrigger &&
-              !this.activeTooltipTrigger.contains(event.target) &&
-              !this.tooltipElement.contains(event.target)
-            ) {
+            if (this.tooltipElement.classList.contains("visible") && this.activeTooltipTrigger && !this.activeTooltipTrigger.contains(event.target) && !this.tooltipElement.contains(event.target)) {
               this.hideTooltip();
             }
           });
@@ -1325,55 +1272,37 @@
          * Initializes ResizeObserver and scroll listener to reposition tooltip.
          */
         initPositionObserver() {
-          // Use ResizeObserver for element resize/movements
           if ("ResizeObserver" in window) {
             this.resizeObserver = new ResizeObserver(() => {
-              if (
-                this.tooltipElement.classList.contains("visible") &&
-                this.activeTooltipTrigger
-              ) {
+              if (this.tooltipElement.classList.contains("visible") && this.activeTooltipTrigger) {
                 this.positionTooltip(this.activeTooltipTrigger);
               }
             });
           } else {
-            console.warn(
-              "ResizeObserver not supported, tooltip repositioning on resize may be limited."
-            );
+            console.warn("ResizeObserver not supported, tooltip repositioning may be limited.");
           }
 
-          // Use a throttled scroll listener for page scroll repositioning
           let isScrolling;
           this.scrollListener = () => {
-            if (!isScrolling) {
-              window.requestAnimationFrame(() => {
-                if (
-                  this.tooltipElement.classList.contains("visible") &&
-                  this.activeTooltipTrigger
-                ) {
-                  this.positionTooltip(this.activeTooltipTrigger);
-                }
-                isScrolling = false;
-              });
-              isScrolling = true;
-            }
+            window.requestAnimationFrame(() => {
+              if (this.tooltipElement.classList.contains("visible") && this.activeTooltipTrigger) {
+                this.positionTooltip(this.activeTooltipTrigger);
+              }
+              isScrolling = false;
+            });
           };
-          window.addEventListener("scroll", this.scrollListener, {
-            passive: true,
-          });
+          window.addEventListener("scroll", this.scrollListener, { passive: true });
         }
 
         /**
          * Cleans up observers and listeners.
          */
         destroy() {
-          if (this.resizeObserver) {
-            this.resizeObserver.disconnect();
-          }
-          if (this.scrollListener) {
-            window.removeEventListener("scroll", this.scrollListener);
-          }
-          // Potentially remove other listeners if needed, though usually not necessary for a page script like this
-          // unless you're re-initializing frequently without page reloads.
+          if (this.resizeObserver) this.resizeObserver.disconnect();
+          if (this.scrollListener) window.removeEventListener("scroll", this.scrollListener);
+          clearTimeout(this.searchTimeout);
+          clearTimeout(this.hideTooltipTimeout);
+          // Potentially remove other listeners if needed
         }
 
         /**
@@ -1383,7 +1312,6 @@
         addTooltipListeners(triggerElement) {
           const show = () => this.showTooltip(triggerElement);
           const hide = () => this.requestHideTooltip();
-
           triggerElement.addEventListener("mouseenter", show);
           triggerElement.addEventListener("focus", show);
           triggerElement.addEventListener("mouseleave", hide);
@@ -1391,71 +1319,91 @@
         }
 
         /**
-         * Handles filter button activation and triggers filtering.
+         * Handles model filter button activation and triggers filtering.
          * @param {HTMLButtonElement} button - The filter button that was activated.
          */
-        handleFilterChange(button) {
-          const filterValue = button.dataset.filter;
-          if (!filterValue) return;
-          this.setActiveFilter(filterValue);
-          this.filterBubbles(filterValue);
-          this.hideTooltip(); // Hide tooltip when filtering changes
+        handleModelFilterChange(button) {
+            const filterValue = button.dataset.filter;
+            if (!filterValue || filterValue === this.activeModelFilter) return;
+            this.activeModelFilter = filterValue;
+            this.setActiveModelFilter(filterValue);
+            this.filterBubbles();
+            this.hideTooltip();
         }
 
         /**
-         * Triggers the pop animation and navigates after delay.
+         * Handles changes in the prompt search input field with debouncing.
+         * @param {Event} event - The input event.
+         */
+        handlePromptSearch(event) {
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+                this.activePromptFilter = event.target.value.trim().toLowerCase();
+                this.filterBubbles();
+                this.hideTooltip(); // Hide tooltip when search term changes
+            }, 150); // 150ms debounce
+        }
+
+
+        /**
+         * Triggers the pop animation and navigates after a calculated delay.
+         * Handles modifier keys for new tabs/windows.
          * @param {Event} event - The triggering event.
          * @param {HTMLElement} bubbleElement - The bubble article element.
          * @param {string | null} link - The destination URL.
          */
         triggerPop(event, bubbleElement, link) {
           if (!link || link === "#") {
-            console.warn("Bubble link is missing or invalid. Cannot navigate.");
-            event.preventDefault(); // Prevent default if it's somehow still an anchor
+            console.warn("Bubble link is missing or invalid.");
+            event.preventDefault();
             return;
           }
-          if (bubbleElement.classList.contains("popping")) return; // Prevent double pop
+          if (bubbleElement.classList.contains("popping")) return;
 
-          // Check for modifier keys (allow opening in new tab)
-          const isModifierKeyPressed =
-            event.ctrlKey || event.metaKey || event.shiftKey;
-          // Check for middle mouse button click
+          const isModifierKeyPressed = event.ctrlKey || event.metaKey || event.shiftKey;
           const isMiddleClick = event.type === "click" && event.button === 1;
 
-          // If modifier key or middle click, don't animate, let browser handle default action (new tab/window)
+          // Handle new tab/window opening directly
           if (isModifierKeyPressed || isMiddleClick) {
-            // We might need to temporarily make the inner link clickable again
-            const innerLink = bubbleElement.querySelector(
-              "a.bubble-link-content"
-            );
-            if (innerLink && innerLink.href) {
-              // Since the main click is on the article, we simulate the link click
-              // or directly navigate if simulation is complex/unreliable.
-              // Simplest: navigate based on intention
-              if (event.ctrlKey || event.metaKey || isMiddleClick) {
-                // New tab
-                window.open(link, "_blank");
-              } else if (event.shiftKey) {
-                // New window
-                window.open(link, "_blank", "noopener,noreferrer"); // Consider security
-              }
-              event.preventDefault(); // Prevent any default action on the article/outer element
-              event.stopPropagation();
-              return;
-            }
+            const target = (event.ctrlKey || event.metaKey || isMiddleClick) ? '_blank' : '_self';
+            const features = event.shiftKey ? 'noopener,noreferrer' : undefined;
+            window.open(link, target, features);
+            event.preventDefault();
+            event.stopPropagation();
+            return;
           }
 
-          // Normal click/activation: proceed with pop animation
+          // Normal activation: proceed with pop animation
           event.preventDefault();
           event.stopPropagation();
+          this.hideTooltip(); // Ensure tooltip is hidden
 
-          this.hideTooltip(); // Ensure tooltip is hidden before popping
+          const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          let navigationDelay;
+
+          if (prefersReducedMotion) {
+            navigationDelay = this.reducedMotionNavDelay;
+          } else {
+            navigationDelay = this.popAnimationDuration * this.popNavDelayFactor;
+            // Apply fixed positioning and styles for animation
+            const rect = bubbleElement.getBoundingClientRect();
+            bubbleElement.style.position = "fixed";
+            bubbleElement.style.top = `${rect.top}px`;
+            bubbleElement.style.left = `${rect.left}px`;
+            bubbleElement.style.width = `${rect.width}px`;
+            bubbleElement.style.height = `${rect.height}px`;
+            bubbleElement.style.zIndex = this.popZIndex;
+            bubbleElement.style.margin = "0";
+            void bubbleElement.offsetWidth; // Force reflow
+          }
+
           bubbleElement.classList.add("popping");
           bubbleElement.setAttribute("aria-hidden", "true");
 
+          // Navigate after delay
           setTimeout(() => {
             window.location.href = link;
-          }, this.popAnimationDuration);
+          }, navigationDelay);
         }
 
         /**
@@ -1463,36 +1411,31 @@
          * @param {HTMLElement} triggerElement - The element that triggered the tooltip.
          */
         showTooltip(triggerElement) {
-          clearTimeout(this.hideTooltipTimeout); // Cancel any pending hide requests
+          clearTimeout(this.hideTooltipTimeout); // Cancel any pending hide
 
-          // Manage observer
+          // Manage observer for position updates
           if (this.resizeObserver) {
-            if (
-              this.activeTooltipTrigger &&
-              this.activeTooltipTrigger !== triggerElement
-            ) {
+            if (this.activeTooltipTrigger && this.activeTooltipTrigger !== triggerElement && this.activeTooltipTrigger.isConnected) {
               this.resizeObserver.unobserve(this.activeTooltipTrigger);
             }
-            if (
-              !this.activeTooltipTrigger ||
-              this.activeTooltipTrigger !== triggerElement
-            ) {
+            if ((!this.activeTooltipTrigger || this.activeTooltipTrigger !== triggerElement) && triggerElement.isConnected) {
               this.resizeObserver.observe(triggerElement);
             }
           }
-          this.activeTooltipTrigger = triggerElement; // Track the current trigger
+          this.activeTooltipTrigger = triggerElement;
 
           const tooltipType = triggerElement.dataset.tooltipType || "info";
-          const tooltipContent =
-            triggerElement.dataset.tooltipContent ||
-            "No information available.";
+          const tooltipContent = triggerElement.dataset.tooltipContent || "No information available.";
 
-          this.tooltipElement.textContent = tooltipContent;
+          this.tooltipElement.textContent = tooltipContent; // Use textContent for safety
           this.tooltipElement.setAttribute("aria-hidden", "false");
           this.tooltipElement.dataset.type = tooltipType;
           this.tooltipElement.classList.add("visible");
 
           this.positionTooltip(triggerElement);
+
+          // Scroll to top if tooltip content is scrollable
+          this.tooltipElement.scrollTop = 0;
         }
 
         /**
@@ -1500,58 +1443,44 @@
          * @param {HTMLElement} triggerElement - The element the tooltip should be positioned near.
          */
         positionTooltip(triggerElement) {
-          if (
-            !this.tooltipElement.classList.contains("visible") ||
-            !triggerElement
-          )
-            return;
+          if (!this.tooltipElement.classList.contains("visible") || !triggerElement || !triggerElement.isConnected) return;
 
           const triggerRect = triggerElement.getBoundingClientRect();
-          // Force reflow to get accurate tooltip dimensions after content/class change
-          this.tooltipElement.style.visibility = "hidden"; // Temporarily hide while measuring
+          this.tooltipElement.style.visibility = "hidden";
           this.tooltipElement.style.display = "block";
           const tooltipHeight = this.tooltipElement.offsetHeight;
           const tooltipWidth = this.tooltipElement.offsetWidth;
-          this.tooltipElement.style.display = ""; // Reset display
-          this.tooltipElement.style.visibility = ""; // Make visible again
+          this.tooltipElement.style.display = "";
+          this.tooltipElement.style.visibility = "";
 
           const spacing = 8;
           const viewportWidth = window.innerWidth;
           const viewportHeight = window.innerHeight;
 
-          // Default position: below and centered horizontally
           let top = triggerRect.bottom + spacing;
-          let left =
-            triggerRect.left + triggerRect.width / 2 - tooltipWidth / 2;
+          let left = triggerRect.left + triggerRect.width / 2 - tooltipWidth / 2;
 
-          // Adjust horizontal position
-          if (left < spacing) {
-            left = spacing;
-          } else if (left + tooltipWidth > viewportWidth - spacing) {
-            left = viewportWidth - tooltipWidth - spacing;
-          }
+          // Adjust horizontal
+          if (left < spacing) left = spacing;
+          else if (left + tooltipWidth > viewportWidth - spacing) left = viewportWidth - tooltipWidth - spacing;
 
-          // Adjust vertical position: If not enough space below, try above
-          if (
-            top + tooltipHeight > viewportHeight - spacing &&
-            triggerRect.top - tooltipHeight - spacing > spacing
-          ) {
+          // Adjust vertical: Prefer below, then try above, finally cap if needed
+          const spaceBelow = viewportHeight - triggerRect.bottom - spacing;
+          const spaceAbove = triggerRect.top - spacing;
+
+          if (spaceBelow < tooltipHeight && spaceAbove >= tooltipHeight) {
+            // Place above
             top = triggerRect.top - tooltipHeight - spacing;
-          } else if (top + tooltipHeight > viewportHeight - spacing) {
-            // Stick to bottom edge if needed
-            top = viewportHeight - tooltipHeight - spacing;
+          } else if (spaceBelow < tooltipHeight && spaceAbove < tooltipHeight) {
+             // Not enough space either way, place below and cap at bottom edge
+             top = Math.max(spacing, viewportHeight - tooltipHeight - spacing);
           }
+          // Ensure it doesn't go off the top edge
+          if (top < spacing) top = spacing;
 
-          // Ensure tooltip doesn't go off the top edge
-          if (top < spacing) {
-            top = spacing;
-          }
-
-          // Apply position - Using top/left is generally reliable
           this.tooltipElement.style.top = `${Math.round(top)}px`;
           this.tooltipElement.style.left = `${Math.round(left)}px`;
-          // Reset transform if it was used previously
-          this.tooltipElement.style.transform = "";
+          this.tooltipElement.style.transform = ""; // Reset animation transform
         }
 
         /**
@@ -1562,27 +1491,23 @@
           clearTimeout(this.hideTooltipTimeout);
           const triggerToFocus = this.activeTooltipTrigger;
 
-          if (this.activeTooltipTrigger && this.resizeObserver) {
+          if (this.activeTooltipTrigger && this.resizeObserver && this.activeTooltipTrigger.isConnected) {
             this.resizeObserver.unobserve(this.activeTooltipTrigger);
           }
           this.activeTooltipTrigger = null;
           this.tooltipElement.classList.remove("visible");
           this.tooltipElement.setAttribute("aria-hidden", "true");
+          this.tooltipElement.style.top = "";
+          this.tooltipElement.style.left = "";
+          this.tooltipElement.style.transform = "";
           delete this.tooltipElement.dataset.type;
 
-          if (
-            returnFocus &&
-            triggerToFocus &&
-            typeof triggerToFocus.focus === "function"
-          ) {
-            if (
-              document.body.contains(triggerToFocus) &&
-              triggerToFocus.offsetParent !== null
-            ) {
-              requestAnimationFrame(() => {
-                triggerToFocus.focus({ preventScroll: true });
-              });
-            }
+          if (returnFocus && triggerToFocus && typeof triggerToFocus.focus === "function" && document.body.contains(triggerToFocus) && triggerToFocus.offsetParent !== null) {
+            requestAnimationFrame(() => {
+              if (document.body.contains(triggerToFocus) && triggerToFocus.offsetParent !== null) {
+                 triggerToFocus.focus({ preventScroll: true });
+              }
+            });
           }
         }
 
@@ -1592,88 +1517,82 @@
         requestHideTooltip() {
           clearTimeout(this.hideTooltipTimeout);
           this.hideTooltipTimeout = setTimeout(() => {
-            // Check focus/hover on trigger OR tooltip
-            const isFocusWithinTrigger = this.activeTooltipTrigger?.contains(
-              document.activeElement
-            );
-            const isFocusWithinTooltip = this.tooltipElement.contains(
-              document.activeElement
-            );
+            const isFocusWithinTrigger = this.activeTooltipTrigger?.contains(document.activeElement);
+            const isFocusWithinTooltip = this.tooltipElement.contains(document.activeElement);
             const isHoveringTooltip = this.tooltipElement.matches(":hover");
-            const isHoveringTrigger =
-              this.activeTooltipTrigger?.matches(":hover");
+            const isHoveringTrigger = this.activeTooltipTrigger?.matches(":hover");
 
-            if (
-              !isFocusWithinTrigger &&
-              !isFocusWithinTooltip &&
-              !isHoveringTooltip &&
-              !isHoveringTrigger
-            ) {
+            if (!isFocusWithinTrigger && !isFocusWithinTooltip && !isHoveringTooltip && !isHoveringTrigger) {
               this.hideTooltip();
             }
           }, 150); // Delay for hover intent
         }
 
         /**
-         * Sets the visual state (aria-pressed) of filter buttons.
+         * Sets the visual state (aria-pressed) of model filter buttons.
          * @param {string} activeFilter - The data-filter value of the active button.
          */
-        setActiveFilter(activeFilter) {
-          this.filterButtons.forEach((button) => {
-            const isPressed = button.dataset.filter === activeFilter;
-            button.setAttribute("aria-pressed", String(isPressed));
-          });
+        setActiveModelFilter(activeFilter) {
+            this.filterButtons.forEach((button) => {
+                button.setAttribute("aria-pressed", String(button.dataset.filter === activeFilter));
+            });
         }
 
         /**
-         * Filters the app bubbles based on the selected model.
-         * @param {string} filterValue - The model to filter by ('all' shows everything).
+         * Filters the app bubbles based on the active model and prompt filters.
          */
-        filterBubbles(filterValue) {
-          let visibleCount = 0;
-          this.appBubbles.forEach((bubbleData) => {
-            const bubbleElement = bubbleData.element;
-            // Ignore bubbles currently animating out
-            if (bubbleElement.classList.contains("popping")) {
-              // If a popping bubble *would* be visible, consider it visible for the count
-              if (filterValue === "all" || bubbleData.model === filterValue) {
-                visibleCount++;
-              }
-              return;
-            }
+        filterBubbles() {
+            let visibleCount = 0;
+            const searchTerm = this.activePromptFilter; // Already lowercase and trimmed
 
-            const isVisible =
-              filterValue === "all" || bubbleData.model === filterValue;
-            bubbleElement.classList.toggle("hidden", !isVisible);
-            // Set aria-hidden based on visibility, but ensure it's true if hidden
-            bubbleElement.setAttribute("aria-hidden", String(!isVisible));
+            this.appBubbles.forEach((bubbleData) => {
+                const { element: bubbleElement, model, prompt } = bubbleData;
 
-            if (isVisible) {
-              visibleCount++;
-              // Ensure tabindex is 0 only if visible and not hidden
-              bubbleElement.setAttribute("tabindex", "0");
-            } else {
-              // Remove from tab order if hidden
-              bubbleElement.setAttribute("tabindex", "-1");
-            }
-          });
+                // Skip bubbles currently popping out
+                if (bubbleElement.classList.contains('popping')) {
+                    // Check if it *would* match if not popping, to keep count accurate
+                    const wouldMatchModel = this.activeModelFilter === 'all' || model === this.activeModelFilter;
+                    const wouldMatchPrompt = !searchTerm || prompt.includes(searchTerm);
+                    if (wouldMatchModel && wouldMatchPrompt) {
+                        visibleCount++;
+                    }
+                    return;
+                }
 
-          this.emptyStateMessage.classList.toggle(
-            "visible",
-            visibleCount === 0
-          );
+                const matchesModel = this.activeModelFilter === 'all' || model === this.activeModelFilter;
+                const matchesPrompt = !searchTerm || prompt.includes(searchTerm);
+                const isVisible = matchesModel && matchesPrompt;
+
+                bubbleElement.classList.toggle('hidden', !isVisible);
+                bubbleElement.setAttribute('aria-hidden', String(!isVisible));
+                bubbleElement.setAttribute('tabindex', isVisible ? '0' : '-1'); // Update tabindex
+
+                if (isVisible) {
+                    visibleCount++;
+                }
+            });
+
+            this.emptyStateMessage.classList.toggle('visible', visibleCount === 0);
+
+            // Optional: Announce results for screen readers (could be more robust)
+            // E.g., update an aria-live region or the grid's label
+             // this.bubbleGrid.setAttribute('aria-label', `Showcase displaying ${visibleCount} bubbles matching filters.`);
         }
       }
 
       // --- Initialize ---
       function initializeShowcase() {
-        new BubbleShowcase();
+        if (typeof BubbleShowcase !== "undefined") {
+          window.bubbleShowcaseInstance = new BubbleShowcase();
+        } else {
+          console.error("BubbleShowcase class not defined.");
+        }
       }
 
       if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", initializeShowcase);
       } else {
-        initializeShowcase();
+        initializeShowcase(); // DOM is already ready
       }
     </script>
   </body>
