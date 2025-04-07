@@ -1,0 +1,314 @@
+import { useState, useEffect, useCallback } from 'react';
+import { Flame, Droplets, Leaf, Sparkles, ShieldAlert, Sword } from 'lucide-react';
+
+interface Move {
+    name: string;
+    type: 'Fire' | 'Water' | 'Grass' | 'Normal';
+    power: number;
+    accuracy: number;
+}
+
+interface Pokemon {
+    name: string;
+    hp: number;
+    maxHp: number;
+    types: ('Fire' | 'Water' | 'Grass' | 'Normal')[];
+    moves: Move[];
+    resonance: number;
+    sprite: string; // URL or path to image
+}
+
+const typeEffectivenessChart: { [key: string]: { [key: string]: number } } = {
+    Fire: { Grass: 2, Water: 0.5, Fire: 0.5 },
+    Water: { Fire: 2, Grass: 0.5, Water: 0.5 },
+    Grass: { Water: 2, Fire: 0.5, Grass: 0.5 },
+    Normal: {},
+};
+
+const calculateTypeEffectiveness = (moveType: string, targetTypes: string[]): number => {
+    let multiplier = 1;
+    const effectiveness = typeEffectivenessChart[moveType] || {};
+    targetTypes.forEach(type => {
+        multiplier *= effectiveness[type] !== undefined ? effectiveness[type] : 1;
+    });
+    return multiplier;
+};
+
+const initialPokemon1: Pokemon = {
+    name: 'Charizard',
+    hp: 150,
+    maxHp: 150,
+    types: ['Fire'],
+    moves: [
+        { name: 'Flamethrower', type: 'Fire', power: 90, accuracy: 1 },
+        { name: 'Slash', type: 'Normal', power: 70, accuracy: 1 },
+        { name: 'Fire Blast', type: 'Fire', power: 110, accuracy: 0.85 },
+        { name: 'Hyper Beam', type: 'Normal', power: 150, accuracy: 0.9 },
+        { name: 'Dragon Claw', type: 'Normal', power: 80, accuracy: 1 },
+        { name: 'Inferno', type: 'Fire', power: 100, accuracy: 0.8 },
+    ],
+    resonance: 0,
+    sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png'
+};
+
+const initialPokemon2: Pokemon = {
+    name: 'Venusaur',
+    hp: 160,
+    maxHp: 160,
+    types: ['Grass'],
+    moves: [
+        { name: 'Solar Beam', type: 'Grass', power: 120, accuracy: 1 },
+        { name: 'Take Down', type: 'Normal', power: 90, accuracy: 0.85 },
+        { name: 'Giga Drain', type: 'Grass', power: 75, accuracy: 1 }, 
+        { name: 'Body Slam', type: 'Normal', power: 85, accuracy: 1 },
+        { name: 'Petal Dance', type: 'Grass', power: 120, accuracy: 0.7 },
+        { name: 'Sleep Powder', type: 'Grass', power: 0, accuracy: 0.75 },
+    ],
+    resonance: 0,
+    sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/3.png'
+};
+
+interface AttackAnimation {
+    type: Move['type'] | null;
+    attacker: 'player1' | 'player2';
+    timestamp: number;
+    start: { left: string; top: string };
+    end: { left: string; top: string };
+}
+
+const HealthBar = ({ currentHp, maxHp }: { currentHp: number; maxHp: number }) => {
+    const percentage = Math.max(0, (currentHp / maxHp) * 100);
+    let bgColor = 'bg-green-500';
+    if (percentage < 50) bgColor = 'bg-yellow-500';
+    if (percentage < 20) bgColor = 'bg-red-500';
+
+    return (
+        <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden border border-slate-300 shadow-inner">
+            <div
+                className={`h-full rounded-full transition-all duration-500 ease-out ${bgColor}`}
+                style={{ width: `${percentage}%` }}
+            ></div>
+        </div>
+    );
+};
+
+const PokemonDisplay = ({ pokemon, isActive, isPlayer1 }: { pokemon: Pokemon; isActive: boolean; isPlayer1: boolean }) => (
+    <div className={`flex flex-col items-center p-4 transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-80'}`}> 
+        <img
+            src={pokemon.sprite}
+            alt={pokemon.name}
+            className={`w-32 h-32 md:w-44 md:h-44 object-contain transition-transform duration-300 ${isActive ? 'animate-bounce-slow' : ''} ${isPlayer1 ? '' : 'scale-x-[-1]'}`}
+            style={{ animationDuration: '1.5s' }}
+        />
+        <div className="mt-3 bg-white/80 backdrop-blur-sm p-3 rounded-xl shadow-md w-44 text-center border border-gray-200/50">
+            <h3 className="text-lg font-semibold text-slate-800">{pokemon.name}</h3>
+            <HealthBar currentHp={pokemon.hp} maxHp={pokemon.maxHp} />
+            <p className="text-xs text-slate-600 mt-1">{pokemon.hp} / {pokemon.maxHp} HP</p>
+            <p className="text-xs text-indigo-600 mt-1 font-medium">Resonance: {pokemon.resonance}</p>
+        </div>
+    </div>
+);
+
+const AttackIcon = ({ type }: { type: AttackAnimation['type'] }) => {
+    switch (type) {
+        case 'Fire': return <Flame className="w-8 h-8 text-orange-500" />; 
+        case 'Water': return <Droplets className="w-8 h-8 text-blue-500" />;
+        case 'Grass': return <Leaf className="w-8 h-8 text-green-600" />;
+        default: return <Sword className="w-8 h-8 text-gray-500" />;
+    }
+};
+
+const BattleSimulator: React.FC = () => {
+    const [player1, setPlayer1] = useState<Pokemon>({ ...initialPokemon1 });
+    const [player2, setPlayer2] = useState<Pokemon>({ ...initialPokemon2 });
+    const [battleLog, setBattleLog] = useState<string[]>(['Battle started!']);
+    const [currentPlayer, setCurrentPlayer] = useState<'player1' | 'player2'>('player1');
+    const [gameOver, setGameOver] = useState(false);
+    const [attackAnimation, setAttackAnimation] = useState<AttackAnimation | null>(null);
+    const [showMoveButtons, setShowMoveButtons] = useState(true);
+
+    const addLog = useCallback((message: string) => {
+        setBattleLog(prev => [message, ...prev.slice(0, 5)]);
+    }, []);
+
+    const handleAttack = useCallback((attacker: Pokemon, defender: Pokemon, moveIndex: number) => {
+        if (gameOver) return;
+        setShowMoveButtons(false);
+
+        const move = attacker.moves[moveIndex];
+        addLog(`${attacker.name} used ${move.name}!`);
+
+        const attackerPosition = attacker === player1 ? { left: '20%', top: '50%' } : { left: '80%', top: '50%' };
+        const targetPosition = attacker === player1 ? { left: '80%', top: '50%' } : { left: '20%', top: '50%' };
+
+        setAttackAnimation({
+            type: move.type,
+            attacker: attacker === player1 ? 'player1' : 'player2',
+            timestamp: Date.now(),
+            start: attackerPosition,
+            end: targetPosition
+        });
+
+        setTimeout(() => {
+            if (Math.random() < move.accuracy) {
+                let power = move.power;
+                let resonanceTriggered = false;
+                if (attacker.resonance >= 3 && attacker.types.includes(move.type)) {
+                    power += 10; // Synergy Resonance boost
+                    resonanceTriggered = true;
+                    addLog(`${attacker.name}'s Synergy Resonance boosted ${move.name}!`);
+                }
+
+                const effectiveness = calculateTypeEffectiveness(move.type, defender.types);
+                const damage = Math.round(power * effectiveness * (Math.random() * 0.15 + 0.85)); // Damage variation
+
+                let effectivenessText = '';
+                if (effectiveness > 1) effectivenessText = "It's super effective!";
+                if (effectiveness < 1 && effectiveness > 0) effectivenessText = "It's not very effective...";
+                if (effectiveness === 0) effectivenessText = `It doesn't affect ${defender.name}...`;
+
+                if (effectivenessText) addLog(effectivenessText);
+
+                const newHp = Math.max(0, defender.hp - damage);
+                addLog(`${defender.name} took ${damage} damage.`);
+
+                const newResonance = attacker.resonance + (effectiveness > 1 ? 1 : 0);
+                const defenderResonance = defender.resonance + (effectiveness < 1 && effectiveness > 0 ? 1 : 0);
+
+                const updatedAttacker = { ...attacker, resonance: resonanceTriggered ? 0 : newResonance };
+                const updatedDefender = { ...defender, hp: newHp, resonance: defenderResonance };
+
+                if (attacker === player1) {
+                    setPlayer1(updatedAttacker);
+                    setPlayer2(updatedDefender);
+                } else {
+                    setPlayer1(updatedDefender);
+                    setPlayer2(updatedAttacker);
+                }
+
+                if (newHp === 0) {
+                    addLog(`${defender.name} fainted!`);
+                    addLog(`${attacker.name} wins!`);
+                    setGameOver(true);
+                } else {
+                    setCurrentPlayer(currentPlayer === 'player1' ? 'player2' : 'player1');
+                }
+            } else {
+                addLog(`${attacker.name}'s attack missed!`);
+                setCurrentPlayer(currentPlayer === 'player1' ? 'player2' : 'player1');
+            }
+            setTimeout(() => setAttackAnimation(null), 100); 
+        }, 600); 
+
+    }, [currentPlayer, gameOver, addLog, player1, player2]);
+
+    useEffect(() => {
+        if (currentPlayer === 'player2' && !gameOver) {
+            const aiMoveIndex = Math.floor(Math.random() * player2.moves.length);
+            const delay = 800 + Math.random() * 700;
+            setTimeout(() => {
+                handleAttack(player2, player1, aiMoveIndex);
+            }, delay);
+        } else if (currentPlayer === 'player1' && !gameOver) {
+            setTimeout(() => setShowMoveButtons(true), 650); // Enable buttons slightly after potential animations
+        }
+    }, [currentPlayer, gameOver, handleAttack, player2]);
+
+    useEffect(() => {
+        const style = document.createElement('style');
+        style.textContent = `
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(-4%); animation-timing-function: cubic-bezier(0.8,0,1,1); }
+            50% { transform: translateY(0); animation-timing-function: cubic-bezier(0,0,0.2,1); }
+        }
+        .animate-bounce-slow { animation: bounce-slow 1.5s infinite; }
+        `;
+        document.head.append(style);
+        return () => { document.head.removeChild(style); };
+    }, []);
+
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-100 via-white to-teal-100 p-4 font-sans text-slate-800 relative overflow-hidden">
+            <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute -bottom-1/4 left-1/4 w-3/4 h-3/4 bg-gradient-to-r from-cyan-200/20 via-transparent to-transparent rounded-full blur-3xl opacity-50 transform -rotate-45"></div>
+                <div className="absolute -top-1/4 right-1/4 w-1/2 h-1/2 bg-gradient-to-l from-orange-200/10 via-transparent to-transparent rounded-full blur-3xl opacity-60 transform rotate-12"></div>
+                <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-green-100/30 via-emerald-50/10 to-transparent"></div>
+            </div>
+            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1613771429939-953534866eed?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80')] bg-cover bg-center opacity-5 blur-md"></div>
+            <h1 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500 pb-2 z-10">Pokémon Battle Arena</h1>
+            <div className="w-full max-w-5xl relative mb-6 z-10" style={{ height: '350px' }}>
+                <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-green-200/40 via-green-100/20 to-transparent z-0"></div>
+                <div className="absolute bottom-20 left-[5%] w-[40%] h-4 bg-gradient-to-r from-transparent via-orange-400/30 to-transparent rounded-full blur-md"></div>
+                <div className="absolute bottom-20 right-[5%] w-[40%] h-4 bg-gradient-to-r from-transparent via-green-400/30 to-transparent rounded-full blur-md"></div>
+                <div className="absolute bottom-16 left-[12%] w-[20%] h-1 bg-black/10 rounded-full blur-sm"></div> 
+                <div className="absolute bottom-16 right-[12%] w-[20%] h-1 bg-black/10 rounded-full blur-sm"></div>
+
+                <div className="absolute left-[5%] md:left-[10%] top-1/2 transform -translate-y-1/2 z-10">
+                    <PokemonDisplay pokemon={player1} isActive={currentPlayer === 'player1' && !gameOver} isPlayer1={true} />
+                </div>
+                <div className="absolute right-[5%] md:right-[10%] top-1/2 transform -translate-y-1/2 z-10">
+                    <PokemonDisplay pokemon={player2} isActive={currentPlayer === 'player2' && !gameOver} isPlayer1={false} />
+                </div>
+                {attackAnimation && (
+                    <div
+                        key={attackAnimation.timestamp}
+                        className="absolute z-20"
+                        style={{
+                            top: attackAnimation.start.top,
+                            left: attackAnimation.start.left,
+                            transform: 'translate(-50%, -50%)',
+                            transition: 'left 0.5s ease-out, opacity 0.3s ease-in 0.4s',
+                            opacity: 1,
+                        }}
+                        ref={el => {
+                            if (el) {
+                                requestAnimationFrame(() => {
+                                    el.style.left = attackAnimation.end.left;
+                                    el.style.opacity = '0';
+                                });
+                            }
+                        }}
+                    >
+                        <AttackIcon type={attackAnimation.type} />
+                    </div>
+                )}
+            </div>
+
+            <div className="w-full max-w-md bg-white/60 backdrop-blur-md p-4 rounded-xl shadow-lg border border-gray-200/30 mb-6 z-10">
+                <h2 className="text-xl font-semibold mb-3 text-center text-slate-700">Battle Log</h2>
+                <div className="h-28 overflow-y-auto text-sm space-y-1.5 text-slate-600 border-t border-slate-300/50 pt-3 px-2 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
+                    {battleLog.map((msg, index) => <p key={index}>{msg}</p>)}
+                </div>
+            </div>
+
+            {!gameOver && (
+                <div className="w-full max-w-lg bg-white/60 backdrop-blur-md p-5 rounded-xl shadow-lg border border-gray-200/30 z-10 min-h-[150px]">
+                    <h2 className="text-xl font-semibold mb-4 text-center text-indigo-700">
+                        {currentPlayer === 'player1' ? "Your Turn: Choose a move!" : "Opponent's Turn..."}
+                    </h2>
+                    {currentPlayer === 'player1' && <div className="grid grid-cols-2 gap-3">
+                        {player1.moves.map((move, index) => (
+                            <button
+                                key={move.name}
+                                onClick={() => handleAttack(player1, player2, index)}
+                                disabled={!showMoveButtons || gameOver || currentPlayer !== 'player1'}
+                                className={`p-3.5 rounded-lg text-white font-medium transition duration-200 ease-in-out transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none
+                                ${move.type === 'Fire' ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600' : ''}
+                                ${move.type === 'Water' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600' : ''}
+                                ${move.type === 'Grass' ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600' : ''}
+                                ${move.type === 'Normal' ? 'bg-gradient-to-r from-gray-500 to-slate-500 hover:from-gray-600 hover:to-slate-600' : ''}
+                                shadow-md hover:shadow-lg text-sm md:text-base`}
+                            >
+                                {move.name} <span className="text-xs opacity-80">({move.type})</span>
+                            </button>
+                        ))}
+                    </div>}
+                </div>
+            )}
+            {gameOver && <button onClick={() => window.location.reload()} className="mt-6 px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold hover:from-green-600 hover:to-emerald-700 transition duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 z-10">Play Again</button>}
+        </div>
+    );
+};
+
+export default BattleSimulator;
+
