@@ -12,7 +12,7 @@
       :root {
         /* Core Dark Theme Palette */
         --color-background: #111827; /* Dark Blue/Gray */
-        --color-text: #f9fafb; /* Almost White for better contrast on image */
+        --color-text: #f9fafb; /* Almost White */
         --color-text-muted: #e5e7eb; /* Lighter Gray */
         --color-heading: #ffffff; /* White */
         --color-primary-accent: #38bdf8; /* Electric Blue */
@@ -20,11 +20,11 @@
         --color-focus-ring: var(--color-secondary-accent);
 
         /* Bubble Specific Palette */
-        --color-bubble-border: rgba(255, 255, 255, 0.15); /* Slightly more visible border */
+        --color-bubble-border: rgba(255, 255, 255, 0.15);
         --color-bubble-border-hover: var(--color-primary-accent);
-        --color-bubble-reflection: rgba(255, 255, 255, 0.45); /* Slightly stronger Reflection */
-        --color-bubble-text-overlay: rgba(0, 0, 0, 0.75); /* Darker overlay for text */
-        --color-bubble-text-shadow: rgba(0, 0, 0, 0.8); /* Stronger shadow */
+        --color-bubble-reflection: rgba(255, 255, 255, 0.45);
+        --color-bubble-text-overlay: rgba(0, 0, 0, 0.75);
+        --color-bubble-text-shadow: rgba(0, 0, 0, 0.8);
         --color-info-button-bg: rgba(17, 24, 39, 0.7);
         --color-info-button-bg-hover: rgba(17, 24, 39, 0.9);
         --color-info-button-icon: var(--color-text-muted);
@@ -35,7 +35,6 @@
         --color-scrollbar-thumb: #4b5563;
         --color-scrollbar-thumb-hover: #6b7280;
         --color-scrollbar-track: rgba(17, 24, 39, 0.5);
-
 
         /* Filter Controls Palette */
         --color-filter-bg: rgba(55, 65, 81, 0.6);
@@ -50,7 +49,11 @@
         /* Typography & Fonts */
         --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
           Roboto, "Helvetica Neue", Arial, sans-serif;
-        --font-heading: "Poppins", var(--font-body), sans-serif; /* Optional Poppins */
+        /* Optional Poppins - commented out to avoid external dependency unless explicitly requested */
+        /* --font-heading: "Poppins", var(--font-body), sans-serif; */
+        --font-heading: var(
+          --font-body
+        ); /* Use system font for heading as default */
         --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
           "Liberation Mono", "Courier New", monospace;
 
@@ -66,7 +69,7 @@
         --border-radius-sm: 0.375rem; /* 6px */
         --border-radius-md: 0.75rem; /* 12px */
         --border-radius-lg: 1rem; /* 16px */
-        --border-radius-bubble: 50%;
+        --border-radius-bubble: 1.25rem; /* 20px (Rounded square) */
         --border-radius-pill: 9999px;
         --transition-duration-fast: 0.15s;
         --transition-duration-med: 0.3s;
@@ -75,9 +78,9 @@
 
         /* Bubble Dimensions & Animation */
         --bubble-size: clamp(230px, 23vw, 290px);
-        --bubble-pop-duration: 0.45s;
-        --bubble-pop-nav-delay-factor: 0.7;
-        --bubble-reduced-motion-nav-delay: 50ms;
+        --bubble-pop-duration: 0.45s; /* Duration from source snippet */
+        --bubble-pop-nav-delay-factor: 0.7; /* Delay factor from source snippet */
+        --bubble-reduced-motion-nav-delay: 50ms; /* Reduced motion delay from source */
         --tooltip-z-index: 100;
         --pop-z-index: 1000;
 
@@ -133,12 +136,18 @@
       }
 
       @keyframes noise-animation {
-        0% { transform: translate(0, 0); }
-        100% { transform: translate(1px, 1px); }
+        0% {
+          transform: translate(0, 0);
+        }
+        100% {
+          transform: translate(1px, 1px);
+        }
       }
 
       /* Basic Elements */
-      h1, h2, h3 {
+      h1,
+      h2,
+      h3 {
         font-family: var(--font-heading);
         color: var(--color-heading);
         line-height: 1.2;
@@ -174,7 +183,8 @@
       a {
         color: var(--color-primary-accent);
         text-decoration: none;
-        transition: color var(--transition-duration-fast) var(--transition-timing);
+        transition: color var(--transition-duration-fast)
+          var(--transition-timing);
         border-radius: var(--border-radius-sm);
       }
 
@@ -185,17 +195,20 @@
         text-underline-offset: 4px;
       }
 
-      a:focus { outline: none; }
+      a:focus {
+        outline: none;
+      }
       a:focus-visible {
         outline: 2px solid var(--color-focus-ring);
         outline-offset: 3px;
         color: var(--color-secondary-accent);
       }
 
-      img, svg {
-          display: block;
-          max-width: 100%;
-          height: auto;
+      img,
+      svg {
+        display: block;
+        max-width: 100%;
+        height: auto;
       }
 
       /* Layout Containers */
@@ -216,9 +229,13 @@
         margin-bottom: var(--spacing-lg);
       }
 
-      main { flex-grow: 1; }
+      main {
+        flex-grow: 1;
+      }
 
-      .bubble-showcase-wrapper { /* Wrapper for potential future needs */ }
+      .bubble-showcase-wrapper {
+        /* Wrapper for potential future needs */
+      }
 
       .bubble-showcase {
         display: flex;
@@ -261,8 +278,8 @@
       }
 
       .filter-group:not(:last-child) {
-         padding-bottom: var(--spacing-md);
-         border-bottom: 1px solid var(--color-filter-border);
+        padding-bottom: var(--spacing-md);
+        border-bottom: 1px solid var(--color-filter-border);
       }
 
       .filter-group .filter-label {
@@ -290,7 +307,8 @@
         background-color: transparent;
         color: var(--color-filter-text);
         cursor: pointer;
-        transition: background-color var(--transition-duration-fast) var(--transition-timing),
+        transition: background-color var(--transition-duration-fast)
+            var(--transition-timing),
           color var(--transition-duration-fast) var(--transition-timing),
           border-color var(--transition-duration-fast) var(--transition-timing),
           transform var(--transition-duration-fast) var(--transition-timing);
@@ -305,7 +323,9 @@
         color: var(--color-heading);
       }
 
-      .filter-controls .filter-button:focus { outline: none; }
+      .filter-controls .filter-button:focus {
+        outline: none;
+      }
       .filter-controls .filter-button:focus-visible {
         outline: 2px solid var(--color-focus-ring);
         outline-offset: 2px;
@@ -328,8 +348,9 @@
         border-radius: var(--border-radius-pill);
         background-color: var(--color-search-bg);
         color: var(--color-filter-text);
-        transition: border-color var(--transition-duration-fast) var(--transition-timing),
-                    box-shadow var(--transition-duration-fast) var(--transition-timing);
+        transition: border-color var(--transition-duration-fast)
+            var(--transition-timing),
+          box-shadow var(--transition-duration-fast) var(--transition-timing);
         flex-grow: 1;
         min-width: 200px;
         max-width: 400px;
@@ -339,17 +360,23 @@
       .prompt-search-input:focus {
         outline: none;
         border-color: var(--color-primary-accent);
-        box-shadow: inset 0 1px 3px var(--color-search-shadow), 0 0 0 2px var(--color-focus-ring);
+        box-shadow: inset 0 1px 3px var(--color-search-shadow),
+          0 0 0 2px var(--color-focus-ring);
       }
-      .prompt-search-input::placeholder { color: var(--color-text-muted); opacity: 0.8; }
+      .prompt-search-input::placeholder {
+        color: var(--color-text-muted);
+        opacity: 0.8;
+      }
       .prompt-search-input::-webkit-search-cancel-button,
-      .prompt-search-input::-webkit-search-decoration { appearance: none; }
+      .prompt-search-input::-webkit-search-decoration {
+        appearance: none;
+      }
 
       /* --- Bubble Styling --- */
       .app-bubble {
         width: var(--bubble-size);
         height: var(--bubble-size);
-        border-radius: var(--border-radius-bubble);
+        border-radius: var(--border-radius-bubble); /* Rounded square */
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -358,62 +385,94 @@
         overflow: hidden;
         display: flex;
         cursor: pointer;
-        transition: transform var(--transition-duration-med) var(--transition-timing),
+        transition: transform var(--transition-duration-med)
+            var(--transition-timing),
           box-shadow var(--transition-duration-med) var(--transition-timing),
           border-color var(--transition-duration-med) var(--transition-timing),
           opacity var(--transition-duration-med) var(--transition-timing),
           visibility var(--transition-duration-med) linear;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), inset 0 2px 5px rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4),
+          inset 0 2px 5px rgba(255, 255, 255, 0.1);
         will-change: transform, opacity;
         outline: none;
       }
 
       /* Specific Bubble Backgrounds */
-      #gemini-app1-bubble { background-image: url('images/gemini pokemon arena image.png'); }
-      #claude-app1-bubble { background-image: url('images/poke catch image.png'); }
-      #nightwhisper-app1-bubble { background-image: url('images/claude pokemon arena image.png'); }
+      /* Placeholder comment: Add specific background images here if needed */
+      /* e.g., #gemini-app1-bubble { background-image: url('path/to/image.png'); } */
+      /* Fallback if image fails or not specified */
+      .app-bubble:not([style*="background-image: url"]) {
+        background-color: #374151; /* Gray fallback */
+      }
 
       .app-bubble:hover,
       .app-bubble:focus-visible {
         transform: translateY(-8px) scale(1.05);
         border-color: var(--color-bubble-border-hover);
-        box-shadow: 0 14px 35px rgba(0, 0, 0, 0.45), inset 0 2px 6px rgba(255, 255, 255, 0.15);
+        box-shadow: 0 14px 35px rgba(0, 0, 0, 0.45),
+          inset 0 2px 6px rgba(255, 255, 255, 0.15);
       }
       .app-bubble:focus-visible {
         outline: 3px solid var(--color-focus-ring);
         outline-offset: 6px;
       }
 
-      /* Bubble Reflection/Highlight Effect */
+      /* Bubble Reflection/Highlight Effect - Adjusted for rounded square */
       .app-bubble::before {
         content: "";
         position: absolute;
-        top: 5%;
-        left: 10%;
-        width: 60%;
-        height: 35%;
-        background: radial-gradient(ellipse at center, var(--color-bubble-reflection) 0%, transparent 75%);
-        border-radius: 60% 40% 70% 30% / 50% 60% 40% 50%;
+        top: 6%; /* Slightly lower */
+        left: 8%; /* Slightly more inset */
+        width: 65%; /* Slightly wider */
+        height: 40%; /* Slightly taller */
+        background: radial-gradient(
+          ellipse at center,
+          var(--color-bubble-reflection) 0%,
+          transparent 75%
+        );
+        /* Adjust border radius for a less circular highlight to match square */
+        border-radius: 30% 70% 40% 60% / 60% 40% 70% 30%;
         opacity: 0.6;
-        transform: rotate(-30deg) skewX(-10deg);
+        transform: rotate(-25deg) skewX(-10deg); /* Adjusted rotation slightly */
         pointer-events: none;
-        transition: opacity var(--transition-duration-med) ease, transform var(--transition-duration-med) ease;
+        transition: opacity var(--transition-duration-med) ease,
+          transform var(--transition-duration-med) ease;
         filter: blur(5px);
         z-index: 3;
       }
       .app-bubble:hover::before {
         opacity: 0.75;
-        transform: rotate(-25deg) skewX(-8deg) scale(1.05);
+        transform: rotate(-20deg) skewX(-8deg) scale(1.05);
       }
 
       /* Remove Glitch Effect */
-      .app-bubble::after { display: none; }
+      .app-bubble::after {
+        display: none;
+      }
 
       /* Filtered out state */
       .app-bubble.hidden {
-        opacity: 0; transform: scale(0.8); pointer-events: none; visibility: hidden;
-        transition: opacity var(--transition-duration-med) var(--transition-timing), transform var(--transition-duration-med) var(--transition-timing), visibility 0s linear var(--transition-duration-med), width 0s linear var(--transition-duration-med), height 0s linear var(--transition-duration-med), padding 0s linear var(--transition-duration-med), margin 0s linear var(--transition-duration-med), border 0s linear var(--transition-duration-med), gap 0s linear var(--transition-duration-med);
-        width: 0 !important; height: 0 !important; padding: 0 !important; margin: 0 !important; border: none !important; overflow: hidden !important; gap: 0 !important;
+        opacity: 0;
+        transform: scale(0.8);
+        pointer-events: none;
+        visibility: hidden;
+        transition: opacity var(--transition-duration-med)
+            var(--transition-timing),
+          transform var(--transition-duration-med) var(--transition-timing),
+          visibility 0s linear var(--transition-duration-med),
+          width 0s linear var(--transition-duration-med),
+          height 0s linear var(--transition-duration-med),
+          padding 0s linear var(--transition-duration-med),
+          margin 0s linear var(--transition-duration-med),
+          border 0s linear var(--transition-duration-med),
+          gap 0s linear var(--transition-duration-med);
+        width: 0 !important;
+        height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        overflow: hidden !important;
+        gap: 0 !important;
       }
 
       /* Content Link Area (Over the background image) */
@@ -430,58 +489,67 @@
         position: relative;
         z-index: 2;
         text-decoration: none;
-        border-radius: inherit;
+        border-radius: inherit; /* Inherit bubble's border-radius */
         outline: none;
         /* Stronger dark overlay for text readability */
-        background: linear-gradient(to top, var(--color-bubble-text-overlay) 10%, rgba(0,0,0,0.5) 50%, transparent 80%);
+        background: linear-gradient(
+          to top,
+          var(--color-bubble-text-overlay) 10%,
+          rgba(0, 0, 0, 0.5) 50%,
+          transparent 80%
+        );
       }
 
       /* Hide Bubble Image Element */
-      .bubble-image { display: none; }
+      .bubble-image {
+        display: none;
+      }
 
       .app-bubble h3 {
-        font-size: clamp(1.05rem, 1.6vw + 0.5rem, 1.25rem); /* Slightly larger */
+        font-size: clamp(1.05rem, 1.6vw + 0.5rem, 1.25rem);
         font-weight: 700;
         margin: 0 0 var(--spacing-xs) 0;
         color: var(--color-heading);
         max-width: 95%;
         line-height: 1.25;
         overflow-wrap: break-word;
-        text-shadow: 1px 1px 3px var(--color-bubble-text-shadow); /* Enhanced shadow */
+        text-shadow: 1px 1px 3px var(--color-bubble-text-shadow);
       }
 
       .app-bubble .model-name {
-        font-size: 0.8rem; /* Slightly larger */
+        font-size: 0.8rem;
         color: var(--color-text-muted);
         font-weight: 500;
         display: block;
         margin-top: 0;
         line-height: 1.2;
-        text-shadow: 1px 1px 2px var(--color-bubble-text-shadow); /* Enhanced shadow */
+        text-shadow: 1px 1px 2px var(--color-bubble-text-shadow);
       }
 
       /* Refinements Info */
       .app-bubble .generation-refinements {
         font-size: 0.7rem;
-        color: var(--color-text); /* Brighter text */
-        font-weight: 600; /* Bolder */
+        color: var(--color-text);
+        font-weight: 600;
         display: inline-block;
         margin-top: var(--spacing-sm);
-        opacity: 1; /* Fully opaque */
+        opacity: 1;
         cursor: help;
         text-decoration: none;
-        border: 1px solid rgba(255, 255, 255, 0.3); /* More visible border */
-        background-color: rgba(0, 0, 0, 0.5); /* Darker background */
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background-color: rgba(0, 0, 0, 0.5);
         border-radius: var(--border-radius-pill);
-        padding: 3px var(--spacing-sm); /* Slightly more padding */
+        padding: 3px var(--spacing-sm);
         line-height: 1.2;
         max-width: calc(100% - var(--spacing-lg));
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         outline: none;
-        text-shadow: 1px 1px 2px var(--color-bubble-text-shadow); /* Enhanced shadow */
-        transition: background-color var(--transition-duration-fast), border-color var(--transition-duration-fast), color var(--transition-duration-fast);
+        text-shadow: 1px 1px 2px var(--color-bubble-text-shadow);
+        transition: background-color var(--transition-duration-fast),
+          border-color var(--transition-duration-fast),
+          color var(--transition-duration-fast);
       }
 
       .app-bubble .generation-refinements:hover,
@@ -495,11 +563,11 @@
         outline-offset: 2px;
       }
 
-      /* Info Button */
+      /* Info Button - Adjusted position slightly */
       .info-button {
         position: absolute;
-        top: var(--spacing-md);
-        right: var(--spacing-md);
+        top: var(--spacing-sm);
+        right: var(--spacing-sm); /* Positioned top-right */
         z-index: 4;
         background-color: var(--color-info-button-bg);
         border: 1px solid var(--color-bubble-border);
@@ -524,11 +592,15 @@
       }
 
       .app-bubble:hover .info-button {
-          opacity: 1;
-          transform: scale(1.1);
+        opacity: 1;
+        transform: scale(1.1);
       }
 
-      .info-button svg { width: 16px; height: 16px; display: block; }
+      .info-button svg {
+        width: 16px;
+        height: 16px;
+        display: block;
+      }
 
       .info-button:hover,
       .info-button:focus {
@@ -546,68 +618,278 @@
 
       /* --- Unified Tooltip Styling --- */
       #bubble-tooltip {
-        position: fixed; z-index: var(--tooltip-z-index); background-color: var(--color-tooltip-bg); color: var(--color-tooltip-text); border: 1px solid var(--color-tooltip-border); border-radius: var(--border-radius-md); padding: var(--spacing-md); padding-right: calc(var(--spacing-md) + var(--spacing-sm)); font-size: 0.85rem; line-height: 1.5; max-width: var(--tooltip-max-width); max-height: var(--tooltip-max-height); overflow-y: auto; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4); opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(10px) scale(0.95); transition: opacity var(--transition-duration-fast) var(--transition-timing), visibility 0s linear var(--transition-duration-fast), transform var(--transition-duration-fast) var(--transition-timing); white-space: pre-wrap; word-wrap: break-word; font-family: var(--font-body); scrollbar-width: thin; scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
+        position: fixed;
+        z-index: var(--tooltip-z-index);
+        background-color: var(--color-tooltip-bg);
+        color: var(--color-tooltip-text);
+        border: 1px solid var(--color-tooltip-border);
+        border-radius: var(--border-radius-md);
+        padding: var(--spacing-md);
+        padding-right: calc(var(--spacing-md) + var(--spacing-sm));
+        font-size: 0.85rem;
+        line-height: 1.5;
+        max-width: var(--tooltip-max-width);
+        max-height: var(--tooltip-max-height);
+        overflow-y: auto;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translateY(10px) scale(0.95);
+        transition: opacity var(--transition-duration-fast)
+            var(--transition-timing),
+          visibility 0s linear var(--transition-duration-fast),
+          transform var(--transition-duration-fast) var(--transition-timing);
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-family: var(--font-body);
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-scrollbar-thumb)
+          var(--color-scrollbar-track);
       }
-      #bubble-tooltip::-webkit-scrollbar { width: 8px; }
-      #bubble-tooltip::-webkit-scrollbar-track { background: var(--color-scrollbar-track); border-radius: var(--border-radius-md); }
-      #bubble-tooltip::-webkit-scrollbar-thumb { background-color: var(--color-scrollbar-thumb); border-radius: 4px; border: 2px solid var(--color-scrollbar-track); }
-      #bubble-tooltip::-webkit-scrollbar-thumb:hover { background-color: var(--color-scrollbar-thumb-hover); }
-      #bubble-tooltip[data-type="prompt"] { font-family: var(--font-mono); max-width: var(--tooltip-prompt-max-width); }
-      #bubble-tooltip.visible { opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0) scale(1); transition-delay: 0s, 0s, 0s; }
+      #bubble-tooltip::-webkit-scrollbar {
+        width: 8px;
+      }
+      #bubble-tooltip::-webkit-scrollbar-track {
+        background: var(--color-scrollbar-track);
+        border-radius: var(--border-radius-md);
+      }
+      #bubble-tooltip::-webkit-scrollbar-thumb {
+        background-color: var(--color-scrollbar-thumb);
+        border-radius: 4px;
+        border: 2px solid var(--color-scrollbar-track);
+      }
+      #bubble-tooltip::-webkit-scrollbar-thumb:hover {
+        background-color: var(--color-scrollbar-thumb-hover);
+      }
+      #bubble-tooltip[data-type="prompt"] {
+        font-family: var(--font-mono);
+        max-width: var(--tooltip-prompt-max-width);
+      }
+      #bubble-tooltip.visible {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateY(0) scale(1);
+        transition-delay: 0s, 0s, 0s;
+      }
 
-      /* --- Pop Animation --- */
-      @keyframes bubble-pop-fast { 0% { transform: scale(1) rotate(0deg); opacity: 1; } 20% { transform: scale(0.8) rotate(-4deg); opacity: 0.95; animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); } 65% { transform: scale(20) rotate(3deg); opacity: 1; animation-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1); } 100% { transform: scale(25) rotate(0deg); opacity: 0; } }
-      .app-bubble.popping { transform-origin: center center; will-change: transform, opacity; animation: bubble-pop-fast var(--bubble-pop-duration) forwards; cursor: default; pointer-events: none; border: none; border-radius: var(--border-radius-bubble); box-shadow: none; overflow: hidden; }
-      .app-bubble.popping > * { opacity: 0 !important; visibility: hidden !important; transition: none !important; }
-      .app-bubble.popping::before { display: none !important; content: none !important; animation: none !important; }
+      /* --- Pop Animation (Imported from Source Snippet) --- */
+      @keyframes bubble-pop-smooth {
+        /* Refined animation */
+        0% {
+          transform: scale(1) rotate(0deg);
+          opacity: 1;
+        }
+        15% {
+          /* Quick initial dip */
+          transform: scale(0.95) rotate(-2deg);
+          opacity: 0.98;
+          animation-timing-function: cubic-bezier(
+            0.34,
+            1.56,
+            0.64,
+            1
+          ); /* Bounce out */
+        }
+        70% {
+          /* Expand and start fading */
+          transform: scale(2.2) rotate(1deg); /* Slightly larger scale */
+          opacity: 0.5; /* Fade faster */
+          animation-timing-function: ease-out;
+        }
+        100% {
+          /* Fade out completely */
+          transform: scale(2.5) rotate(0deg);
+          opacity: 0;
+        }
+      }
+
+      .app-bubble.popping {
+        /* Fixed positioning is handled by JS */
+        transform-origin: center center;
+        will-change: transform, opacity;
+        animation: bubble-pop-smooth var(--bubble-pop-duration) forwards; /* Use new animation */
+        cursor: default;
+        pointer-events: none;
+        border: none !important; /* Ensure no border during animation */
+        border-radius: var(--border-radius-bubble); /* Keep bubble shape */
+        box-shadow: none !important; /* Remove shadow */
+        overflow: hidden;
+      }
+      .app-bubble.popping > * {
+        /* Hide contents immediately */
+        opacity: 0 !important;
+        visibility: hidden !important;
+        transition: none !important;
+        animation: none !important;
+      }
+      .app-bubble.popping::before {
+        /* Hide reflection */
+        display: none !important;
+        content: none !important;
+        animation: none !important;
+      }
 
       /* Empty state message */
-      .empty-state { text-align: center; color: var(--color-text-muted); padding: var(--spacing-xl); border: 2px dashed var(--color-filter-border); border-radius: var(--border-radius-md); width: calc(100% - var(--spacing-lg) * 2); margin: var(--spacing-lg) auto; display: none; }
-      .empty-state.visible { display: block; }
+      .empty-state {
+        text-align: center;
+        color: var(--color-text-muted);
+        padding: var(--spacing-xl);
+        border: 2px dashed var(--color-filter-border);
+        border-radius: var(--border-radius-md);
+        width: calc(100% - var(--spacing-lg) * 2);
+        margin: var(--spacing-lg) auto;
+        display: none;
+      }
+      .empty-state.visible {
+        display: block;
+      }
 
       /* Accessibility */
-      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+      }
 
       /* Media Queries */
       @media (max-width: 768px) {
-        h1 { font-size: clamp(2rem, 8vw, 3rem); }
-        .container { width: 95%; }
-        .bubble-showcase { gap: var(--spacing-lg); }
-        .filter-group { gap: var(--spacing-sm); }
-        .filter-group .filter-label { margin-bottom: var(--spacing-sm); }
-        .prompt-search-input { max-width: 90%; min-width: 180px; }
-        .info-button { top: var(--spacing-sm); right: var(--spacing-sm); width: 26px; height: 26px; }
-        .info-button svg { width: 14px; height: 14px; }
-        #bubble-tooltip { max-width: 90vw; font-size: 0.8rem; --tooltip-max-height: 250px; }
-         .app-bubble h3 { font-size: clamp(1rem, 1.5vw + 0.4rem, 1.15rem); }
-         .app-bubble .model-name { font-size: 0.75rem; }
-         .app-bubble .generation-refinements { font-size: 0.65rem; }
+        h1 {
+          font-size: clamp(2rem, 8vw, 3rem);
+        }
+        .container {
+          width: 95%;
+        }
+        .bubble-showcase {
+          gap: var(--spacing-lg);
+        }
+        .filter-group {
+          gap: var(--spacing-sm);
+        }
+        .filter-group .filter-label {
+          margin-bottom: var(--spacing-sm);
+        }
+        .prompt-search-input {
+          max-width: 90%;
+          min-width: 180px;
+        }
+        .info-button {
+          top: var(--spacing-xs);
+          right: var(--spacing-xs);
+          width: 26px;
+          height: 26px;
+        }
+        .info-button svg {
+          width: 14px;
+          height: 14px;
+        }
+        #bubble-tooltip {
+          max-width: 90vw;
+          font-size: 0.8rem;
+          --tooltip-max-height: 250px;
+        }
+        .app-bubble h3 {
+          font-size: clamp(1rem, 1.5vw + 0.4rem, 1.15rem);
+        }
+        .app-bubble .model-name {
+          font-size: 0.75rem;
+        }
+        .app-bubble .generation-refinements {
+          font-size: 0.65rem;
+        }
       }
 
       @media (max-width: 480px) {
-        p.intro-text { font-size: 1rem; }
-        .app-bubble h3 { font-size: 0.95rem; }
-        .app-bubble .model-name { font-size: 0.7rem; }
-        .app-bubble .generation-refinements { font-size: 0.6rem; padding: 2px var(--spacing-xs); }
-        .filter-controls { padding: var(--spacing-md); }
-        .filter-group { gap: var(--spacing-xs) var(--spacing-sm); }
-        .filter-controls .filter-button { font-size: 0.85rem; padding: var(--spacing-xs) var(--spacing-sm); }
-        .prompt-search-input { font-size: 0.85rem; padding: var(--spacing-xs) var(--spacing-sm); max-width: 100%; }
-        #bubble-tooltip { --tooltip-max-height: 200px; }
-        .info-button { width: 24px; height: 24px; }
-        .info-button svg { width: 12px; height: 12px; }
+        p.intro-text {
+          font-size: 1rem;
+        }
+        .app-bubble h3 {
+          font-size: 0.95rem;
+        }
+        .app-bubble .model-name {
+          font-size: 0.7rem;
+        }
+        .app-bubble .generation-refinements {
+          font-size: 0.6rem;
+          padding: 2px var(--spacing-xs);
+        }
+        .filter-controls {
+          padding: var(--spacing-md);
+        }
+        .filter-group {
+          gap: var(--spacing-xs) var(--spacing-sm);
+        }
+        .filter-controls .filter-button {
+          font-size: 0.85rem;
+          padding: var(--spacing-xs) var(--spacing-sm);
+        }
+        .prompt-search-input {
+          font-size: 0.85rem;
+          padding: var(--spacing-xs) var(--spacing-sm);
+          max-width: 100%;
+        }
+        #bubble-tooltip {
+          --tooltip-max-height: 200px;
+        }
+        .info-button {
+          width: 24px;
+          height: 24px;
+        }
+        .info-button svg {
+          width: 12px;
+          height: 12px;
+        }
       }
 
       @media (prefers-reduced-motion: reduce) {
-        body::before { animation: none !important; }
-        .app-bubble, .filter-button, .app-bubble::before, .info-button, #bubble-tooltip, .generation-refinements { transition-duration: 0.01ms !important; transition-delay: 0ms !important; }
-        .app-bubble.popping { animation: none !important; opacity: 0 !important; transform: scale(0) !important; transition: opacity 0.05s linear, transform 0.05s linear !important; }
-        .app-bubble:hover, .app-bubble:focus-visible, .app-bubble:focus-within { transform: none; }
-        .app-bubble:hover::before { transform: rotate(-30deg) skewX(-10deg); }
-        .info-button { transform: scale(1); }
-        .info-button:hover, .info-button:focus, .app-bubble:hover .info-button { transform: scale(1); }
-        #bubble-tooltip { transform: translateY(0) scale(1); }
-        .filter-button:hover { transform: none; }
+        body::before {
+          animation: none !important;
+        }
+        .app-bubble,
+        .filter-button,
+        .app-bubble::before,
+        .info-button,
+        #bubble-tooltip,
+        .generation-refinements {
+          transition-duration: 0.01ms !important;
+          transition-delay: 0ms !important;
+        }
+        /* Reduced motion pop: Quick fade/scale out (from source snippet) */
+        .app-bubble.popping {
+          animation: none !important;
+          opacity: 0 !important;
+          transform: scale(0.9) !important; /* Reduced motion scale */
+          transition: opacity 0.1s linear, transform 0.1s linear !important;
+        }
+        .app-bubble:hover,
+        .app-bubble:focus-visible,
+        .app-bubble:focus-within {
+          transform: none;
+        }
+        .app-bubble:hover::before {
+          transform: rotate(-25deg) skewX(-10deg);
+        } /* Match default reduced motion transform */
+        .info-button {
+          transform: scale(1);
+        }
+        .info-button:hover,
+        .info-button:focus,
+        .app-bubble:hover .info-button {
+          transform: scale(1);
+        }
+        #bubble-tooltip {
+          transform: translateY(0) scale(1);
+        }
+        .filter-button:hover {
+          transform: none;
+        }
       }
     </style>
   </head>
@@ -619,43 +901,140 @@
         HTML files – each a unique digital creation. Planted by a human prompt,
         they are grown and refined collaboratively with AI assistants. Click a
         bubble to pop it and explore! Use the
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width: 1em; height: 1em; vertical-align: -0.125em; display: inline-block; color: var(--color-info-button-icon);" aria-hidden="true">
-          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          style="
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.125em;
+            display: inline-block;
+            color: var(--color-info-button-icon);
+          "
+          aria-hidden="true"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+            clip-rule="evenodd"
+          />
         </svg>
         icon for initial prompts and hover over or focus "Refinements" for
         iteration details. Filter or search below.
       </p>
 
-      <div class="filter-controls" role="toolbar" aria-label="Filter apps by AI Model and Search Prompts">
+      <div
+        class="filter-controls"
+        role="toolbar"
+        aria-label="Filter apps by AI Model and Search Prompts"
+      >
         <div class="filter-group model-filters">
-          <span class="filter-label" id="filter-label-model">Filter by Model:</span>
-          <button type="button" class="filter-button" data-filter="all" aria-pressed="true" aria-describedby="filter-label-model">All</button>
-          <button type="button" class="filter-button" data-filter="gemini-2.5-pro" aria-pressed="false" aria-describedby="filter-label-model">Gemini 2.5 Pro</button>
-          <button type="button" class="filter-button" data-filter="claude-3.7-thinking" aria-pressed="false" aria-describedby="filter-label-model">Claude 3.7 thinking</button>
-          <button type="button" class="filter-button" data-filter="nightwhisper" aria-pressed="false" aria-describedby="filter-label-model">Nightwhisper</button>
+          <span class="filter-label" id="filter-label-model"
+            >Filter by Model:</span
+          >
+          <button
+            type="button"
+            class="filter-button"
+            data-filter="all"
+            aria-pressed="true"
+            aria-describedby="filter-label-model"
+          >
+            All
+          </button>
+          <button
+            type="button"
+            class="filter-button"
+            data-filter="gemini-2.5-pro"
+            aria-pressed="false"
+            aria-describedby="filter-label-model"
+          >
+            Gemini 2.5 Pro
+          </button>
+          <button
+            type="button"
+            class="filter-button"
+            data-filter="claude-3.7-thinking"
+            aria-pressed="false"
+            aria-describedby="filter-label-model"
+          >
+            Claude 3.7 thinking
+          </button>
+          <button
+            type="button"
+            class="filter-button"
+            data-filter="nightwhisper"
+            aria-pressed="false"
+            aria-describedby="filter-label-model"
+          >
+            Nightwhisper
+          </button>
           <!-- Add more filter buttons here -->
         </div>
         <div class="filter-group prompt-filter">
-            <label for="prompt-search" class="filter-label">Search Prompts:</label>
-            <input type="search" id="prompt-search" class="prompt-search-input" placeholder="e.g., game, simulator, css..." aria-label="Search prompts">
+          <label for="prompt-search" class="filter-label"
+            >Search Prompts:</label
+          >
+          <input
+            type="search"
+            id="prompt-search"
+            class="prompt-search-input"
+            placeholder="e.g., game, simulator, css..."
+            aria-label="Search prompts"
+          />
         </div>
       </div>
     </header>
 
     <main class="container">
-      <section class="bubble-showcase-wrapper" aria-labelledby="showcase-heading">
+      <section
+        class="bubble-showcase-wrapper"
+        aria-labelledby="showcase-heading"
+      >
         <h2 id="showcase-heading" class="sr-only">App Bubble Showcase</h2>
-        <div class="bubble-showcase" id="bubble-grid" aria-live="polite" aria-atomic="true">
+        <div
+          class="bubble-showcase"
+          id="bubble-grid"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           <!-- Announce changes when filters are applied -->
 
           <!-- Bubble 1: Pokémon Battle Simulator -->
-          <article id="gemini-app1-bubble" class="app-bubble" data-model="gemini-2.5-pro" tabindex="0" aria-labelledby="gemini-app1-title">
-            <a href="pokemon-sim-gemini.html" class="bubble-link-content" tabindex="-1" aria-hidden="true">
+          <article
+            id="gemini-app1-bubble"
+            class="app-bubble"
+            data-model="gemini-2.5-pro"
+            tabindex="0"
+            aria-labelledby="gemini-app1-title"
+            style="
+              background-image: url('images/gemini pokemon arena image.png');
+            "
+          >
+            <a
+              href="pokemon-sim-gemini.html"
+              class="bubble-link-content"
+              tabindex="-1"
+              aria-hidden="true"
+            >
               <h3 id="gemini-app1-title">Pokémon Battle Simulator</h3>
               <span class="model-name">Gemini 2.5 Pro</span>
-              <span class="generation-refinements" tabindex="0" aria-describedby="bubble-tooltip" data-tooltip-type="refinement" data-tooltip-content="Developed over 3 refinement iterations with the AI.">Refinements: 3</span>
+              <span
+                class="generation-refinements"
+                tabindex="0"
+                aria-describedby="bubble-tooltip"
+                data-tooltip-type="refinement"
+                data-tooltip-content="Developed over 3 refinement iterations with the AI."
+                >Refinements: 3</span
+              >
             </a>
-            <button type="button" class="info-button" aria-label="View Prompt for Pokémon Battle Simulator" aria-describedby="bubble-tooltip" data-tooltip-type="prompt" data-tooltip-content="Generate JavaScript code for a turn-based Pokémon battle simulator engine. Style it as if it's an apple expert designer. When the character is active, add a smooth animation bouncing on the avatar. Make it like a battle in a 2d map, left vs right, when a Pokémon attacks it will be animated in a cool way to attack the other character of the other side. Given the attack type, for example if its fire, we generate fire icons that start from the character and go smoothly attacking the enemy, it should look really flowing smoothly
+            <button
+              type="button"
+              class="info-button"
+              aria-label="View Prompt for Pokémon Battle Simulator"
+              aria-describedby="bubble-tooltip"
+              data-tooltip-type="prompt"
+              data-tooltip-content="Generate JavaScript code for a turn-based Pokémon battle simulator engine. Style it as if it's an apple expert designer. When the character is active, add a smooth animation bouncing on the avatar. Make it like a battle in a 2d map, left vs right, when a Pokémon attacks it will be animated in a cool way to attack the other character of the other side. Given the attack type, for example if its fire, we generate fire icons that start from the character and go smoothly attacking the enemy, it should look really flowing smoothly
 
 **Core Requirements:**
 
@@ -672,147 +1051,150 @@
     *   `power` (number, base damage)
     *   `accuracy` (number between 0 and 1, chance to hit)
 
-3.  **Type Effectiveness:** Implement the classic Rock-Paper-Scissors elemental type effectiveness logic. Use the following basic chart (feel free to represent this efficiently, e.g., using an object or map):
-    *   Fire > Grass (2x damage)
-    *   Grass > Water (2x damage)
-    *   Water > Fire (2x damage)
-    *   Fire < Water (0.5x damage)
-    *   Grass < Fire (0.5x damage)
-    *   Water < Grass (0.5x damage)
-    *   *All other interactions are 1x damage.*
-    *   Handle dual types: If a target has two types, calculate the multiplier for each type against the move's type and multiply them together (e.g., Water move vs Fire/Rock target: Water vs Fire = 2x, Water vs Rock = 2x, total multiplier = 4x).
+3.  **Type Effectiveness:** Implement the classic Rock-Paper-Scissors elemental type effectiveness logic...
 
 4.  **Battle Flow:**
-    *   The simulation should take two Pokémon objects as input.
-    *   Implement a turn-based loop. On each turn, one Pokémon uses a move against the other. (For simplicity, assume a fixed turn order or alternate turns).
-    *   When a move is used:
-        *   Check if the move hits based on its `accuracy`.
-        *   If it hits, calculate damage: `damage = move.power * typeEffectivenessMultiplier`.
-        *   Subtract the damage from the target Pokémon's `hp`.
-        *   Ensure HP doesn't go below 0.
-    *   The battle ends when one Pokémon's `hp` reaches 0.
+    *   The simulation should take two Pokémon objects as input...
 
-5.  **Output:** Log the key events of the battle to the console (e.g., "Pikachu used Thunderbolt!", "It's super effective!", "Charizard took 35 damage.", "Charizard fainted!").
+5.  **Output:** Log the key events of the battle to the console...
 
 **Novelty Element: Synergy Resonance**
 
 6.  **Implement 'Synergy Resonance':**
-    *   Each Pokémon object should also have a `resonance` property, starting at 0.
-    *   When a Pokémon lands a **super effective** hit, its `resonance` increases by 1.
-    *   When a Pokémon takes a **not very effective** hit (resists the attack), its `resonance` increases by 1.
-    *   When a Pokémon's `resonance` reaches 3 or more:
-        *   The *next* move it uses that matches one of its *own types* (STAB - Same Type Attack Bonus) gets an additional +10 power bonus *before* type effectiveness is calculated.
-        *   After using this boosted move, the Pokémon's `resonance` resets to 0.
-    *   Log console messages when resonance increases and when the boosted attack occurs.
+    *   Each Pokémon object should also have a `resonance` property...
 
 **Code Structure:**
 
-*   Aim for clear, well-commented functions (e.g., `calculateTypeEffectiveness(moveType, targetTypes)`, `calculateDamage(...)`, `executeTurn(...)`, `startBattle(...)`).
-*   Include example Pokémon and move data to run a sample battle.
+*   Aim for clear, well-commented functions...
+*   Include example Pokémon and move data...
 
 **Example Scenario to Test:**
 
-*   A pure 'Fire' type Pokémon (e.g., Charmander) vs a pure 'Grass' type Pokémon (e.g., Bulbasaur).
-*   Charmander uses a 'Fire' move, hits super effectively, gains 1 resonance.
-*   Bulbasaur uses a 'Grass' move, hits not very effectively, Charmander gains 1 resonance.
-*   Charmander uses another 'Fire' move, hits super effectively, gains 1 resonance (now at 3).
-*   The *next* 'Fire' move Charmander uses should activate Synergy Resonance, gain +10 power, deal damage, and reset Charmander's resonance to 0.">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+*   A pure 'Fire' type Pokémon (e.g., Charmander) vs a pure 'Grass' type Pokémon (e.g., Bulbasaur)..."
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  clip-rule="evenodd"
+                />
               </svg>
             </button>
-            <span class="sr-only">(Opens Pokémon Battle Simulator generated by Gemini 2.5 Pro)</span>
+            <span class="sr-only"
+              >(Opens Pokémon Battle Simulator generated by Gemini 2.5
+              Pro)</span
+            >
           </article>
 
           <!-- Bubble 2: Pokémon Catch Game -->
-          <article id="claude-app1-bubble" class="app-bubble" data-model="claude-3.7-thinking" tabindex="0" aria-labelledby="claude-app1-title">
-            <a href="poke-catch-sonnet.html" class="bubble-link-content" tabindex="-1" aria-hidden="true">
+          <article
+            id="claude-app1-bubble"
+            class="app-bubble"
+            data-model="claude-3.7-thinking"
+            tabindex="0"
+            aria-labelledby="claude-app1-title"
+            style="background-image: url('images/poke catch image.png')"
+          >
+            <a
+              href="poke-catch-sonnet.html"
+              class="bubble-link-content"
+              tabindex="-1"
+              aria-hidden="true"
+            >
               <h3 id="claude-app1-title">Pokémon Catch Game</h3>
               <span class="model-name">Claude 3.7 thinking</span>
-              <span class="generation-refinements" tabindex="0" aria-describedby="bubble-tooltip" data-tooltip-type="refinement" data-tooltip-content="Developed over 1 refinement iteration with the AI.">Refinements: 1</span>
+              <span
+                class="generation-refinements"
+                tabindex="0"
+                aria-describedby="bubble-tooltip"
+                data-tooltip-type="refinement"
+                data-tooltip-content="Developed over 1 refinement iteration with the AI."
+                >Refinements: 1</span
+              >
             </a>
-            <button type="button" class="info-button" aria-label="View Prompt for Pokémon Catch Game" aria-describedby="bubble-tooltip" data-tooltip-type="prompt" data-tooltip-content="Create a pokemon game">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            <button
+              type="button"
+              class="info-button"
+              aria-label="View Prompt for Pokémon Catch Game"
+              aria-describedby="bubble-tooltip"
+              data-tooltip-type="prompt"
+              data-tooltip-content="Create a pokemon game"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  clip-rule="evenodd"
+                />
               </svg>
             </button>
-            <span class="sr-only">(Opens Pokémon Catch Game generated by Claude 3.7 thinking)</span>
+            <span class="sr-only"
+              >(Opens Pokémon Catch Game generated by Claude 3.7 thinking)</span
+            >
           </article>
 
           <!-- Bubble 3: Pokémon Battle Arena -->
-          <article id="nightwhisper-app1-bubble" class="app-bubble" data-model="nightwhisper" tabindex="0" aria-labelledby="nightwhisper-app1-title">
-            <a href="pokemon-sim-nightwhisper.html" class="bubble-link-content" tabindex="-1" aria-hidden="true">
+          <article
+            id="nightwhisper-app1-bubble"
+            class="app-bubble"
+            data-model="nightwhisper"
+            tabindex="0"
+            aria-labelledby="nightwhisper-app1-title"
+            style="
+              background-image: url('images/claude pokemon arena image.png');
+            "
+          >
+            <a
+              href="pokemon-sim-nightwhisper.html"
+              class="bubble-link-content"
+              tabindex="-1"
+              aria-hidden="true"
+            >
               <h3 id="nightwhisper-app1-title">Pokémon Battle Arena</h3>
               <span class="model-name">Nightwhisper</span>
-              <span class="generation-refinements" tabindex="0" aria-describedby="bubble-tooltip" data-tooltip-type="refinement" data-tooltip-content="Developed over 1 refinement iteration with the AI.">Refinements: 1</span>
+              <span
+                class="generation-refinements"
+                tabindex="0"
+                aria-describedby="bubble-tooltip"
+                data-tooltip-type="refinement"
+                data-tooltip-content="Developed over 1 refinement iteration with the AI."
+                >Refinements: 1</span
+              >
             </a>
-            <button type="button" class="info-button" aria-label="View Prompt for Pokémon Battle Arena" aria-describedby="bubble-tooltip" data-tooltip-type="prompt" data-tooltip-content="Generate JavaScript code for a turn-based Pokémon battle simulator engine. Style it as if it's an apple expert designer. When the character is active, add a smooth animation bouncing on the avatar. Make it like a battle in a 2d map, left vs right, when a Pokémon attacks it will be animated in a cool way to attack the other character of the other side. Given the attack type, for example if its fire, we generate fire icons that start from the character and go smoothly attacking the enemy, it should look really flowing smoothly
-
-**Core Requirements:**
-
-1.  **Pokémon Representation:** Create a way to represent Pokémon using JavaScript objects. Each Pokémon must have at least:
-    *   `name` (string)
-    *   `hp` (number, current hit points)
-    *   `maxHp` (number, maximum hit points)
-    *   `types` (array of strings, e.g., `['Fire']`, `['Water', 'Rock']`)
-    *   `moves` (array of move objects)
-
-2.  **Move Representation:** Create a way to represent moves using JavaScript objects. Each move must have at least:
-    *   `name` (string)
-    *   `type` (string, e.g., 'Grass', 'Normal')
-    *   `power` (number, base damage)
-    *   `accuracy` (number between 0 and 1, chance to hit)
-
-3.  **Type Effectiveness:** Implement the classic Rock-Paper-Scissors elemental type effectiveness logic. Use the following basic chart (feel free to represent this efficiently, e.g., using an object or map):
-    *   Fire > Grass (2x damage)
-    *   Grass > Water (2x damage)
-    *   Water > Fire (2x damage)
-    *   Fire < Water (0.5x damage)
-    *   Grass < Fire (0.5x damage)
-    *   Water < Grass (0.5x damage)
-    *   *All other interactions are 1x damage.*
-    *   Handle dual types: If a target has two types, calculate the multiplier for each type against the move's type and multiply them together (e.g., Water move vs Fire/Rock target: Water vs Fire = 2x, Water vs Rock = 2x, total multiplier = 4x).
-
-4.  **Battle Flow:**
-    *   The simulation should take two Pokémon objects as input.
-    *   Implement a turn-based loop. On each turn, one Pokémon uses a move against the other. (For simplicity, assume a fixed turn order or alternate turns).
-    *   When a move is used:
-        *   Check if the move hits based on its `accuracy`.
-        *   If it hits, calculate damage: `damage = move.power * typeEffectivenessMultiplier`.
-        *   Subtract the damage from the target Pokémon's `hp`.
-        *   Ensure HP doesn't go below 0.
-    *   The battle ends when one Pokémon's `hp` reaches 0.
-
-5.  **Output:** Log the key events of the battle to the console (e.g., "Pikachu used Thunderbolt!", "It's super effective!", "Charizard took 35 damage.", "Charizard fainted!").
-
-**Novelty Element: Synergy Resonance**
-
-6.  **Implement 'Synergy Resonance':**
-    *   Each Pokémon object should also have a `resonance` property, starting at 0.
-    *   When a Pokémon lands a **super effective** hit, its `resonance` increases by 1.
-    *   When a Pokémon takes a **not very effective** hit (resists the attack), its `resonance` increases by 1.
-    *   When a Pokémon's `resonance` reaches 3 or more:
-        *   The *next* move it uses that matches one of its *own types* (STAB - Same Type Attack Bonus) gets an additional +10 power bonus *before* type effectiveness is calculated.
-        *   After using this boosted move, the Pokémon's `resonance` resets to 0.
-    *   Log console messages when resonance increases and when the boosted attack occurs.
-
-**Code Structure:**
-
-*   Aim for clear, well-commented functions (e.g., `calculateTypeEffectiveness(moveType, targetTypes)`, `calculateDamage(...)`, `executeTurn(...)`, `startBattle(...)`).
-*   Include example Pokémon and move data to run a sample battle.
-
-**Example Scenario to Test:**
-
-*   A pure 'Fire' type Pokémon (e.g., Charmander) vs a pure 'Grass' type Pokémon (e.g., Bulbasaur).
-*   Charmander uses a 'Fire' move, hits super effectively, gains 1 resonance.
-*   Bulbasaur uses a 'Grass' move, hits not very effectively, Charmander gains 1 resonance.
-*   Charmander uses another 'Fire' move, hits super effectively, gains 1 resonance (now at 3).
-*   The *next* 'Fire' move Charmander uses should activate Synergy Resonance, gain +10 power, deal damage, and reset Charmander's resonance to 0.">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            <button
+              type="button"
+              class="info-button"
+              aria-label="View Prompt for Pokémon Battle Arena"
+              aria-describedby="bubble-tooltip"
+              data-tooltip-type="prompt"
+              data-tooltip-content="Generate JavaScript code for a turn-based Pokémon battle simulator engine. Style it as if it's an apple expert designer... (prompt continues as before)"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  clip-rule="evenodd"
+                />
               </svg>
             </button>
-            <span class="sr-only">(Opens Pokémon Battle Arena generated by Nightwhisper)</span>
+            <span class="sr-only"
+              >(Opens Pokémon Battle Arena generated by Nightwhisper)</span
+            >
           </article>
 
           <!-- Add more app bubbles here -->
@@ -853,27 +1235,48 @@
         constructor() {
           this.filterControls = document.querySelector(".filter-controls");
           this.bubbleGrid = document.getElementById("bubble-grid");
-          this.emptyStateMessage = document.getElementById("empty-state-message");
+          this.emptyStateMessage = document.getElementById(
+            "empty-state-message"
+          );
           this.tooltipElement = document.getElementById("bubble-tooltip");
-          this.promptSearchInput = document.getElementById('prompt-search');
+          this.promptSearchInput = document.getElementById("prompt-search");
           this.popZIndex = this.getCssVariableValue("--pop-z-index", "1000"); // Get z-index for popping
 
-          if (!this.filterControls || !this.bubbleGrid || !this.emptyStateMessage || !this.tooltipElement || !this.promptSearchInput) {
-            console.error("Bubble Showcase Error: Required elements missing (controls, grid, empty state, tooltip, or search input).");
+          if (
+            !this.filterControls ||
+            !this.bubbleGrid ||
+            !this.emptyStateMessage ||
+            !this.tooltipElement ||
+            !this.promptSearchInput
+          ) {
+            console.error(
+              "Bubble Showcase Error: Required elements missing (controls, grid, empty state, tooltip, or search input)."
+            );
             return;
           }
 
           /** @type {AppBubbleData[]} */
           this.appBubbles = [];
-          this.activeModelFilter = 'all'; // Initial model filter
-          this.activePromptFilter = '';   // Initial prompt filter
-          this.searchTimeout = null;      // Timeout for debouncing search input
+          this.activeModelFilter = "all"; // Initial model filter
+          this.activePromptFilter = ""; // Initial prompt filter
+          this.searchTimeout = null; // Timeout for debouncing search input
           this.initBubbles(); // Populate appBubbles array
 
-          this.filterButtons = this.filterControls.querySelectorAll(".filter-button");
-          this.popAnimationDuration = this.getCssVariableDuration("--bubble-pop-duration", 450); // Default: 0.45s
-          this.popNavDelayFactor = this.getCssVariableNumber("--bubble-pop-nav-delay-factor", 0.7); // Default: 70%
-          this.reducedMotionNavDelay = this.getCssVariableDuration("--bubble-reduced-motion-nav-delay", 50); // Default: 50ms
+          this.filterButtons =
+            this.filterControls.querySelectorAll(".filter-button");
+          // Read animation/timing variables from CSS
+          this.popAnimationDuration = this.getCssVariableDuration(
+            "--bubble-pop-duration",
+            450
+          );
+          this.popNavDelayFactor = this.getCssVariableNumber(
+            "--bubble-pop-nav-delay-factor",
+            0.7
+          );
+          this.reducedMotionNavDelay = this.getCssVariableDuration(
+            "--bubble-reduced-motion-nav-delay",
+            50
+          );
 
           /** @type {HTMLElement | null} */
           this.activeTooltipTrigger = null; // Track which element triggered the tooltip
@@ -891,29 +1294,91 @@
 
         /**
          * Parses bubble elements from the DOM and populates the this.appBubbles array.
+         * Also sets up image error handling.
          */
         initBubbles() {
-          this.appBubbles = Array.from(this.bubbleGrid.querySelectorAll(".app-bubble")).map((bubbleEl) => {
+          this.appBubbles = Array.from(
+            this.bubbleGrid.querySelectorAll(".app-bubble")
+          ).map((bubbleEl) => {
             const linkContent = bubbleEl.querySelector("a.bubble-link-content");
             const infoButton = bubbleEl.querySelector(".info-button");
-            const refinementSpan = bubbleEl.querySelector(".generation-refinements");
-            const promptContent = infoButton?.dataset.tooltipContent || '';
+            const refinementSpan = bubbleEl.querySelector(
+              ".generation-refinements"
+            );
+            const promptContent = infoButton?.dataset.tooltipContent || "";
+
+            // Image error handling
+            const bgImageStyle = bubbleEl.style.backgroundImage;
+            if (bgImageStyle && bgImageStyle.startsWith("url(")) {
+              const img = new Image();
+              const url = bgImageStyle.slice(5, -2); // Extract URL: url('path') -> path
+              img.onerror = () => {
+                console.warn(
+                  `Failed to load bubble background: ${url}. Applying fallback.`
+                );
+                bubbleEl.style.backgroundImage = "none"; // Remove broken image style
+                // Ensure fallback color is applied if not already handled by CSS ':not' selector
+                if (!bubbleEl.style.backgroundColor) {
+                  bubbleEl.style.backgroundColor = "#374151";
+                }
+              };
+              img.src = url;
+            } else if (!bgImageStyle) {
+              // Apply fallback color if no background image is set at all
+              bubbleEl.style.backgroundColor = "#374151";
+            }
+
             return {
               element: bubbleEl,
               model: bubbleEl.dataset.model || "unknown",
               link: linkContent?.getAttribute("href"),
               infoButton: infoButton,
               refinementSpan: refinementSpan,
-              prompt: promptContent.toLowerCase() // Store lowercase prompt
+              prompt: promptContent.toLowerCase(), // Store lowercase prompt for searching
             };
           });
         }
 
-        /** Get CSS Variable Helpers (unchanged) */
-        getCssVariableValue(propertyName, fallbackValue){try{const e=getComputedStyle(document.documentElement).getPropertyValue(propertyName).trim();return e||fallbackValue}catch(e){return console.warn(`Could not read CSS variable ${propertyName}:`,e),fallbackValue}}
-        getCssVariableDuration(propertyName, fallbackMs){try{const e=this.getCssVariableValue(propertyName,"");if(e){const t=e.match(/^(\d*\.?\d+)(m?s)?$/i);if(t){const s=parseFloat(t[1]),o=t[2]?.toLowerCase();if("s"===o)return s*1000;if("ms"===o||!o)return s}}}catch(e){console.warn(`Could not parse CSS variable ${propertyName} as duration:`,e)}return fallbackMs}
-        getCssVariableNumber(propertyName, fallbackNumber){try{const e=this.getCssVariableValue(propertyName,"");if(e){const t=parseFloat(e);if(!isNaN(t))return t}}catch(e){console.warn(`Could not parse CSS variable ${propertyName} as number:`,e)}return fallbackNumber}
-
+        /** Get CSS Variable Helpers (minified) */
+        getCssVariableValue(prop, fallback) {
+          try {
+            const e = getComputedStyle(document.documentElement)
+              .getPropertyValue(prop)
+              .trim();
+            return e || fallback;
+          } catch (e) {
+            return console.warn(`Could not read CSS var ${prop}:`, e), fallback;
+          }
+        }
+        getCssVariableDuration(prop, fallbackMs) {
+          try {
+            const e = this.getCssVariableValue(prop, "");
+            if (e) {
+              const t = e.match(/^(\d*\.?\d+)(m?s)?$/i);
+              if (t) {
+                const s = parseFloat(t[1]),
+                  o = t[2]?.toLowerCase();
+                if ("s" === o) return s * 1000;
+                if ("ms" === o || !o) return s;
+              }
+            }
+          } catch (e) {
+            console.warn(`Could not parse CSS var ${prop} as duration:`, e);
+          }
+          return fallbackMs;
+        }
+        getCssVariableNumber(prop, fallbackNum) {
+          try {
+            const e = this.getCssVariableValue(prop, "");
+            if (e) {
+              const t = parseFloat(e);
+              if (!isNaN(t)) return t;
+            }
+          } catch (e) {
+            console.warn(`Could not parse CSS var ${prop} as number:`, e);
+          }
+          return fallbackNum;
+        }
 
         /**
          * Adds event listeners for filters, bubbles, and tooltips.
@@ -933,11 +1398,14 @@
           });
 
           // Prompt Search Input
-          this.promptSearchInput.addEventListener('input', this.handlePromptSearch.bind(this));
-          this.promptSearchInput.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-              this.promptSearchInput.value = '';
-              this.handlePromptSearch({ target: this.promptSearchInput });
+          this.promptSearchInput.addEventListener(
+            "input",
+            this.handlePromptSearch.bind(this)
+          );
+          this.promptSearchInput.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+              this.promptSearchInput.value = "";
+              this.handlePromptSearch({ target: this.promptSearchInput }); // Trigger update
               event.preventDefault();
             }
           });
@@ -948,52 +1416,91 @@
 
             // Main bubble activation (click/key)
             element.addEventListener("click", (event) => {
-              const isInteractiveElementClick = event.target === infoButton || event.target === refinementSpan || infoButton?.contains(event.target) || refinementSpan?.contains(event.target);
-               const isInfoButtonClick = event.target.closest('.info-button');
-              if (!isInteractiveElementClick && !isInfoButtonClick) {
+              // Ignore clicks originating from interactive inner elements
+              const isInteractiveElementClick = event.target.closest(
+                ".info-button, .generation-refinements"
+              );
+              if (!isInteractiveElementClick) {
                 this.triggerPop(event, element, link);
               }
             });
             element.addEventListener("keydown", (event) => {
-              if ((event.key === "Enter" || event.key === " ") && document.activeElement === element) {
-                  event.preventDefault();
-                  this.triggerPop(event, element, link);
+              // Trigger pop only if the bubble element itself has focus
+              if (
+                (event.key === "Enter" || event.key === " ") &&
+                document.activeElement === element
+              ) {
+                event.preventDefault();
+                this.triggerPop(event, element, link);
               }
             });
 
             // Info button (prompt tooltip)
             if (infoButton) {
               this.addTooltipListeners(infoButton);
-               infoButton.addEventListener("click", (e) => e.stopPropagation());
-               infoButton.addEventListener("keydown", (e) => {
-                 if (e.key === "Enter" || e.key === " ") {
-                   e.preventDefault(); e.stopPropagation(); this.showTooltip(infoButton);
-                 }
-               });
+              infoButton.addEventListener("click", (e) => {
+                e.stopPropagation();
+                this.showTooltip(infoButton);
+              }); // Show tooltip on click too
+              infoButton.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  this.showTooltip(infoButton);
+                } else if (e.key === "Escape") {
+                  this.hideTooltip(true); // Hide and return focus
+                  e.stopPropagation();
+                }
+              });
             }
 
             // Refinement span (refinement tooltip)
             if (refinementSpan) {
               this.addTooltipListeners(refinementSpan);
-              refinementSpan.addEventListener("click", (e) => e.stopPropagation());
+              refinementSpan.addEventListener("click", (e) => {
+                e.stopPropagation();
+                this.showTooltip(refinementSpan);
+              }); // Show tooltip on click too
               refinementSpan.addEventListener("keydown", (e) => {
                 if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault(); e.stopPropagation(); this.showTooltip(refinementSpan);
+                  e.preventDefault();
+                  e.stopPropagation();
+                  this.showTooltip(refinementSpan);
+                } else if (e.key === "Escape") {
+                  this.hideTooltip(true); // Hide and return focus
+                  e.stopPropagation();
                 }
               });
             }
           });
 
-          // Tooltip interaction
-          this.tooltipElement.addEventListener("mouseenter", () => clearTimeout(this.hideTooltipTimeout));
-          this.tooltipElement.addEventListener("mouseleave", () => this.requestHideTooltip());
+          // Tooltip interaction (keep visible on hover)
+          this.tooltipElement.addEventListener("mouseenter", () =>
+            clearTimeout(this.hideTooltipTimeout)
+          );
+          this.tooltipElement.addEventListener("mouseleave", () =>
+            this.requestHideTooltip()
+          );
 
-          // Global listeners
+          // Global listeners for hiding tooltip
           document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape" && this.tooltipElement.classList.contains("visible")) { this.hideTooltip(true); }
+            if (
+              event.key === "Escape" &&
+              this.tooltipElement.classList.contains("visible")
+            ) {
+              this.hideTooltip(true);
+            }
           });
           document.addEventListener("click", (event) => {
-            if (this.tooltipElement.classList.contains("visible") && this.activeTooltipTrigger && !this.activeTooltipTrigger.contains(event.target) && !this.tooltipElement.contains(event.target)) { this.hideTooltip(); }
+            // Hide if click is outside the active trigger AND outside the tooltip itself
+            if (
+              this.tooltipElement.classList.contains("visible") &&
+              this.activeTooltipTrigger &&
+              !this.activeTooltipTrigger.contains(event.target) &&
+              !this.tooltipElement.contains(event.target)
+            ) {
+              this.hideTooltip();
+            }
           });
         }
 
@@ -1003,22 +1510,49 @@
         initPositionObserver() {
           if ("ResizeObserver" in window) {
             this.resizeObserver = new ResizeObserver(() => {
-              if (this.tooltipElement.classList.contains("visible") && this.activeTooltipTrigger) {
+              if (
+                this.tooltipElement.classList.contains("visible") &&
+                this.activeTooltipTrigger
+              ) {
                 this.positionTooltip(this.activeTooltipTrigger);
               }
             });
-          } else { console.warn("ResizeObserver not supported, tooltip repositioning may be limited."); }
+          } else {
+            console.warn(
+              "ResizeObserver not supported, tooltip repositioning may be limited."
+            );
+          }
 
           this.scrollListener = () => {
-             if (this.tooltipElement.classList.contains("visible") && this.activeTooltipTrigger) {
-               window.requestAnimationFrame(() => this.positionTooltip(this.activeTooltipTrigger));
-             }
+            if (
+              this.tooltipElement.classList.contains("visible") &&
+              this.activeTooltipTrigger
+            ) {
+              // Use rAF for performance on scroll/resize
+              window.requestAnimationFrame(() =>
+                this.positionTooltip(this.activeTooltipTrigger)
+              );
+            }
           };
-          window.addEventListener("scroll", this.scrollListener, { passive: true });
+          // Use passive listener for scroll performance
+          window.addEventListener("scroll", this.scrollListener, {
+            passive: true,
+          });
+          window.addEventListener("resize", this.scrollListener, {
+            passive: true,
+          }); // Also reposition on resize
         }
 
         /** Cleans up observers and listeners. */
-        destroy() { if (this.resizeObserver) this.resizeObserver.disconnect(); if (this.scrollListener) window.removeEventListener("scroll", this.scrollListener); clearTimeout(this.searchTimeout); clearTimeout(this.hideTooltipTimeout); }
+        destroy() {
+          if (this.resizeObserver) this.resizeObserver.disconnect();
+          if (this.scrollListener) {
+            window.removeEventListener("scroll", this.scrollListener);
+            window.removeEventListener("resize", this.scrollListener);
+          }
+          clearTimeout(this.searchTimeout);
+          clearTimeout(this.hideTooltipTimeout);
+        }
 
         /**
          * Adds standard tooltip event listeners to a trigger element.
@@ -1031,48 +1565,360 @@
           triggerElement.addEventListener("focus", show);
           triggerElement.addEventListener("mouseleave", hide);
           triggerElement.addEventListener("blur", hide);
+          // Prevent clicks on trigger from bubbling up and causing pop
+          triggerElement.addEventListener("click", (e) => e.stopPropagation());
         }
 
         /** Handles model filter button activation. */
-        handleModelFilterChange(button) { const e=button.dataset.filter;e&&e!==this.activeModelFilter&&(this.activeModelFilter=e,this.setActiveModelFilter(e),this.filterBubbles(),this.hideTooltip())}
+        handleModelFilterChange(button) {
+          const newFilter = button.dataset.filter;
+          if (newFilter && newFilter !== this.activeModelFilter) {
+            this.activeModelFilter = newFilter;
+            this.setActiveModelFilter(newFilter);
+            this.filterBubbles();
+            this.hideTooltip(); // Hide tooltip when filters change
+          }
+        }
 
         /** Handles prompt search input with debouncing. */
-        handlePromptSearch(event) { clearTimeout(this.searchTimeout); this.searchTimeout=setTimeout(()=>{this.activePromptFilter=event.target.value.trim().toLowerCase(),this.filterBubbles(),this.hideTooltip()},150)}
+        handlePromptSearch(event) {
+          clearTimeout(this.searchTimeout);
+          // Debounce filtering to avoid excessive updates during typing
+          this.searchTimeout = setTimeout(() => {
+            this.activePromptFilter = event.target.value.trim().toLowerCase();
+            this.filterBubbles();
+            this.hideTooltip(); // Hide tooltip when search changes
+          }, 250); // 250ms debounce delay
+        }
 
         /** Triggers pop animation and navigation. */
         triggerPop(event, bubbleElement, link) {
-          if(!link||"#"===link)return console.warn("Bubble link is missing or invalid."),void event.preventDefault();if(bubbleElement.classList.contains("popping"))return;const e=event.ctrlKey||event.metaKey||event.shiftKey,t="click"===event.type&&1===event.button;if(e||t){const n=e||t?"_blank":"_self",i=event.shiftKey?"noopener,noreferrer":void 0;return setTimeout(()=>window.open(link,n,i),50),event.preventDefault(),void event.stopPropagation()}event.preventDefault(),event.stopPropagation(),this.hideTooltip();const s=window.matchMedia("(prefers-reduced-motion: reduce)").matches;let o;if(s)o=this.reducedMotionNavDelay;else{o=this.popAnimationDuration*this.popNavDelayFactor;const a=bubbleElement.getBoundingClientRect();bubbleElement.style.position="fixed",bubbleElement.style.top=`${a.top}px`,bubbleElement.style.left=`${a.left}px`,bubbleElement.style.width=`${a.width}px`,bubbleElement.style.height=`${a.height}px`,bubbleElement.style.zIndex=this.popZIndex,bubbleElement.style.margin="0",void bubbleElement.offsetWidth}bubbleElement.classList.add("popping"),bubbleElement.setAttribute("aria-hidden","true"),setTimeout(()=>{window.location.href=link},o)
+          // Validate link
+          if (!link || link === "#") {
+            console.warn("Bubble link is missing or invalid.", bubbleElement);
+            event.preventDefault(); // Still prevent default if link invalid
+            return;
+          }
+          // Prevent double-popping
+          if (bubbleElement.classList.contains("popping")) {
+            return;
+          }
+
+          // Handle opening in new tab (Ctrl/Cmd + Click, Middle Click) or Shift + Click
+          const openInNewTab =
+            event.ctrlKey || event.metaKey || event.button === 1;
+          const shiftClick = event.shiftKey;
+
+          if (openInNewTab || shiftClick) {
+            // Open immediately in new tab/window, skipping animation
+            const target = openInNewTab ? "_blank" : "_self"; // Shift click opens in same tab/window
+            const features = shiftClick ? "noopener,noreferrer" : undefined;
+            // Small delay to allow browser to process click before opening
+            setTimeout(() => window.open(link, target, features), 50);
+            event.preventDefault(); // Prevent default link navigation
+            event.stopPropagation();
+            return; // Stop execution here for new tab/window clicks
+          }
+
+          // --- Standard click: Proceed with pop animation ---
+          event.preventDefault(); // Prevent default link navigation
+          event.stopPropagation();
+          this.hideTooltip(); // Hide any active tooltip
+
+          const prefersReducedMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+          ).matches;
+          let navigationDelay;
+
+          if (prefersReducedMotion) {
+            navigationDelay = this.reducedMotionNavDelay;
+            // Add popping class immediately for reduced motion (no fixed positioning needed)
+            bubbleElement.classList.add("popping");
+            bubbleElement.setAttribute("aria-hidden", "true");
+          } else {
+            navigationDelay =
+              this.popAnimationDuration * this.popNavDelayFactor;
+
+            // --- Critical Style Application for Smooth Animation ---
+            // 1. Get current position *before* changing styles
+            const rect = bubbleElement.getBoundingClientRect();
+
+            // 2. Apply fixed position and dimensions immediately
+            bubbleElement.style.position = "fixed";
+            bubbleElement.style.top = `${rect.top}px`;
+            bubbleElement.style.left = `${rect.left}px`;
+            bubbleElement.style.width = `${rect.width}px`;
+            bubbleElement.style.height = `${rect.height}px`;
+            bubbleElement.style.zIndex = this.popZIndex; // Use CSS variable
+            bubbleElement.style.margin = "0"; // Reset margin
+
+            // 3. Force a reflow/repaint - ESSENTIAL step
+            // Reading a property like offsetWidth forces the browser to calculate layout
+            void bubbleElement.offsetWidth;
+
+            // 4. Add the animation class *after* fixed positioning is calculated
+            bubbleElement.classList.add("popping");
+            bubbleElement.setAttribute("aria-hidden", "true");
+            // --- End Critical Style Application ---
+          }
+
+          // Navigate after the appropriate delay
+          setTimeout(() => {
+            window.location.href = link;
+          }, navigationDelay);
         }
 
         /** Shows and positions the tooltip. */
         showTooltip(triggerElement) {
           clearTimeout(this.hideTooltipTimeout);
-          if(this.resizeObserver){if(this.activeTooltipTrigger&&this.activeTooltipTrigger!==triggerElement&&this.activeTooltipTrigger.isConnected)this.resizeObserver.unobserve(this.activeTooltipTrigger);if((!this.activeTooltipTrigger||this.activeTooltipTrigger!==triggerElement)&&triggerElement.isConnected)this.resizeObserver.observe(triggerElement)}this.activeTooltipTrigger=triggerElement;const e=triggerElement.dataset.tooltipType||"info",t=triggerElement.dataset.tooltipContent||"No information available.";this.tooltipElement.textContent=t,this.tooltipElement.setAttribute("aria-hidden","false"),this.tooltipElement.dataset.type=e,this.tooltipElement.classList.add("visible"),this.positionTooltip(triggerElement),this.tooltipElement.scrollTop=0
+
+          // Update resize observer target
+          if (this.resizeObserver) {
+            if (
+              this.activeTooltipTrigger &&
+              this.activeTooltipTrigger !== triggerElement &&
+              this.activeTooltipTrigger.isConnected
+            ) {
+              this.resizeObserver.unobserve(this.activeTooltipTrigger);
+            }
+            if (
+              (!this.activeTooltipTrigger ||
+                this.activeTooltipTrigger !== triggerElement) &&
+              triggerElement.isConnected
+            ) {
+              this.resizeObserver.observe(triggerElement);
+            }
+          }
+          this.activeTooltipTrigger = triggerElement;
+
+          const type = triggerElement.dataset.tooltipType || "info";
+          const content =
+            triggerElement.dataset.tooltipContent ||
+            "No information available.";
+
+          this.tooltipElement.textContent = content; // Use textContent for safety
+          this.tooltipElement.setAttribute("aria-hidden", "false");
+          this.tooltipElement.dataset.type = type; // For potential type-specific styling
+          this.tooltipElement.classList.add("visible");
+          this.positionTooltip(triggerElement);
+          this.tooltipElement.scrollTop = 0; // Reset scroll for long tooltips
         }
 
-        /** Calculates tooltip position. */
+        /** Calculates and applies tooltip position. */
         positionTooltip(triggerElement) {
-          if(!this.tooltipElement.classList.contains("visible")||!triggerElement||!triggerElement.isConnected)return;const e=triggerElement.getBoundingClientRect();this.tooltipElement.style.visibility="hidden",this.tooltipElement.style.display="block";const t=this.tooltipElement.offsetHeight,s=this.tooltipElement.offsetWidth;this.tooltipElement.style.display="",this.tooltipElement.style.visibility="";const o=8,a=window.innerWidth,n=window.innerHeight;let i=e.bottom+o,l=e.left+e.width/2-s/2;if(l<o)l=o;else if(l+s>a-o)l=a-s-o;const r=n-e.bottom-o,d=e.top-o;if(r<t&&d>=t)i=e.top-t-o;else if(r<t&&d<t)i=n-t-o;if(i<o)i=o;this.tooltipElement.style.top=`${Math.round(i)}px`,this.tooltipElement.style.left=`${Math.round(l)}px`,requestAnimationFrame(()=>{this.tooltipElement.style.transform=""})
+          if (
+            !this.tooltipElement.classList.contains("visible") ||
+            !triggerElement ||
+            !triggerElement.isConnected
+          )
+            return;
+
+          const triggerRect = triggerElement.getBoundingClientRect();
+          const tooltip = this.tooltipElement;
+
+          // Temporarily make visible to measure, but keep off-screen
+          tooltip.style.visibility = "hidden";
+          tooltip.style.display = "block";
+          const tooltipHeight = tooltip.offsetHeight;
+          const tooltipWidth = tooltip.offsetWidth;
+          tooltip.style.display = ""; // Reset display
+          tooltip.style.visibility = ""; // Reset visibility
+
+          const spacing = 8; // Space between trigger and tooltip
+          const viewportWidth = window.innerWidth;
+          const viewportHeight = window.innerHeight;
+
+          // Default position: Below the trigger, centered horizontally
+          let top = triggerRect.bottom + spacing;
+          let left =
+            triggerRect.left + triggerRect.width / 2 - tooltipWidth / 2;
+
+          // Adjust horizontal position if off-screen
+          if (left < spacing) {
+            left = spacing;
+          } else if (left + tooltipWidth > viewportWidth - spacing) {
+            left = viewportWidth - tooltipWidth - spacing;
+          }
+
+          // Adjust vertical position if off-screen below
+          const spaceBelow = viewportHeight - triggerRect.bottom - spacing;
+          const spaceAbove = triggerRect.top - spacing;
+
+          if (spaceBelow < tooltipHeight && spaceAbove >= tooltipHeight) {
+            // Not enough space below, enough space above: Position above
+            top = triggerRect.top - tooltipHeight - spacing;
+          } else if (spaceBelow < tooltipHeight && spaceAbove < tooltipHeight) {
+            // Not enough space below OR above: Position against viewport bottom edge
+            top = Math.max(spacing, viewportHeight - tooltipHeight - spacing); // Ensure it doesn't go above top spacing
+          }
+
+          // Ensure tooltip doesn't go off-screen at the top
+          if (top < spacing) {
+            top = spacing;
+          }
+
+          // Apply calculated position
+          tooltip.style.top = `${Math.round(top)}px`;
+          tooltip.style.left = `${Math.round(left)}px`;
+          // Use rAF to ensure transform reset happens cleanly for transitions
+          requestAnimationFrame(() => {
+            tooltip.style.transform = "";
+          });
         }
 
-        /** Hides the tooltip. */
+        /** Hides the tooltip immediately or after focus check. */
         hideTooltip(returnFocus = false) {
-          clearTimeout(this.hideTooltipTimeout);const e=this.activeTooltipTrigger;if(this.activeTooltipTrigger&&this.resizeObserver&&this.activeTooltipTrigger.isConnected)this.resizeObserver.unobserve(this.activeTooltipTrigger);if(this.activeTooltipTrigger=null,this.tooltipElement.classList.remove("visible"),this.tooltipElement.setAttribute("aria-hidden","true"),this.tooltipElement.style.top="",this.tooltipElement.style.left="",this.tooltipElement.style.transform="",delete this.tooltipElement.dataset.type,returnFocus&&e&&"function"==typeof e.focus&&document.body.contains(e)&&null!==e.offsetParent)requestAnimationFrame(()=>{if(document.body.contains(e)&&null!==e.offsetParent&&document.activeElement!==e)e.focus({preventScroll:!0})})
+          clearTimeout(this.hideTooltipTimeout);
+          const triggerToFocus = this.activeTooltipTrigger; // Store before clearing
+
+          if (
+            this.activeTooltipTrigger &&
+            this.resizeObserver &&
+            this.activeTooltipTrigger.isConnected
+          ) {
+            this.resizeObserver.unobserve(this.activeTooltipTrigger);
+          }
+          this.activeTooltipTrigger = null;
+
+          if (this.tooltipElement.classList.contains("visible")) {
+            this.tooltipElement.classList.remove("visible");
+            this.tooltipElement.setAttribute("aria-hidden", "true");
+
+            // Reset styles after transition for perfect timing is complex;
+            // Resetting transform immediately is usually sufficient for positioning.
+            this.tooltipElement.style.transform = "";
+            delete this.tooltipElement.dataset.type;
+            // Optionally reset top/left after transition (add small delay)
+            // setTimeout(() => {
+            //     if (!this.tooltipElement.classList.contains('visible')) {
+            //         this.tooltipElement.style.top = '';
+            //         this.tooltipElement.style.left = '';
+            //     }
+            // }, this.getCssVariableDuration('--transition-duration-fast', 150) + 50);
+          }
+
+          // Return focus if requested (e.g., on Escape key) and element is still focusable
+          if (
+            returnFocus &&
+            triggerToFocus &&
+            typeof triggerToFocus.focus === "function" &&
+            document.body.contains(triggerToFocus) &&
+            triggerToFocus.offsetParent !== null
+          ) {
+            // Use rAF to ensure focus happens after potential DOM changes/reflow
+            requestAnimationFrame(() => {
+              // Double check element still exists and is visible before focusing
+              if (
+                document.body.contains(triggerToFocus) &&
+                triggerToFocus.offsetParent !== null &&
+                document.activeElement !== triggerToFocus
+              ) {
+                triggerToFocus.focus({ preventScroll: true }); // preventScroll is a hint
+              }
+            });
+          }
         }
 
-        /** Requests tooltip hide after delay. */
-        requestHideTooltip() { clearTimeout(this.hideTooltipTimeout);this.hideTooltipTimeout=setTimeout(()=>{const e=this.activeTooltipTrigger?.contains(document.activeElement),t=this.tooltipElement.contains(document.activeElement),s=this.tooltipElement.matches(":hover"),o=this.activeTooltipTrigger?.matches(":hover");if(!e&&!t&&!s&&!o)this.hideTooltip()},150)}
+        /** Requests tooltip hide after a short delay, checks focus/hover. */
+        requestHideTooltip() {
+          clearTimeout(this.hideTooltipTimeout);
+          this.hideTooltipTimeout = setTimeout(() => {
+            const triggerHasFocus =
+              this.activeTooltipTrigger === document.activeElement ||
+              this.activeTooltipTrigger?.contains(document.activeElement);
+            const tooltipHasFocus = this.tooltipElement.contains(
+              document.activeElement
+            );
+            const tooltipIsHovered = this.tooltipElement.matches(":hover");
+            const triggerIsHovered =
+              this.activeTooltipTrigger?.matches(":hover");
 
-        /** Sets visual state for model filter buttons. */
-        setActiveModelFilter(activeFilter) { this.filterButtons.forEach(e=>{e.setAttribute("aria-pressed",String(e.dataset.filter===activeFilter))}) }
+            // Hide only if focus/hover is not on the trigger or the tooltip itself
+            if (
+              !triggerHasFocus &&
+              !tooltipHasFocus &&
+              !tooltipIsHovered &&
+              !triggerIsHovered
+            ) {
+              this.hideTooltip();
+            }
+          }, 150); // Delay allows moving mouse from trigger to tooltip
+        }
 
-        /** Filters bubbles based on active filters. */
-        filterBubbles() { let e=0;const t=this.activePromptFilter;this.appBubbles.forEach(s=>{const{element:o,model:a,prompt:n}=s;if(o.classList.contains("popping")){const l="all"===this.activeModelFilter||a===this.activeModelFilter,r=!t||n.includes(t);return void(l&&r&&e++)}const i="all"===this.activeModelFilter||a===this.activeModelFilter,d=!t||n.includes(t),c=i&&d;o.classList.toggle("hidden",!c),o.setAttribute("aria-hidden",String(!c)),o.setAttribute("tabindex",c?"0":"-1"),c&&e++});this.emptyStateMessage.classList.toggle("visible",0===e)}
+        /** Sets the visual state for the active model filter button. */
+        setActiveModelFilter(activeFilter) {
+          this.filterButtons.forEach((button) => {
+            button.setAttribute(
+              "aria-pressed",
+              String(button.dataset.filter === activeFilter)
+            );
+          });
+        }
+
+        /** Filters bubbles based on current model and prompt filters. */
+        filterBubbles() {
+          let visibleCount = 0;
+          const searchTerms = this.activePromptFilter; // Already lowercase and trimmed
+
+          this.appBubbles.forEach((bubbleData) => {
+            const { element, model, prompt } = bubbleData;
+
+            // Skip filtering logic completely for bubbles currently popping
+            if (element.classList.contains("popping")) {
+              // Check if it *would* have been visible if not popping, to maintain count accuracy
+              const matchesModel =
+                this.activeModelFilter === "all" ||
+                model === this.activeModelFilter;
+              const matchesPrompt =
+                !searchTerms || prompt.includes(searchTerms);
+              if (matchesModel && matchesPrompt) visibleCount++;
+              return; // Don't toggle classes on popping elements
+            }
+
+            const matchesModel =
+              this.activeModelFilter === "all" ||
+              model === this.activeModelFilter;
+            const matchesPrompt = !searchTerms || prompt.includes(searchTerms); // Check prompt inclusion
+            const isVisible = matchesModel && matchesPrompt;
+
+            element.classList.toggle("hidden", !isVisible);
+            element.setAttribute("aria-hidden", String(!isVisible));
+            element.setAttribute("tabindex", isVisible ? "0" : "-1"); // Manage keyboard focus
+
+            if (isVisible) visibleCount++;
+          });
+
+          // Show/hide the empty state message based on visible count
+          this.emptyStateMessage.classList.toggle(
+            "visible",
+            visibleCount === 0
+          );
+        }
       }
 
       // --- Initialize ---
-      function initializeShowcase() { if (typeof BubbleShowcase !== "undefined") { window.bubbleShowcaseInstance = new BubbleShowcase(); } else { console.error("BubbleShowcase class not defined."); } }
-      if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", initializeShowcase); } else { initializeShowcase(); }
+      function initializeShowcase() {
+        if (typeof BubbleShowcase !== "undefined") {
+          // Ensure any previous instance is cleaned up if re-initializing
+          if (
+            window.bubbleShowcaseInstance &&
+            typeof window.bubbleShowcaseInstance.destroy === "function"
+          ) {
+            window.bubbleShowcaseInstance.destroy();
+          }
+          window.bubbleShowcaseInstance = new BubbleShowcase();
+        } else {
+          console.error("BubbleShowcase class not defined.");
+        }
+      }
+
+      // Run initialization when the DOM is ready
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initializeShowcase);
+      } else {
+        // DOM is already loaded
+        initializeShowcase();
+      }
     </script>
   </body>
 </html>
