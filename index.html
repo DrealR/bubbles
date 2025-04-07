@@ -25,9 +25,8 @@
         --color-bubble-border: rgba(107, 114, 128, 0.3); /* Subtle Gray Border */
         --color-bubble-border-hover: var(--color-primary-accent);
         --color-bubble-highlight: rgba(56, 189, 248, 0.15); /* Subtler blue highlight */
-        --color-bubble-placeholder-bg-start: var(--color-primary-accent);
-        --color-bubble-placeholder-bg-end: var(--color-secondary-accent);
-        --color-bubble-placeholder-text: rgba(255, 255, 255, 0.85);
+        --color-bubble-image-bg: #374151; /* Darker Gray for image background */
+        --color-bubble-image-fg: #e5e7eb; /* Foreground for image placeholders */
         --color-info-button-bg: rgba(17, 24, 39, 0.5); /* Very dark semi-transparent */
         --color-info-button-bg-hover: rgba(17, 24, 39, 0.8);
         --color-info-button-icon: var(--color-text-muted);
@@ -77,7 +76,7 @@
         --transition-timing-bounce: cubic-bezier(0.68, -0.55, 0.27, 1.55);
 
         /* Bubble Dimensions & Animation */
-        --bubble-size: clamp(200px, 22vw, 260px); /* Adjusted size range */
+        --bubble-size: clamp(220px, 22vw, 280px); /* Slightly larger bubbles */
         --bubble-pop-duration: 0.45s; /* FASTER duration for pop */
         --bubble-pop-nav-delay-factor: 0.7; /* Navigate after 70% of pop duration */
         --bubble-reduced-motion-nav-delay: 50ms; /* Navigation delay for reduced motion */
@@ -194,6 +193,12 @@
         outline: 2px solid var(--color-focus-ring);
         outline-offset: 3px;
         color: var(--color-secondary-accent);
+      }
+
+      img, svg {
+          display: block;
+          max-width: 100%;
+          height: auto;
       }
 
       /* Layout Containers */
@@ -466,10 +471,10 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: center; /* Vertically center content */
         width: 100%;
         height: 100%;
-        padding: var(--spacing-sm);
+        padding: var(--spacing-sm); /* Reduced padding for image */
         color: var(--color-heading);
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         text-align: center;
@@ -480,38 +485,35 @@
         outline: none; /* Remove focus outline from link itself */
       }
 
-      .bubble-image-placeholder {
-        width: 35%;
-        aspect-ratio: 1 / 1; /* Maintain square */
-        height: auto; /* Let aspect-ratio define height */
-        border-radius: 50%;
-        background: linear-gradient(45deg, var(--color-bubble-placeholder-bg-start), var(--color-bubble-placeholder-bg-end));
-        opacity: 0.65; /* Slightly more opaque */
+      /* Bubble Image Styles */
+      .bubble-image {
+        width: 65%; /* Control image width inside bubble */
+        max-width: 160px; /* Max width for consistency */
+        height: auto;
+        aspect-ratio: 1 / 1; /* Make image container square */
+        object-fit: cover; /* Cover the square area, crop if needed */
+        border-radius: var(--border-radius-md); /* Slightly rounded corners */
         margin-bottom: var(--spacing-sm);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.6rem;
-        color: var(--color-bubble-placeholder-text);
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3), 0 2px 5px rgba(0, 0, 0, 0.2);
-        flex-shrink: 0;
+        display: block;
+        background-color: var(--color-bubble-image-bg); /* Use defined BG color */
+        border: 1px solid var(--color-bubble-border); /* Subtle border */
+        flex-shrink: 0; /* Prevent shrinking in flex context */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Subtle shadow */
+        color: var(--color-bubble-image-fg); /* Color for SVG strokes/fills if not specified */
       }
 
       .app-bubble h3 {
-        font-size: clamp(0.9rem, 1.5vw + 0.5rem, 1.15rem);
+        font-size: clamp(0.9rem, 1.4vw + 0.5rem, 1.05rem); /* Slightly smaller */
         font-weight: 600;
-        margin-bottom: var(--spacing-xs);
+        margin: 0 0 var(--spacing-xs) 0;
         color: var(--color-heading);
-        max-width: 90%; /* Prevent title touching edges/info button */
+        max-width: 90%;
         line-height: 1.3;
-        overflow-wrap: break-word; /* Break long words if needed */
+        overflow-wrap: break-word;
       }
 
       .app-bubble .model-name {
-        font-size: 0.75rem;
+        font-size: 0.7rem; /* Slightly smaller */
         color: var(--color-text-muted);
         font-weight: 400;
         display: block;
@@ -521,26 +523,26 @@
 
       /* Refinements Info */
       .app-bubble .generation-refinements {
-        font-size: 0.7rem;
+        font-size: 0.65rem; /* Slightly smaller */
         color: var(--color-text-muted);
         font-weight: 400;
         display: block;
-        margin-top: var(--spacing-sm);
+        margin-top: var(--spacing-xs); /* Reduced margin */
         opacity: 0.8;
-        cursor: help; /* Indicate interaction */
+        cursor: help;
         text-decoration: underline dashed 1px;
         text-decoration-color: rgba(156, 163, 175, 0.5);
         text-underline-offset: 2px;
         transition: color var(--transition-duration-fast), text-decoration-color var(--transition-duration-fast), opacity var(--transition-duration-fast);
         border-radius: var(--border-radius-sm);
-        padding: var(--spacing-xs);
-        margin: var(--spacing-sm) calc(var(--spacing-xs) * -1) 0; /* Adjust margin for padding */
+        padding: 2px var(--spacing-xs); /* Adjusted padding */
+        margin: var(--spacing-xs) calc(var(--spacing-xs) * -1) 0;
         line-height: 1.3;
-        max-width: calc(100% - 50px); /* Prevent overlap with info button */
+        max-width: calc(100% - 50px);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        outline: none; /* Focus handled by focus-visible */
+        outline: none;
       }
 
       .app-bubble .generation-refinements:hover,
@@ -552,7 +554,7 @@
       .app-bubble .generation-refinements:focus-visible {
         outline: 2px solid var(--color-focus-ring);
         outline-offset: 1px;
-        opacity: 1; /* Ensure visibility on focus */
+        opacity: 1;
       }
 
       /* Info Button */
@@ -560,8 +562,8 @@
         position: absolute;
         top: var(--spacing-md);
         right: var(--spacing-md);
-        z-index: 3; /* Above content, below tooltip */
-        padding: 0; /* Padding handled by size */
+        z-index: 3;
+        padding: 0;
         margin: 0;
         background-color: var(--color-info-button-bg);
         border: 1px solid var(--color-bubble-border);
@@ -573,7 +575,7 @@
         width: 28px;
         height: 28px;
         color: var(--color-info-button-icon);
-        opacity: 0; /* Hidden by default */
+        opacity: 0;
         transform: scale(0.8);
         transition: opacity var(--transition-duration-fast) ease-in-out,
           transform var(--transition-duration-fast) ease-in-out,
@@ -582,11 +584,11 @@
         backdrop-filter: blur(3px);
         -webkit-backdrop-filter: blur(3px);
         appearance: none;
-        outline: none; /* Focus handled by focus-visible */
+        outline: none;
       }
       .app-bubble:hover .info-button,
       .app-bubble:focus-within .info-button,
-      .info-button:focus-visible /* Keep visible when focused itself */ {
+      .info-button:focus-visible {
         opacity: 1;
         transform: scale(1);
       }
@@ -602,30 +604,29 @@
         background-color: var(--color-info-button-bg-hover);
         color: var(--color-info-button-icon-hover);
         border-color: var(--color-primary-accent);
-        transform: scale(1.1); /* Slightly larger on hover/focus */
+        transform: scale(1.1);
       }
       .info-button:focus-visible {
         outline: 2px solid var(--color-focus-ring);
         outline-offset: 2px;
-        transform: scale(1.1); /* Maintain scale on focus */
+        transform: scale(1.1);
       }
 
       /* --- Unified Tooltip Styling --- */
       #bubble-tooltip {
-        position: fixed; /* Relative to viewport */
+        position: fixed;
         z-index: var(--tooltip-z-index);
         background-color: var(--color-tooltip-bg);
         color: var(--color-tooltip-text);
         border: 1px solid var(--color-tooltip-border);
         border-radius: var(--border-radius-md);
         padding: var(--spacing-md);
-        /* Add right padding for scrollbar space */
         padding-right: calc(var(--spacing-md) + var(--spacing-sm));
         font-size: 0.85rem;
         line-height: 1.5;
-        max-width: var(--tooltip-max-width); /* Default max-width */
-        max-height: var(--tooltip-max-height); /* *** ADDED: Constrain height *** */
-        overflow-y: auto; /* *** ADDED: Enable scrolling *** */
+        max-width: var(--tooltip-max-width);
+        max-height: var(--tooltip-max-height);
+        overflow-y: auto;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
         opacity: 0;
         visibility: hidden;
@@ -634,179 +635,84 @@
         transition: opacity var(--transition-duration-fast) var(--transition-timing),
           visibility 0s linear var(--transition-duration-fast),
           transform var(--transition-duration-fast) var(--transition-timing);
-        white-space: pre-wrap; /* Preserve line breaks and spaces */
+        white-space: pre-wrap;
         word-wrap: break-word;
         font-family: var(--font-body);
-        scrollbar-width: thin; /* Firefox */
-        scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track); /* Firefox */
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
       }
 
-      /* Webkit scrollbar styles */
-      #bubble-tooltip::-webkit-scrollbar {
-        width: 8px;
-      }
-      #bubble-tooltip::-webkit-scrollbar-track {
-        background: var(--color-scrollbar-track);
-        border-radius: var(--border-radius-md);
-      }
-      #bubble-tooltip::-webkit-scrollbar-thumb {
-        background-color: var(--color-scrollbar-thumb);
-        border-radius: 4px;
-        border: 2px solid var(--color-scrollbar-track);
-      }
-      #bubble-tooltip::-webkit-scrollbar-thumb:hover {
-        background-color: var(--color-scrollbar-thumb-hover);
-      }
+      #bubble-tooltip::-webkit-scrollbar { width: 8px; }
+      #bubble-tooltip::-webkit-scrollbar-track { background: var(--color-scrollbar-track); border-radius: var(--border-radius-md); }
+      #bubble-tooltip::-webkit-scrollbar-thumb { background-color: var(--color-scrollbar-thumb); border-radius: 4px; border: 2px solid var(--color-scrollbar-track); }
+      #bubble-tooltip::-webkit-scrollbar-thumb:hover { background-color: var(--color-scrollbar-thumb-hover); }
 
-
-      #bubble-tooltip[data-type="prompt"] {
-        font-family: var(--font-mono);
-        max-width: var(--tooltip-prompt-max-width); /* Wider for prompts */
-      }
-      /* Refinement tooltips don't need specific styles, inherit default */
-
-      #bubble-tooltip.visible {
-        opacity: 1;
-        visibility: visible;
-        pointer-events: auto;
-        transform: translateY(0) scale(1);
-        transition-delay: 0s, 0s, 0s; /* Reset delays */
-      }
+      #bubble-tooltip[data-type="prompt"] { font-family: var(--font-mono); max-width: var(--tooltip-prompt-max-width); }
+      #bubble-tooltip.visible { opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0) scale(1); transition-delay: 0s, 0s, 0s; }
 
       /* --- FASTER Pop Animation --- */
       @keyframes bubble-pop-fast {
         0% { transform: scale(1) rotate(0deg); opacity: 1; }
-        20% {
-          transform: scale(0.8) rotate(-4deg); opacity: 0.95;
-          animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); /* Overshoot */
-        }
-        65% {
-          transform: scale(20) rotate(3deg); opacity: 1;
-          animation-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1); /* EaseOutQuad */
-        }
+        20% { transform: scale(0.8) rotate(-4deg); opacity: 0.95; animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
+        65% { transform: scale(20) rotate(3deg); opacity: 1; animation-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1); }
         100% { transform: scale(25) rotate(0deg); opacity: 0; }
       }
 
       .app-bubble.popping {
-        /* Position/size/zIndex/margin set dynamically by JS */
         transform-origin: center center;
         will-change: transform, opacity;
         animation: bubble-pop-fast var(--bubble-pop-duration) forwards;
         cursor: default;
         pointer-events: none;
         background: linear-gradient(135deg, var(--color-bubble-bg-start), var(--color-bubble-bg-end));
-        border: 1px solid var(--color-bubble-border); /* Keep border */
-        border-radius: var(--border-radius-bubble); /* Keep shape */
-        box-shadow: none; /* Remove original shadow */
-        backdrop-filter: none; /* Remove blur during pop */
+        border: 1px solid var(--color-bubble-border);
+        border-radius: var(--border-radius-bubble);
+        box-shadow: none;
+        backdrop-filter: none;
         -webkit-backdrop-filter: none;
-        overflow: hidden; /* Hide internal content cleanly */
+        overflow: hidden;
       }
-      .app-bubble.popping > * {
-        opacity: 0 !important;
-        visibility: hidden !important;
-        transition: none !important;
-      }
-      .app-bubble.popping::before,
-      .app-bubble.popping::after {
-        display: none !important;
-        content: none !important;
-        animation: none !important;
-      }
+      .app-bubble.popping > * { opacity: 0 !important; visibility: hidden !important; transition: none !important; }
+      .app-bubble.popping::before, .app-bubble.popping::after { display: none !important; content: none !important; animation: none !important; }
 
       /* Empty state message */
-      .empty-state {
-        text-align: center;
-        color: var(--color-text-muted);
-        padding: var(--spacing-xl);
-        border: 2px dashed var(--color-bubble-border);
-        border-radius: var(--border-radius-md);
-        width: calc(100% - var(--spacing-lg) * 2);
-        margin: var(--spacing-lg) auto;
-        display: none; /* Hidden by default */
-      }
+      .empty-state { text-align: center; color: var(--color-text-muted); padding: var(--spacing-xl); border: 2px dashed var(--color-bubble-border); border-radius: var(--border-radius-md); width: calc(100% - var(--spacing-lg) * 2); margin: var(--spacing-lg) auto; display: none; }
       .empty-state.visible { display: block; }
 
       /* Accessibility */
-      .sr-only {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border-width: 0;
-      }
+      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
 
       /* Media Queries */
       @media (max-width: 768px) {
         h1 { font-size: clamp(2rem, 8vw, 3rem); }
         .container { width: 95%; }
         .bubble-showcase { gap: var(--spacing-lg); }
-
         .filter-group { gap: var(--spacing-sm); }
         .filter-group .filter-label { margin-bottom: var(--spacing-sm); }
         .prompt-search-input { max-width: 90%; min-width: 180px; }
-
-        .info-button {
-          top: var(--spacing-sm);
-          right: var(--spacing-sm);
-          width: 24px;
-          height: 24px;
-        }
+        .info-button { top: var(--spacing-sm); right: var(--spacing-sm); width: 24px; height: 24px; }
         .info-button svg { width: 14px; height: 14px; }
-
-        #bubble-tooltip {
-          max-width: 90vw; /* Allow tooltip to take more width */
-          font-size: 0.8rem;
-          /* Adjust max-height slightly for smaller screens if needed */
-          --tooltip-max-height: 250px;
-        }
-        /* No need to override data-type specific max-width here, 90vw covers it */
+        .bubble-image { width: 60%; max-width: 140px; }
+        #bubble-tooltip { max-width: 90vw; font-size: 0.8rem; --tooltip-max-height: 250px; }
       }
 
       @media (max-width: 480px) {
         p.intro-text { font-size: 1rem; }
-        .app-bubble h3 { font-size: 0.85rem; }
-        .app-bubble .model-name { font-size: 0.7rem; }
-        .app-bubble .generation-refinements {
-          font-size: 0.65rem;
-          max-width: calc(100% - 40px);
-        }
-        .bubble-image-placeholder { width: 30%; }
+        .app-bubble h3 { font-size: 0.8rem; }
+        .app-bubble .model-name { font-size: 0.65rem; }
+        .app-bubble .generation-refinements { font-size: 0.6rem; max-width: calc(100% - 40px); }
+        .bubble-image { width: 55%; max-width: 120px; }
         .filter-controls { padding: var(--spacing-md); }
         .filter-group { gap: var(--spacing-xs) var(--spacing-sm); }
-        .filter-controls .filter-button {
-          font-size: 0.85rem;
-          padding: var(--spacing-xs) var(--spacing-sm);
-        }
-        .prompt-search-input {
-          font-size: 0.85rem;
-          padding: var(--spacing-xs) var(--spacing-sm);
-          max-width: 100%; /* Allow full width */
-        }
-         /* Further reduce tooltip height on very small screens */
-        #bubble-tooltip {
-            --tooltip-max-height: 200px;
-        }
+        .filter-controls .filter-button { font-size: 0.85rem; padding: var(--spacing-xs) var(--spacing-sm); }
+        .prompt-search-input { font-size: 0.85rem; padding: var(--spacing-xs) var(--spacing-sm); max-width: 100%; }
+        #bubble-tooltip { --tooltip-max-height: 200px; }
       }
 
       @media (prefers-reduced-motion: reduce) {
-        body::before,
-        .app-bubble::after { animation: none !important; }
-        .app-bubble, .filter-button, .app-bubble::before, .app-bubble::after,
-        .info-button, #bubble-tooltip, .generation-refinements {
-          transition-duration: 0.01ms !important;
-          transition-delay: 0ms !important;
-        }
-        .app-bubble.popping {
-          animation: none !important;
-          opacity: 0 !important;
-          transform: scale(0) !important;
-          transition: opacity 0.05s linear, transform 0.05s linear !important;
-        }
+        body::before, .app-bubble::after { animation: none !important; }
+        .app-bubble, .filter-button, .app-bubble::before, .app-bubble::after, .info-button, #bubble-tooltip, .generation-refinements { transition-duration: 0.01ms !important; transition-delay: 0ms !important; }
+        .app-bubble.popping { animation: none !important; opacity: 0 !important; transform: scale(0) !important; transition: opacity 0.05s linear, transform 0.05s linear !important; }
         .app-bubble:hover, .app-bubble:focus-visible, .app-bubble:focus-within { transform: none; }
         .app-bubble:hover::before { transform: rotate(-25deg); }
         .info-button { transform: scale(1); }
@@ -856,7 +762,8 @@
           <!-- Bubble 1: Pokémon Battle Simulator -->
           <article class="app-bubble" data-model="gemini-2.5-pro" tabindex="0" aria-labelledby="gemini-app1-title">
             <a href="pokemon-sim-gemini.html" class="bubble-link-content" tabindex="-1" aria-hidden="true">
-              <div class="bubble-image-placeholder" aria-hidden="true">IMG</div>
+              <!-- Replaced SVG with IMG -->
+              <img src="images/gemini pokemon arena image.png" alt="Preview of Pokémon Battle Simulator interface" class="bubble-image">
               <h3 id="gemini-app1-title">Pokémon Battle Simulator</h3>
               <span class="model-name">Gemini 2.5 Pro</span>
               <span class="generation-refinements" tabindex="0" aria-describedby="bubble-tooltip" data-tooltip-type="refinement" data-tooltip-content="Developed over 3 refinement iterations with the AI.">Refinements: 3</span>
@@ -933,7 +840,8 @@
           <!-- Bubble 2: Pokémon Catch Game -->
           <article class="app-bubble" data-model="claude-3.7-thinking" tabindex="0" aria-labelledby="claude-app1-title">
             <a href="poke-catch-sonnet.html" class="bubble-link-content" tabindex="-1" aria-hidden="true">
-              <div class="bubble-image-placeholder" aria-hidden="true">IMG</div>
+              <!-- Replaced SVG with IMG -->
+              <img src="images/poke catch image.png" alt="Preview of Pokémon Catch Game interface" class="bubble-image">
               <h3 id="claude-app1-title">Pokémon Catch Game</h3>
               <span class="model-name">Claude 3.7 thinking</span>
               <span class="generation-refinements" tabindex="0" aria-describedby="bubble-tooltip" data-tooltip-type="refinement" data-tooltip-content="Developed over 1 refinement iteration with the AI.">Refinements: 1</span>
@@ -949,7 +857,8 @@
           <!-- Bubble 3: Pokémon Battle Arena -->
           <article class="app-bubble" data-model="nightwhisper" tabindex="0" aria-labelledby="nightwhisper-app1-title">
             <a href="pokemon-sim-nightwhisper.html" class="bubble-link-content" tabindex="-1" aria-hidden="true">
-              <div class="bubble-image-placeholder" aria-hidden="true">IMG</div>
+              <!-- Replaced SVG with IMG -->
+              <img src="images/claude pokemon arena image.png" alt="Preview of Pokémon Battle Arena interface" class="bubble-image">
               <h3 id="nightwhisper-app1-title">Pokémon Battle Arena</h3>
               <span class="model-name">Nightwhisper</span>
               <span class="generation-refinements" tabindex="0" aria-describedby="bubble-tooltip" data-tooltip-type="refinement" data-tooltip-content="Developed over 1 refinement iteration with the AI.">Refinements: 1</span>
@@ -1282,14 +1191,11 @@
             console.warn("ResizeObserver not supported, tooltip repositioning may be limited.");
           }
 
-          let isScrolling;
           this.scrollListener = () => {
-            window.requestAnimationFrame(() => {
-              if (this.tooltipElement.classList.contains("visible") && this.activeTooltipTrigger) {
-                this.positionTooltip(this.activeTooltipTrigger);
-              }
-              isScrolling = false;
-            });
+            // Debounce or throttle scroll events if performance becomes an issue
+             if (this.tooltipElement.classList.contains("visible") && this.activeTooltipTrigger) {
+               window.requestAnimationFrame(() => this.positionTooltip(this.activeTooltipTrigger));
+             }
           };
           window.addEventListener("scroll", this.scrollListener, { passive: true });
         }
@@ -1367,7 +1273,8 @@
           if (isModifierKeyPressed || isMiddleClick) {
             const target = (event.ctrlKey || event.metaKey || isMiddleClick) ? '_blank' : '_self';
             const features = event.shiftKey ? 'noopener,noreferrer' : undefined;
-            window.open(link, target, features);
+            // Use a minimal delay even for direct open, allowing visual feedback if any
+            setTimeout(() => window.open(link, target, features), 50);
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -1446,12 +1353,13 @@
           if (!this.tooltipElement.classList.contains("visible") || !triggerElement || !triggerElement.isConnected) return;
 
           const triggerRect = triggerElement.getBoundingClientRect();
-          this.tooltipElement.style.visibility = "hidden";
-          this.tooltipElement.style.display = "block";
+          this.tooltipElement.style.visibility = "hidden"; // Hide while measuring
+          this.tooltipElement.style.display = "block"; // Needed to measure correctly
           const tooltipHeight = this.tooltipElement.offsetHeight;
           const tooltipWidth = this.tooltipElement.offsetWidth;
-          this.tooltipElement.style.display = "";
-          this.tooltipElement.style.visibility = "";
+          this.tooltipElement.style.display = ""; // Reset display
+          this.tooltipElement.style.visibility = ""; // Make visible again
+
 
           const spacing = 8;
           const viewportWidth = window.innerWidth;
@@ -1472,15 +1380,18 @@
             // Place above
             top = triggerRect.top - tooltipHeight - spacing;
           } else if (spaceBelow < tooltipHeight && spaceAbove < tooltipHeight) {
-             // Not enough space either way, place below and cap at bottom edge
-             top = Math.max(spacing, viewportHeight - tooltipHeight - spacing);
+             // Not enough space either way, place below but prevent going off bottom
+             top = viewportHeight - tooltipHeight - spacing;
           }
           // Ensure it doesn't go off the top edge
           if (top < spacing) top = spacing;
 
           this.tooltipElement.style.top = `${Math.round(top)}px`;
           this.tooltipElement.style.left = `${Math.round(left)}px`;
-          this.tooltipElement.style.transform = ""; // Reset animation transform
+          // Reset transform only after positioning is calculated
+          requestAnimationFrame(() => {
+            this.tooltipElement.style.transform = ""; // Reset animation transform
+          });
         }
 
         /**
@@ -1499,14 +1410,15 @@
           this.tooltipElement.setAttribute("aria-hidden", "true");
           this.tooltipElement.style.top = "";
           this.tooltipElement.style.left = "";
-          this.tooltipElement.style.transform = "";
+          this.tooltipElement.style.transform = ""; // Reset transform immediately on hide
           delete this.tooltipElement.dataset.type;
 
           if (returnFocus && triggerToFocus && typeof triggerToFocus.focus === "function" && document.body.contains(triggerToFocus) && triggerToFocus.offsetParent !== null) {
+            // Delay focus slightly to avoid immediate re-triggering issues
             requestAnimationFrame(() => {
-              if (document.body.contains(triggerToFocus) && triggerToFocus.offsetParent !== null) {
-                 triggerToFocus.focus({ preventScroll: true });
-              }
+               if (document.body.contains(triggerToFocus) && triggerToFocus.offsetParent !== null && document.activeElement !== triggerToFocus) {
+                  triggerToFocus.focus({ preventScroll: true });
+               }
             });
           }
         }
@@ -1565,7 +1477,8 @@
 
                 bubbleElement.classList.toggle('hidden', !isVisible);
                 bubbleElement.setAttribute('aria-hidden', String(!isVisible));
-                bubbleElement.setAttribute('tabindex', isVisible ? '0' : '-1'); // Update tabindex
+                // Only make visible bubbles focusable
+                bubbleElement.setAttribute('tabindex', isVisible ? '0' : '-1');
 
                 if (isVisible) {
                     visibleCount++;
