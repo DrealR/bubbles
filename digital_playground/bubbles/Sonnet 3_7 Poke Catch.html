@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pokémon Catch Game Bubble</title>
+    <style>
+      :root {
+        --primary-color: #ff5350; /* Pokéball Red */
+        --primary-dark: #e0403d;
+        --secondary-color: #3b4cca; /* Classic Blue */
+        --secondary-dark: #2e3c9e;
+        --accent-color: #ffde00; /* Pikachu Yellow */
+        --accent-dark: #e6c900;
+
+        --bg-color: #f8f9fa;
+        --card-bg: #ffffff;
+        --text-color: #333333;
+        --muted-text-color: #6c757d;
+        --success-color: #4caf50;
+        --error-color: #f44336;
+        --disabled-color: #bdbdbd;
+
+        --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+        --base-font-size: 16px;
+        --border-radius: 12px;
+        --card-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+        --focus-ring: 0 0 0 3px rgba(59, 76, 202, 0.4);
+        --transition-speed: 0.3s;
+        --transition-func: ease;
+      }
+
+      /* Basic Reset & Body Styles */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: var(--base-font-size);
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-family: var(--font-family);
+        line-height: 1.6;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        padding: 1.5rem;
+        align-items: center; /* Center the game container */
+      }
+
+      /* Game Title */
+      .game-title {
+        text-align: center;
+        margin-bottom: 2rem;
+        color: var(--primary-color);
+        font-size: clamp(2rem, 5vw, 2.8rem);
+        font-weight: 700;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Main Game Layout */
+      .game-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        max-width: 1200px;
+        width: 100%;
+      }
+
+      @media (min-width: 900px) {
+        .game-container {
+          flex-direction: row;
+        }
+      }
+
+      /* Shared Area Styles */
+      .game-area,
+      .collection-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background-color: var(--card-bg);
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+      }
+
+      /* Game Area (Pokemon Encounter) */
+      .game-area {
+        align-items: center;
+        position: relative; /* For message positioning */
+      }
+
+      /* Pokemon Card */
+      .pokemon-card {
+        width: 100%;
+        max-width: 400px;
+        padding: 1.5rem;
+        background-color: var(
+          --card-bg
+        ); /* Re-declare for specificity if needed */
+        border-radius: var(--border-radius);
+        /* No shadow here, shadow is on game-area */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative; /* For animation container */
+        overflow: hidden; /* Contain animations */
+        transition: opacity var(--transition-speed) var(--transition-func);
+      }
+
+      .pokemon-card[aria-busy="true"] {
+        opacity: 0.7;
+        cursor: wait;
+      }
+
+      .pokemon-image-container {
+        width: 220px;
+        height: 220px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        position: relative; /* For animations if needed */
+      }
+
+      .pokemon-image {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.15));
+        transition: filter var(--transition-speed) var(--transition-func),
+          transform var(--transition-speed) var(--transition-func);
+        image-rendering: pixelated; /* Keep pokemon sprites crisp */
+        image-rendering: -moz-crisp-edges;
+        image-rendering: crisp-edges;
+      }
+
+      /* "Hidden" state for unknown Pokemon */
+      .pokemon-image.hidden {
+        filter: brightness(0) opacity(0.7);
+      }
+
+      /* Pokemon Info Section */
+      .pokemon-info {
+        text-align: center;
+        width: 100%;
+      }
+
+      .pokemon-name {
+        font-size: clamp(1.5rem, 4vw, 1.9rem);
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        text-transform: capitalize;
+        min-height: 1.9rem * 1.2; /* Prevent layout shift */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .pokemon-types {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-bottom: 1.25rem;
+        min-height: 30px; /* Prevent layout shift */
+      }
+
+      .pokemon-type {
+        padding: 0.4rem 1rem;
+        border-radius: 50px; /* Pill shape */
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: white;
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+        letter-spacing: 0.5px;
+      }
+
+      /* Pokemon Stats Grid */
+      .pokemon-stats {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.75rem;
+        padding: 0 1rem; /* Add padding for better spacing */
+      }
+
+      .stat {
+        text-align: center;
+        font-size: 0.9rem;
+        color: var(--muted-text-color);
+      }
+      .stat p:first-child {
+        /* Stat Name */
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        margin-bottom: 0.25rem;
+        font-weight: 600;
+      }
+      .stat-value {
+        font-weight: 700;
+        font-size: 1.3rem;
+        color: var(--secondary-color);
+        min-height: 1.3rem * 1.2; /* Prevent layout shift */
+      }
+
+      /* Catch Button */
+      .catch-button {
+        padding: 0.8rem 2.2rem;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all var(--transition-speed) var(--transition-func);
+        display: inline-flex; /* Use inline-flex for icon alignment */
+        align-items: center;
+        gap: 0.6rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+      }
+
+      .catch-button:hover:not(:disabled) {
+        background: linear-gradient(
+          135deg,
+          var(--primary-dark),
+          var(--primary-color)
+        );
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .catch-button:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring), 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .catch-button:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .catch-button:disabled {
+        background: var(--disabled-color);
+        cursor: not-allowed;
+        box-shadow: none;
+        color: var(--muted-text-color);
+        opacity: 0.8;
+      }
+      .catch-button:disabled .pokeball-icon path,
+      .catch-button:disabled .pokeball-icon circle {
+        stroke: var(--muted-text-color);
+      }
+      .catch-button:disabled .pokeball-icon circle:last-child {
+        fill: var(--muted-text-color);
+      }
+
+      .pokeball-icon {
+        width: 22px;
+        height: 22px;
+        display: inline-block; /* Ensure it doesn't affect layout */
+        vertical-align: middle;
+        transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      }
+      .catch-button:hover:not(:disabled) .pokeball-icon {
+        transform: rotate(15deg) scale(1.1);
+      }
+
+      /* Message Area */
+      .message-area {
+        position: absolute;
+        top: 1rem; /* Position relative to game-area */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 350px;
+        z-index: 100;
+        pointer-events: none; /* Allow clicks through */
+      }
+
+      .message {
+        padding: 0.8rem 1.2rem;
+        border-radius: var(--border-radius);
+        text-align: center;
+        font-weight: 600;
+        color: white;
+        box-shadow: var(--card-shadow);
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: opacity var(--transition-speed) var(--transition-func),
+          transform var(--transition-speed) var(--transition-func);
+        font-size: 0.9rem;
+      }
+
+      .message.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .message.success {
+        background-color: var(--success-color);
+      }
+
+      .message.error {
+        background-color: var(--error-color);
+      }
+
+      /* Game Controls */
+      .game-controls {
+        display: flex;
+        flex-wrap: wrap; /* Allow wrapping on small screens */
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .control-button {
+        padding: 0.6rem 1.2rem;
+        background-color: var(--secondary-color);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: all var(--transition-speed) var(--transition-func);
+        font-weight: 600;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .control-button:hover {
+        background-color: var(--secondary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .control-button:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring), 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .control-button:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Collection Area */
+      .collection-area {
+        gap: 1rem; /* Reduced gap */
+      }
+
+      .collection-title {
+        font-size: clamp(1.3rem, 4vw, 1.6rem);
+        color: var(--secondary-color);
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.5rem; /* Add margin bottom */
+        font-weight: 600;
+        border-bottom: 2px solid var(--bg-color);
+        padding-bottom: 0.5rem;
+      }
+      .collection-title svg {
+        width: 28px;
+        height: 28px;
+      }
+
+      .collection-stats {
+        display: flex;
+        flex-wrap: wrap; /* Allow wrapping */
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .collection-stat {
+        background-color: var(--bg-color);
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius);
+        font-size: 0.85rem;
+        font-weight: 500;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+      }
+      .collection-stat span {
+        font-weight: 700;
+        color: var(--primary-color);
+      }
+
+      /* Collection Grid */
+      .collection-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 1rem;
+        overflow-y: auto;
+        max-height: 550px; /* Slightly increased */
+        padding: 0.75rem;
+        background-color: var(--bg-color); /* Light background for contrast */
+        border-radius: var(--border-radius);
+        min-height: 150px; /* Ensure it has some height even when empty */
+      }
+
+      .collection-item {
+        background-color: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        cursor: default; /* Not interactive in this version */
+        transition: all var(--transition-speed) var(--transition-func);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .collection-item:hover {
+        transform: translateY(-4px) scale(1.03);
+        box-shadow: var(--card-shadow);
+        z-index: 5;
+      }
+
+      .collection-item img {
+        width: 70px;
+        height: 70px;
+        object-fit: contain;
+        margin-bottom: 0.5rem;
+        image-rendering: pixelated;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: crisp-edges;
+      }
+
+      .collection-item p {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: capitalize;
+        line-height: 1.3;
+      }
+
+      /* Empty Collection State */
+      .empty-collection {
+        grid-column: 1 / -1; /* Span all columns */
+        text-align: center;
+        padding: 2.5rem 1rem;
+        color: var(--muted-text-color);
+        font-style: italic;
+        font-size: 0.95rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+      .empty-collection svg {
+        width: 40px;
+        height: 40px;
+        opacity: 0.5;
+      }
+
+      /* Animations */
+      .pokeball-animation-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        z-index: 10;
+      }
+      .pokeball-animation {
+        width: 70px;
+        height: 70px;
+        opacity: 0; /* Start invisible */
+        transform: scale(0.5);
+      }
+      .pokeball-animation.throw {
+        animation: throw-pokeball 1.6s cubic-bezier(0.3, 0, 0.4, 1) forwards;
+      }
+      @keyframes throw-pokeball {
+        0% {
+          opacity: 1;
+          transform: translateY(150px) scale(0.5) rotate(0deg);
+        }
+        40% {
+          opacity: 1;
+          transform: translateY(-60px) scale(1.2) rotate(360deg);
+        } /* Apex */
+        55% {
+          opacity: 1;
+          transform: translateY(0) scale(1) rotate(540deg);
+        } /* Hit target */
+        65% {
+          opacity: 1;
+          transform: translateY(0) scale(1.1) rotate(540deg);
+        } /* Wiggle prep */
+        75% {
+          opacity: 1;
+          transform: translateY(0) scale(1) rotate(530deg);
+        } /* Wiggle 1 */
+        85% {
+          opacity: 1;
+          transform: translateY(0) scale(1) rotate(550deg);
+        } /* Wiggle 2 */
+        95% {
+          opacity: 1;
+          transform: translateY(0) scale(1) rotate(540deg);
+        } /* Wiggle 3 */
+        100% {
+          opacity: 0;
+          transform: translateY(0) scale(0.8) rotate(540deg);
+        } /* Fade out */
+      }
+
+      .shake-animation {
+        animation: shake-pokemon 0.8s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+      }
+      @keyframes shake-pokemon {
+        10%,
+        90% {
+          transform: translateX(-2px);
+        }
+        20%,
+        80% {
+          transform: translateX(4px);
+        }
+        30%,
+        50%,
+        70% {
+          transform: translateX(-6px);
+        }
+        40%,
+        60% {
+          transform: translateX(6px);
+        }
+      }
+
+      /* Pokémon Type Colors */
+      .type-normal {
+        background-color: #a8a878;
+      }
+      .type-fire {
+        background-color: #f08030;
+      }
+      .type-water {
+        background-color: #6890f0;
+      }
+      .type-grass {
+        background-color: #78c850;
+      }
+      .type-electric {
+        background-color: #f8d030;
+        color: #333;
+        text-shadow: none;
+      } /* Adjusted contrast */
+      .type-ice {
+        background-color: #98d8d8;
+      }
+      .type-fighting {
+        background-color: #c03028;
+      }
+      .type-poison {
+        background-color: #a040a0;
+      }
+      .type-ground {
+        background-color: #e0c068;
+      }
+      .type-flying {
+        background-color: #a890f0;
+      }
+      .type-psychic {
+        background-color: #f85888;
+      }
+      .type-bug {
+        background-color: #a8b820;
+      }
+      .type-rock {
+        background-color: #b8a038;
+      }
+      .type-ghost {
+        background-color: #705898;
+      }
+      .type-dragon {
+        background-color: #7038f8;
+      }
+      .type-dark {
+        background-color: #705848;
+      }
+      .type-steel {
+        background-color: #b8b8d0;
+      }
+      .type-fairy {
+        background-color: #ee99ac;
+      }
+
+      /* Hidden SVG definitions */
+      .hidden-svgs {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Hidden SVGs for cloning -->
+    <svg class="hidden-svgs">
+      <defs>
+        <svg
+          id="pokeball-graphic"
+          viewBox="0 0 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="50"
+            cy="50"
+            r="48"
+            fill="#f0f0f0"
+            stroke="#333"
+            stroke-width="4"
+          />
+          <path d="M 50,6 A 44,44 0 0 1 50,94" fill="#FF5350" stroke="none" />
+          <path d="M 2,50 H 98" stroke="#333" stroke-width="6" />
+          <circle
+            cx="50"
+            cy="50"
+            r="18"
+            fill="#f0f0f0"
+            stroke="#333"
+            stroke-width="4"
+          />
+          <circle
+            cx="50"
+            cy="50"
+            r="10"
+            fill="#f0f0f0"
+            stroke="#333"
+            stroke-width="1"
+          />
+        </svg>
+        <svg
+          id="icon-collection"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M21 4H3C1.89543 4 1 4.89543 1 6V18C1 19.1046 1.89543 20 3 20H21C22.1046 20 23 19.1046 23 18V6C23 4.89543 22.1046 4 21 4Z"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M1 10H23"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <svg
+          id="icon-pokeball-empty"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path
+            d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"
+          ></path>
+          <path
+            d="M12 5c-3.859 0-7 3.141-7 7s3.141 7 7 7 7-3.141 7-7-3.141-7-7-7zm0 11.5c-2.481 0-4.5-2.019-4.5-4.5s2.019-4.5 4.5-4.5 4.5 2.019 4.5 4.5-2.019 4.5-4.5 4.5z"
+          ></path>
+          <circle cx="12" cy="12" r="2.5"></circle>
+        </svg>
+      </defs>
+    </svg>
+
+    <h1 class="game-title">Pokémon Catch Adventure</h1>
+
+    <div class="game-container">
+      <!-- Game Area: Encounter -->
+      <section class="game-area" aria-labelledby="encounter-heading">
+        <h2 id="encounter-heading" class="visually-hidden">
+          Pokémon Encounter
+        </h2>
+        <div class="message-area" role="alert" aria-live="polite">
+          <div id="message" class="message"></div>
+        </div>
+        <div class="pokemon-card" id="pokemon-card" aria-busy="false">
+          <div
+            class="pokeball-animation-container"
+            id="pokeball-animation-container"
+          >
+            <!-- Animation injected here -->
+          </div>
+          <div class="pokemon-image-container">
+            <img
+              id="pokemon-image"
+              class="pokemon-image hidden"
+              src=""
+              alt="A wild Pokémon appears!"
+            />
+            <!-- Initial alt text -->
+          </div>
+          <div class="pokemon-info">
+            <h3 id="pokemon-name" class="pokemon-name">???</h3>
+            <div id="pokemon-types" class="pokemon-types">
+              <span
+                class="pokemon-type"
+                style="background-color: var(--muted-text-color)"
+                >???</span
+              >
+            </div>
+            <div id="pokemon-stats" class="pokemon-stats">
+              <div class="stat">
+                <p>HP</p>
+                <p id="stat-hp" class="stat-value">?</p>
+              </div>
+              <div class="stat">
+                <p>Attack</p>
+                <p id="stat-attack" class="stat-value">?</p>
+              </div>
+              <div class="stat">
+                <p>Defense</p>
+                <p id="stat-defense" class="stat-value">?</p>
+              </div>
+              <div class="stat">
+                <p>Speed</p>
+                <p id="stat-speed" class="stat-value">?</p>
+              </div>
+            </div>
+          </div>
+          <button id="catch-button" class="catch-button" disabled>
+            <!-- Initially disabled until Pokemon loads -->
+            <svg
+              class="pokeball-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <line
+                x1="2"
+                y1="12"
+                x2="22"
+                y2="12"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <circle cx="12" cy="12" r="3" fill="currentColor" />
+            </svg>
+            <span id="catch-button-text">Catch Pokémon</span>
+          </button>
+        </div>
+        <div class="game-controls">
+          <button id="new-pokemon-button" class="control-button">
+            Find New Pokémon
+          </button>
+          <button id="reset-game-button" class="control-button">
+            Reset Game
+          </button>
+        </div>
+      </section>
+
+      <!-- Collection Area -->
+      <section class="collection-area" aria-labelledby="collection-heading">
+        <h2 class="collection-title" id="collection-heading">
+          <svg aria-hidden="true" focusable="false">
+            <use xlink:href="#icon-collection" />
+          </svg>
+          Your Collection
+        </h2>
+        <div class="collection-stats">
+          <div class="collection-stat">
+            Caught: <span id="caught-count">0</span>
+          </div>
+          <div class="collection-stat">
+            Encounters: <span id="encounter-count">0</span>
+          </div>
+          <div class="collection-stat">
+            Success Rate: <span id="success-rate">0%</span>
+          </div>
+        </div>
+        <div id="collection-grid" class="collection-grid">
+          <!-- Collection items will be added here -->
+          <div class="empty-collection" id="empty-collection-message">
+            <svg aria-hidden="true" focusable="false">
+              <use xlink:href="#icon-pokeball-empty" />
+            </svg>
+            <span>Your collection is empty. Go catch some Pokémon!</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Visually Hidden Utility Class -->
+    <style>
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    </style>
+
+    <script>
+      (function () {
+        "use strict";
+
+        /**
+         * Simplified local Pokémon database.
+         * In a real scenario, this might come from an API, but here it's embedded.
+         */
+        const pokemonDatabase = [
+          {
+            id: 1,
+            name: "bulbasaur",
+            types: ["grass", "poison"],
+            stats: { hp: 45, attack: 49, defense: 49, speed: 45 },
+            sprite:
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png",
+            rarity: "common",
+          },
+          {
+            id: 4,
+            name: "charmander",
+            types: ["fire"],
+            stats: { hp: 39, attack: 52, defense: 43, speed: 65 },
+            sprite:
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png",
+            rarity: "common",
+          },
+          {
+            id: 7,
+            name: "squirtle",
+            types: ["water"],
+            stats: { hp: 44, attack: 48, defense: 65, speed: 43 },
+            sprite:
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png",
+            rarity: "common",
+          },
+          {
+            id: 25,
+            name: "pikachu",
+            types: ["electric"],
+            stats: { hp: 35, attack: 55, defense: 40, speed: 90 },
+            sprite:
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png",
+            rarity: "uncommon",
+          },
+          {
+            id: 133,
+            name: "eevee",
+            types: ["normal"],
+            stats: { hp: 55, attack: 55, defense: 50, speed: 55 },
+            sprite:
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/133.png",
+            rarity: "uncommon",
+          },
+          {
+            id: 94,
+            name: "gengar",
+            types: ["ghost", "poison"],
+            stats: { hp: 60, attack: 65, defense: 60, speed: 110 },
+            sprite:
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/94.png",
+            rarity: "rare",
+          },
+          {
+            id: 6,
+            name: "charizard",
+            types: ["fire", "flying"],
+            stats: { hp: 78, attack: 84, defense: 78, speed: 100 },
+            sprite:
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png",
+            rarity: "rare",
+          },
+          {
+            id: 150,
+            name: "mewtwo",
+            types: ["psychic"],
+            stats: { hp: 106, attack: 110, defense: 90, speed: 130 },
+            sprite:
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png",
+            rarity: "legendary",
+          },
+          {
+            id: 143,
+            name: "snorlax",
+            types: ["normal"],
+            stats: { hp: 160, attack: 110, defense: 65, speed: 30 },
+            sprite:
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/143.png",
+            rarity: "rare",
+          },
+          {
+            id: 39,
+            name: "jigglypuff",
+            types: ["normal", "fairy"],
+            stats: { hp: 115, attack: 45, defense: 20, speed: 20 },
+            sprite:
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/39.png",
+            rarity: "common",
+          },
+          {
+            id: 130,
+            name: "gyarados",
+            types: ["water", "flying"],
+            stats: { hp: 95, attack: 125, defense: 79, speed: 81 },
+            sprite:
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/130.png",
+            rarity: "rare",
+          },
+          {
+            id: 151,
+            name: "mew",
+            types: ["psychic"],
+            stats: { hp: 100, attack: 100, defense: 100, speed: 100 },
+            sprite:
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/151.png",
+            rarity: "legendary",
+          },
+          {
+            id: 52,
+            name: "meowth",
+            types: ["normal"],
+            stats: { hp: 40, attack: 45, defense: 35, speed: 90 },
+            sprite:
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/52.png",
+            rarity: "common",
+          },
+          {
+            id: 65,
+            name: "alakazam",
+            types: ["psychic"],
+            stats: { hp: 55, attack: 50, defense: 45, speed: 120 },
+            sprite:
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/65.png",
+            rarity: "rare",
+          },
+          {
+            id: 149,
+            name: "dragonite",
+            types: ["dragon", "flying"],
+            stats: { hp: 91, attack: 134, defense: 95, speed: 80 },
+            sprite:
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/149.png",
+            rarity: "legendary",
+          },
+        ];
+
+        // Game State
+        const gameState = {
+          currentPokemon: null,
+          collection: [], // Stores { id, name, sprite, types }
+          stats: {
+            encounters: 0,
+            caught: 0,
+          },
+          isCatching: false, // Prevent multiple catch attempts simultaneously
+        };
+
+        // DOM Elements Cache
+        const DOMElements = {
+          pokemonCard: document.getElementById("pokemon-card"),
+          pokemonImage: document.getElementById("pokemon-image"),
+          pokemonName: document.getElementById("pokemon-name"),
+          pokemonTypes: document.getElementById("pokemon-types"),
+          statHp: document.getElementById("stat-hp"),
+          statAttack: document.getElementById("stat-attack"),
+          statDefense: document.getElementById("stat-defense"),
+          statSpeed: document.getElementById("stat-speed"),
+          catchButton: document.getElementById("catch-button"),
+          catchButtonText: document.getElementById("catch-button-text"),
+          newPokemonButton: document.getElementById("new-pokemon-button"),
+          resetGameButton: document.getElementById("reset-game-button"),
+          message: document.getElementById("message"),
+          collectionGrid: document.getElementById("collection-grid"),
+          emptyCollectionMessage: document.getElementById(
+            "empty-collection-message"
+          ),
+          caughtCount: document.getElementById("caught-count"),
+          encounterCount: document.getElementById("encounter-count"),
+          successRate: document.getElementById("success-rate"),
+          pokeballAnimationContainer: document.getElementById(
+            "pokeball-animation-container"
+          ),
+        };
+
+        /**
+         * Fetches a random Pokémon from the local database.
+         * @returns {object} A Pokémon object.
+         */
+        function getRandomPokemon() {
+          const randomIndex = Math.floor(
+            Math.random() * pokemonDatabase.length
+          );
+          return pokemonDatabase[randomIndex];
+        }
+
+        /**
+         * Initializes or resets the game state and UI.
+         */
+        function initGame() {
+          resetGameState();
+          generateNewPokemon();
+        }
+
+        /**
+         * Resets the game state variables.
+         */
+        function resetGameState() {
+          gameState.currentPokemon = null;
+          gameState.collection = [];
+          gameState.stats.encounters = 0;
+          gameState.stats.caught = 0;
+          gameState.isCatching = false;
+          updateStatsDisplay();
+          updateCollectionDisplay();
+          DOMElements.message.classList.remove("visible"); // Hide any lingering messages
+        }
+
+        /**
+         * Generates a new Pokémon encounter.
+         */
+        function generateNewPokemon() {
+          if (gameState.isCatching) return; // Don't change if currently catching
+
+          gameState.currentPokemon = getRandomPokemon();
+          gameState.stats.encounters++;
+          updateStatsDisplay();
+          displayCurrentPokemon(false); // Display as hidden initially
+          DOMElements.catchButton.disabled = false; // Enable catch button
+          DOMElements.pokemonCard.setAttribute("aria-busy", "false");
+          DOMElements.message.classList.remove("visible"); // Hide previous message
+        }
+
+        /**
+         * Updates the main Pokémon display area.
+         * @param {boolean} reveal - Whether to reveal the Pokémon's details (true if caught/already revealed).
+         */
+        function displayCurrentPokemon(reveal = false) {
+          const pokemon = gameState.currentPokemon;
+          if (!pokemon) return; // Should not happen in normal flow
+
+          DOMElements.pokemonCard.setAttribute("aria-busy", "true"); // Indicate loading/updating
+
+          // --- Update Image ---
+          DOMElements.pokemonImage.src = pokemon.sprite;
+          if (reveal) {
+            DOMElements.pokemonImage.classList.remove("hidden");
+            DOMElements.pokemonImage.alt = `Artwork of ${pokemon.name}`;
+          } else {
+            DOMElements.pokemonImage.classList.add("hidden");
+            DOMElements.pokemonImage.alt = "Silhouette of an unknown Pokémon";
+          }
+
+          // --- Update Name ---
+          DOMElements.pokemonName.textContent = reveal ? pokemon.name : "???";
+
+          // --- Update Types ---
+          DOMElements.pokemonTypes.innerHTML = ""; // Clear previous types
+          if (reveal) {
+            pokemon.types.forEach((type) => {
+              const typeEl = document.createElement("span");
+              typeEl.className = `pokemon-type type-${type}`;
+              typeEl.textContent = type;
+              DOMElements.pokemonTypes.appendChild(typeEl);
+            });
+          } else {
+            const typeEl = document.createElement("span");
+            typeEl.className = "pokemon-type";
+            typeEl.style.backgroundColor = "var(--muted-text-color)";
+            typeEl.textContent = "???";
+            DOMElements.pokemonTypes.appendChild(typeEl);
+          }
+
+          // --- Update Stats ---
+          DOMElements.statHp.textContent = reveal ? pokemon.stats.hp : "?";
+          DOMElements.statAttack.textContent = reveal
+            ? pokemon.stats.attack
+            : "?";
+          DOMElements.statDefense.textContent = reveal
+            ? pokemon.stats.defense
+            : "?";
+          DOMElements.statSpeed.textContent = reveal
+            ? pokemon.stats.speed
+            : "?";
+
+          // --- Update Catch Button State ---
+          DOMElements.catchButtonText.textContent = reveal
+            ? "Caught!"
+            : "Catch Pokémon";
+          DOMElements.catchButton.disabled = reveal || gameState.isCatching; // Disable if revealed or currently catching
+
+          // Ensure the card is marked as not busy after updates (slight delay for visual effect)
+          setTimeout(
+            () => DOMElements.pokemonCard.setAttribute("aria-busy", "false"),
+            100
+          );
+        }
+
+        /**
+         * Attempts to catch the current Pokémon.
+         */
+        function tryToCatch() {
+          if (
+            !gameState.currentPokemon ||
+            gameState.isCatching ||
+            DOMElements.catchButton.disabled
+          ) {
+            return;
+          }
+
+          gameState.isCatching = true;
+          DOMElements.catchButton.disabled = true;
+          DOMElements.pokemonCard.setAttribute("aria-busy", "true");
+          DOMElements.message.classList.remove("visible"); // Hide previous message
+
+          // --- Pokeball Animation ---
+          const pokeballGraphic = document
+            .getElementById("pokeball-graphic")
+            .cloneNode(true);
+          pokeballGraphic.classList.add("pokeball-animation");
+          DOMElements.pokeballAnimationContainer.innerHTML = ""; // Clear previous animation
+          DOMElements.pokeballAnimationContainer.appendChild(pokeballGraphic);
+          // Trigger animation by adding class after insertion
+          requestAnimationFrame(() => {
+            pokeballGraphic.classList.add("throw");
+          });
+
+          // --- Calculate Catch Chance ---
+          // More complex calculation could involve level, HP, status, ball type etc.
+          // Simple rarity-based chance for this demo.
+          let catchChance;
+          switch (gameState.currentPokemon.rarity) {
+            case "common":
+              catchChance = 0.75;
+              break;
+            case "uncommon":
+              catchChance = 0.5;
+              break;
+            case "rare":
+              catchChance = 0.25;
+              break;
+            case "legendary":
+              catchChance = 0.05;
+              break;
+            default:
+              catchChance = 0.5;
+          }
+          const isCaught = Math.random() < catchChance;
+
+          // --- Process Catch Result (after animation) ---
+          // Timeout duration matches the pokeball animation duration
+          setTimeout(() => {
+            if (isCaught) {
+              handleCatchSuccess();
+            } else {
+              handleCatchFailure();
+            }
+
+            // Clean up animation element after a short delay
+            setTimeout(() => {
+              if (pokeballGraphic.parentNode) {
+                DOMElements.pokeballAnimationContainer.innerHTML = "";
+              }
+            }, 500);
+
+            gameState.isCatching = false;
+            DOMElements.pokemonCard.setAttribute("aria-busy", "false");
+            // Re-enable catch button ONLY if the catch failed
+            if (!isCaught) {
+              DOMElements.catchButton.disabled = false;
+            }
+          }, 1600); // Corresponds to pokeball animation duration
+        }
+
+        /**
+         * Handles the UI updates and state changes for a successful catch.
+         */
+        function handleCatchSuccess() {
+          const caughtPokemon = { ...gameState.currentPokemon }; // Clone data
+          gameState.collection.push({
+            id: caughtPokemon.id,
+            name: caughtPokemon.name,
+            sprite: caughtPokemon.sprite,
+            types: caughtPokemon.types,
+          });
+          gameState.stats.caught++;
+          updateStatsDisplay();
+          updateCollectionDisplay();
+          displayCurrentPokemon(true); // Reveal the caught Pokémon
+          showMessage(
+            `Gotcha! ${capitalize(caughtPokemon.name)} was caught!`,
+            "success"
+          );
+        }
+
+        /**
+         * Handles the UI updates for a failed catch attempt.
+         */
+        function handleCatchFailure() {
+          DOMElements.pokemonImage.classList.add("shake-animation");
+          showMessage(
+            `Oh no! ${capitalize(gameState.currentPokemon.name)} broke free!`,
+            "error"
+          );
+
+          // Remove shake animation after it finishes
+          DOMElements.pokemonImage.addEventListener(
+            "animationend",
+            () => {
+              DOMElements.pokemonImage.classList.remove("shake-animation");
+            },
+            { once: true }
+          );
+        }
+
+        /**
+         * Displays a status message to the user.
+         * @param {string} text - The message content.
+         * @param {'success' | 'error'} type - The type of message.
+         */
+        function showMessage(text, type) {
+          // Sanitize text before displaying (though it's internally generated here)
+          DOMElements.message.textContent = text;
+          DOMElements.message.className = `message ${type}`; // Reset classes first
+
+          // Trigger reflow before adding 'visible' for transition
+          void DOMElements.message.offsetWidth;
+
+          DOMElements.message.classList.add("visible");
+
+          // Hide the message after a delay
+          setTimeout(() => {
+            DOMElements.message.classList.remove("visible");
+          }, 3500);
+        }
+
+        /**
+         * Updates the collection grid display.
+         */
+        function updateCollectionDisplay() {
+          DOMElements.collectionGrid.innerHTML = ""; // Clear grid
+
+          if (gameState.collection.length === 0) {
+            // Show the empty message (already in HTML, just ensure it's visible)
+            const emptyMsg =
+              DOMElements.emptyCollectionMessage ||
+              createEmptyCollectionMessage(); // Defensive check
+            DOMElements.collectionGrid.appendChild(emptyMsg);
+          } else {
+            // Hide empty message if it exists dynamically (though it's static here)
+            if (DOMElements.emptyCollectionMessage)
+              DOMElements.emptyCollectionMessage.style.display = "none";
+
+            // Sort collection alphabetically for consistency
+            const sortedCollection = [...gameState.collection].sort((a, b) =>
+              a.name.localeCompare(b.name)
+            );
+
+            sortedCollection.forEach((pokemon) => {
+              const item = document.createElement("div");
+              item.className = "collection-item";
+              item.setAttribute(
+                "aria-label",
+                `${capitalize(pokemon.name)}, ${pokemon.types.join("/")} type`
+              );
+              item.title = `${capitalize(pokemon.name)} (${pokemon.types.join(
+                ", "
+              )})`; // Tooltip
+
+              const image = document.createElement("img");
+              image.src = pokemon.sprite;
+              image.alt = ""; // Decorative within the item context
+              image.loading = "lazy"; // Improve initial load
+
+              const name = document.createElement("p");
+              name.textContent = capitalize(pokemon.name);
+
+              item.appendChild(image);
+              item.appendChild(name);
+              DOMElements.collectionGrid.appendChild(item);
+            });
+          }
+        }
+
+        /** Creates the empty collection message element (fallback if not in HTML) */
+        function createEmptyCollectionMessage() {
+          const emptyMessage = document.createElement("div");
+          emptyMessage.className = "empty-collection";
+          emptyMessage.id = "empty-collection-message";
+
+          const iconSvg = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "svg"
+          );
+          iconSvg.setAttribute("aria-hidden", "true");
+          iconSvg.setAttribute("focusable", "false");
+          const iconUse = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "use"
+          );
+          iconUse.setAttributeNS(
+            "http://www.w3.org/1999/xlink",
+            "xlink:href",
+            "#icon-pokeball-empty"
+          );
+          iconSvg.appendChild(iconUse);
+
+          const textSpan = document.createElement("span");
+          textSpan.textContent =
+            "Your collection is empty. Go catch some Pokémon!";
+
+          emptyMessage.appendChild(iconSvg);
+          emptyMessage.appendChild(textSpan);
+          return emptyMessage;
+        }
+
+        /**
+         * Updates the displayed game statistics.
+         */
+        function updateStatsDisplay() {
+          DOMElements.caughtCount.textContent = gameState.stats.caught;
+          DOMElements.encounterCount.textContent = gameState.stats.encounters;
+
+          const rate =
+            gameState.stats.encounters === 0
+              ? 0
+              : Math.round(
+                  (gameState.stats.caught / gameState.stats.encounters) * 100
+                );
+          DOMElements.successRate.textContent = `${rate}%`;
+        }
+
+        /**
+         * Capitalizes the first letter of a string.
+         * @param {string} str The string to capitalize.
+         * @returns {string} The capitalized string.
+         */
+        function capitalize(str) {
+          if (!str) return "";
+          return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        // --- Event Listeners ---
+        DOMElements.catchButton.addEventListener("click", tryToCatch);
+        DOMElements.newPokemonButton.addEventListener(
+          "click",
+          generateNewPokemon
+        );
+        DOMElements.resetGameButton.addEventListener("click", () => {
+          // Optional: Add a confirmation dialog later if desired
+          if (
+            confirm(
+              "Are you sure you want to reset the game? Your collection will be lost."
+            )
+          ) {
+            initGame();
+            showMessage("Game reset successfully!", "success"); // Use success color for reset confirmation
+          }
+        });
+
+        // --- Initialisation ---
+        document.addEventListener("DOMContentLoaded", initGame);
+      })();
+    </script>
+  </body>
+</html>
