@@ -1,0 +1,3632 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Superhero Duplicator Evolved - Merge Power Bubble</title>
+    <!-- Updated Title -->
+    <style>
+      /* --- Bubble Wrapper Styles --- */
+      :root {
+        /* Bubble specific vars */
+        --bubble-pop-button-bg: rgba(255, 255, 255, 0.7);
+        --bubble-pop-button-bg-hover: rgba(255, 255, 255, 0.9);
+        --bubble-pop-button-icon-color: var(
+          --secondary-color,
+          #3b4cca
+        ); /* Fallback added */
+        --bubble-pop-button-icon-color-hover: var(
+          --secondary-dark,
+          #2e3c9e
+        ); /* Fallback added */
+        --bubble-border-radius: 30px;
+        --bubble-pop-duration: 0.4s;
+
+        /* Base vars from bubble template (can be overridden by game styles below if needed) */
+        --primary-color: #ff5350;
+        --primary-dark: #e0403d;
+        --secondary-color: #3b4cca;
+        --secondary-dark: #2e3c9e;
+        --accent-color: #ffde00;
+        --accent-dark: #e6c900;
+        --bg-color: #f0f4f8; /* Bubble page background */
+        --card-bg: #ffffff;
+        --text-color: #333333; /* Bubble page text */
+        --muted-text-color: #6c757d;
+        --success-color: #4caf50;
+        --error-color: #f44336;
+        --disabled-color: #bdbdbd;
+        --border-color: #e5e7eb;
+        --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+        --mono-font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono",
+          monospace;
+        --base-font-size: 16px;
+        --border-radius: 12px;
+        --card-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+        --focus-ring: 0 0 0 3px rgba(59, 76, 202, 0.4);
+        --transition-speed: 0.3s;
+        --transition-func: ease;
+        --container-max-width: 1800px; /* Adjusted based on game needs */
+      }
+
+      /* Basic Reset & Body Styles (Bubble Page) */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        font-size: var(--base-font-size);
+        scroll-behavior: smooth;
+      }
+      body {
+        background-color: var(--bg-color); /* Use bubble background */
+        color: var(--text-color); /* Use bubble text color */
+        font-family: var(--font-family);
+        line-height: 1.6;
+        min-height: 100vh;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden; /* Game might need this */
+        /* display: flex; Removed */
+        /* justify-content: center; Removed */
+        /* align-items: center; Removed */
+      }
+
+      /* Bubble Wrapper Styling */
+      #bubble-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Revert to center alignment for the column */
+        width: 100%;
+        max-width: var(--container-max-width); /* Limit wrapper width */
+        min-height: calc(100vh - 3rem); /* Ensure minimum height - Restored */
+        /* height: 100%; Removed */
+        background-color: var(
+          --bg-color
+        ); /* Match body or slightly different */
+        border-radius: var(--bubble-border-radius);
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.5),
+          0 10px 30px rgba(0, 0, 0, 0.1);
+        padding: 1rem; /* Removed bottom padding */
+        transition: transform var(--bubble-pop-duration) ease-out,
+          opacity var(--bubble-pop-duration) ease-out;
+        transform-origin: center center;
+        overflow: hidden; /* Important for bubble pop - Restored */
+        position: relative; /* Ensure wrapper context */
+      }
+      @media (min-width: 600px) {
+        #bubble-wrapper {
+          padding: 2rem; /* Removed bottom padding */
+        }
+      }
+
+      /* Pop Out Animation */
+      #bubble-wrapper.popping-out {
+        transform: scale(1.3);
+        opacity: 0;
+        pointer-events: none;
+      }
+      @keyframes pop-out-animation {
+        0% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1.3);
+          opacity: 0;
+        }
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        #bubble-wrapper.popping-out {
+          animation: pop-out-animation var(--bubble-pop-duration) ease-out
+            forwards;
+        }
+      }
+
+      /* Pop Bubble Button */
+      #pop-bubble-button {
+        position: fixed; /* Keep fixed positioning */
+        top: 1.5rem;
+        left: 1.5rem;
+        z-index: 1000; /* Ensure it's above game UI */
+        width: 44px;
+        height: 44px;
+        background-color: var(--bubble-pop-button-bg);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        transition: background-color var(--transition-speed)
+            var(--transition-func),
+          transform var(--transition-speed) var(--transition-func),
+          box-shadow var(--transition-speed) var(--transition-func);
+        appearance: none;
+        padding: 0;
+      }
+      #pop-bubble-button svg {
+        width: 24px;
+        height: 24px;
+        color: var(--bubble-pop-button-icon-color);
+        transition: color var(--transition-speed) var(--transition-func);
+      }
+      #pop-bubble-button:hover {
+        background-color: var(--bubble-pop-button-bg-hover);
+        transform: scale(1.1);
+        box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
+      }
+      #pop-bubble-button:hover svg {
+        color: var(--bubble-pop-button-icon-color-hover);
+      }
+      #pop-bubble-button:focus {
+        outline: none;
+      }
+      #pop-bubble-button:focus-visible {
+        box-shadow: 0 0 0 3px var(--focus-ring), 0 3px 8px rgba(0, 0, 0, 0.15);
+      }
+      #pop-bubble-button:active {
+        transform: scale(1);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      /* --- Game Specific Styles (from duplicato-showdown1.html) --- */
+      /* Game :root variables */
+      :root {
+        --background-color: #0a0a14; /* Even darker space blue */
+        --player-color-primary: #00f2a1; /* Brighter Cyan/Green */
+        --player-color-secondary: #00b894; /* Darker Cyan/Green */
+        --duplicate-color-primary: #7efca9; /* Lighter Green */
+        --duplicate-color-secondary: #57b894;
+        --duplicate-aggressive-tint: rgba(
+          255,
+          107,
+          107,
+          0.15
+        ); /* Tint for aggressive clones */
+        --minion-color-primary: #ff6b6b; /* Vibrant Red */
+        --minion-color-secondary: #d63031; /* Darker Red */
+        --minion-shooter-primary: #feca57; /* Yellow/Orange */
+        --minion-shooter-secondary: #ff9f43;
+        --boss-color-primary: #ff9f43; /* Orange */
+        --boss-color-secondary: #e17055; /* Darker Orange/Red */
+        --projectile-player-color: #ffffff;
+        --projectile-player-glow: rgba(255, 255, 255, 0.7);
+        --projectile-enemy-color: #feca57; /* Yellow/Orange */
+        --projectile-enemy-glow: rgba(254, 202, 87, 0.7);
+        --projectile-enemy-shooter-color: #ff6b6b; /* Red */
+        --projectile-enemy-shooter-glow: rgba(255, 107, 107, 0.7);
+        --boss-laser-color: #ff4757; /* Intense Red for Laser */
+        --powerup-shield-primary: #54a0ff;
+        --powerup-shield-secondary: #2e86de;
+        --powerup-rapidfire-primary: #ffdd59;
+        --powerup-rapidfire-secondary: #ffc312;
+        --powerup-health-primary: #1dd1a1;
+        --powerup-health-secondary: #10ac84;
+        --text-color-game: #e2e8f0; /* Renamed to avoid conflict */
+        --text-muted-color-game: #94a3b8; /* Renamed */
+        --ui-background: rgba(15, 23, 42, 0.9);
+        --ui-border-color: rgba(51, 65, 85, 0.7);
+        --health-bar-background: #334155;
+        --health-bar-player: var(--player-color-primary);
+        --health-bar-enemy: var(--minion-color-primary);
+        --xp-bar-background: #334155;
+        --xp-bar-fill: #a855f7; /* Purple */
+        --cooldown-indicator-bg: #334155;
+        --cooldown-indicator-fill: var(--player-color-primary);
+        --merge-indicator-fill: #f472b6; /* Pink for merge power */
+        --formation-indicator-fill: #818cf8; /* Indigo for formation cooldown */
+        --strength-indicator-color: #fde047; /* Yellow for strength */
+        --particle-color-hit: #ffffff;
+        --particle-color-explosion: #ff9f43; /* Orange */
+        --particle-color-shoot: var(--player-color-secondary);
+        --particle-color-star: rgba(226, 232, 240, 0.6);
+        --particle-color-levelup: #a855f7; /* Purple for Level Up */
+        --particle-color-merge: #f472b6; /* Pink for merge */
+        --particle-color-group: #818cf8; /* Indigo for grouping */
+        --particle-color-disband: #ff6b6b; /* Red for disband/aggressive */
+        --particle-color-strength: #fde047; /* Yellow for strength */
+        --hit-flash-color: rgba(255, 255, 255, 0.8);
+        --font-family-game: "Inter", "Segoe UI", Tahoma, Geneva, Verdana,
+          sans-serif; /* Renamed */
+        --button-bg: var(--player-color-primary);
+        --button-text: var(--background-color);
+        --button-hover-bg: var(--player-color-secondary);
+        --button-active-bg: #00a180;
+        --crosshair-color: rgba(255, 255, 255, 0.7);
+        --stack-indicator-color: rgba(255, 255, 255, 0.9);
+        --gradient-player: linear-gradient(
+          135deg,
+          var(--player-color-primary) 0%,
+          var(--player-color-secondary) 100%
+        );
+        --gradient-duplicate: linear-gradient(
+          135deg,
+          var(--duplicate-color-primary) 0%,
+          var(--duplicate-color-secondary) 100%
+        );
+        --gradient-minion: linear-gradient(
+          135deg,
+          var(--minion-color-primary) 0%,
+          var(--minion-color-secondary) 100%
+        );
+        --gradient-minion-shooter: linear-gradient(
+          135deg,
+          var(--minion-shooter-primary) 0%,
+          var(--minion-shooter-secondary) 100%
+        );
+        --gradient-boss: linear-gradient(
+          135deg,
+          var(--boss-color-primary) 0%,
+          var(--boss-color-secondary) 100%
+        );
+        --gradient-powerup-shield: linear-gradient(
+          135deg,
+          var(--powerup-shield-primary) 0%,
+          var(--powerup-shield-secondary) 100%
+        );
+        --gradient-powerup-rapidfire: linear-gradient(
+          135deg,
+          var(--powerup-rapidfire-primary) 0%,
+          var(--powerup-rapidfire-secondary) 100%
+        );
+        --gradient-powerup-health: linear-gradient(
+          135deg,
+          var(--powerup-health-primary) 0%,
+          var(--powerup-health-secondary) 100%
+        );
+      }
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap");
+
+      /* Game Container Styles */
+      #game-container {
+        position: relative; /* Changed from absolute to relative within bubble */
+        border: 1px solid var(--ui-border-color);
+        border-radius: 16px;
+        box-shadow: 0 0 45px rgba(0, 242, 161, 0.3), 0 0 15px rgba(0, 0, 0, 0.4);
+        background-color: #0e111a; /* Game background */
+        overflow: hidden;
+        width: 95%; /* Make it responsive within bubble */
+        /* height: 80vh; REMOVED fixed height */
+        flex-grow: 1; /* Allow game container to take available space - Restored */
+        max-width: 1800px; /* Match container max width */
+        /* max-height: 1100px; Removed max-height constraint */
+        margin-top: 1rem; /* Add some space from title */
+        display: flex; /* Ensure canvas inside can stretch */
+        align-self: center; /* Explicitly center this item */
+        color: var(--text-color-game); /* Use game text color */
+        font-family: var(--font-family-game); /* Use game font */
+      }
+      canvas {
+        display: block;
+        background: transparent;
+        cursor: none;
+        width: 100%;
+        height: 100%;
+      } /* Make canvas fill container */
+      #ui-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 18px;
+        box-sizing: border-box;
+        z-index: 10;
+      }
+      .ui-panel {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--ui-background);
+        padding: 10px 15px;
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--ui-border-color);
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 0.9em;
+      }
+      .ui-bottom {
+        justify-content: space-between;
+        color: var(--text-muted-color-game);
+        background: rgba(15, 23, 42, 0.8);
+        pointer-events: all;
+        padding: 8px 15px;
+      }
+      #score,
+      #player-health-ui,
+      #duplicate-info,
+      #wave-info,
+      #boss-health-ui,
+      #high-score-ui,
+      #player-level-ui,
+      #player-strength-ui {
+        font-weight: 700;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      #player-strength-ui {
+        color: var(--strength-indicator-color);
+      }
+      #player-strength-ui span {
+        font-weight: bold;
+        margin-left: 2px;
+      }
+      #player-health-ui span,
+      #boss-health-ui span {
+        color: var(--health-bar-player);
+        margin-left: 4px;
+        min-width: 30px;
+        text-align: right;
+      }
+      #boss-health-ui span {
+        color: var(--health-bar-enemy);
+      }
+      #high-score-ui {
+        color: var(--powerup-rapidfire-primary);
+      }
+      #player-level-ui {
+        color: var(--xp-bar-fill);
+      }
+      .cooldown-indicator {
+        display: inline-block;
+        width: 50px;
+        height: 9px;
+        background-color: var(--cooldown-indicator-bg);
+        border-radius: 5px;
+        overflow: hidden;
+        margin-left: 4px;
+        vertical-align: middle;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+      }
+      .cooldown-indicator .fill {
+        width: 0%;
+        height: 100%;
+        background: var(--gradient-player);
+        border-radius: 4px;
+        transition: width 0.1s linear;
+      }
+      .cooldown-indicator .fill.merge-fill {
+        background: linear-gradient(
+          90deg,
+          var(--merge-indicator-fill) 0%,
+          #ec4899 100%
+        );
+      }
+      #xp-bar-container {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .xp-bar {
+        width: 70px;
+        height: 9px;
+        background-color: var(--xp-bar-background);
+        border-radius: 5px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+      }
+      .xp-bar .fill {
+        width: 0%;
+        height: 100%;
+        background-color: var(--xp-bar-fill);
+        border-radius: 4px;
+        transition: width 0.3s ease-out;
+      }
+      #powerup-timers {
+        display: flex;
+        gap: 8px;
+        margin-left: auto;
+        align-items: center;
+      }
+      .powerup-timer {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        font-size: 0.8em;
+        padding: 2px 6px;
+        border-radius: 5px;
+        background: rgba(0, 0, 0, 0.25);
+        border: 1px solid var(--ui-border-color);
+      }
+      .powerup-timer.shield {
+        border-color: var(--powerup-shield-primary);
+        color: var(--powerup-shield-primary);
+      }
+      .powerup-timer.rapid-fire {
+        border-color: var(--powerup-rapidfire-primary);
+        color: var(--powerup-rapidfire-primary);
+      }
+      .powerup-timer.merge-boost {
+        border-color: var(--merge-indicator-fill);
+        color: var(--merge-indicator-fill);
+      }
+      .powerup-timer.strength-boost {
+        border-color: var(--strength-indicator-color);
+        color: var(--strength-indicator-color);
+      }
+      #game-message {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.9);
+        background: var(--ui-background);
+        padding: 35px 55px;
+        border-radius: 16px;
+        text-align: center;
+        font-size: 2.2em;
+        font-weight: bold;
+        display: none;
+        opacity: 0;
+        flex-direction: column;
+        align-items: center;
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--player-color-primary);
+        box-shadow: 0 6px 35px rgba(0, 242, 161, 0.35);
+        transition: opacity 0.3s ease,
+          transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 20;
+      }
+      #game-message.visible {
+        display: flex;
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      #game-message button {
+        margin-top: 28px;
+        padding: 16px 35px;
+        font-size: 0.65em;
+        font-weight: bold;
+        background: var(--gradient-player);
+        color: var(--background-color);
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        pointer-events: all;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+      }
+      #game-message button:hover {
+        filter: brightness(1.15);
+        box-shadow: 0 6px 15px rgba(0, 242, 161, 0.4);
+      }
+      #game-message button:active {
+        transform: scale(0.94);
+        filter: brightness(0.9);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+      }
+      #game-message button:focus-visible {
+        outline: 3px solid var(--player-color-primary);
+        outline-offset: 4px;
+      }
+      .controls-area {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      .controls-area span {
+        font-size: 0.8em;
+      }
+      .clone-controls {
+        display: flex;
+        gap: 10px;
+        pointer-events: all;
+      }
+      .control-button {
+        background: rgba(51, 65, 85, 0.8);
+        border: 1px solid var(--ui-border-color);
+        color: var(--text-muted-color-game);
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 0.8em;
+        cursor: pointer;
+        transition: background-color 0.2s, color 0.2s, box-shadow 0.2s,
+          opacity 0.2s;
+        position: relative;
+        overflow: hidden;
+        min-width: 70px;
+        text-align: center;
+      }
+      .control-button:hover:not(:disabled) {
+        background-color: rgba(71, 85, 105, 0.9);
+        color: var(--text-color-game);
+        box-shadow: 0 0 8px rgba(84, 160, 255, 0.3);
+      }
+      .control-button:active:not(:disabled) {
+        background-color: rgba(30, 41, 59, 0.9);
+        transform: translateY(1px);
+      }
+      .control-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: rgba(51, 65, 85, 0.5);
+        color: var(--text-muted-color-game);
+        box-shadow: none;
+      }
+      .control-button .cooldown-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(244, 114, 182, 0.6);
+        transform: translateY(100%);
+        transition: transform 0.1s linear;
+        pointer-events: none;
+      }
+      .control-button.formation-cooldown .cooldown-overlay {
+        background: rgba(129, 140, 248, 0.6);
+      }
+      .control-button.disband-cooldown .cooldown-overlay {
+        background: rgba(255, 107, 107, 0.6);
+      }
+      .control-button .keybind {
+        font-size: 0.8em;
+        margin-left: 5px;
+        opacity: 0.7;
+        font-weight: bold;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 1px 4px;
+        border-radius: 3px;
+        display: inline-block;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+      }
+
+      /* Game Title (Optional - can be removed if bubble title is sufficient) */
+      .game-title {
+        text-align: center;
+        margin-bottom: 1rem; /* Reduced margin */
+        color: var(--player-color-primary); /* Use game color */
+        font-size: clamp(1.8rem, 4vw, 2.5rem); /* Slightly smaller */
+        font-weight: 700;
+        text-shadow: 0 0 8px rgba(0, 242, 161, 0.4);
+        margin-top: 0; /* Remove extra top margin */
+      }
+    </style>
+  </head>
+  <body>
+    <button id="pop-bubble-button" aria-label="Close Bubble">
+      <!-- Keep -->
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+
+    <div id="bubble-wrapper">
+      <!-- Keep -->
+      <h1 class="game-title">Superhero Duplicator Evolved</h1>
+      <!-- Updated Title Text -->
+
+      <!-- Game Container (from duplicato-showdown1.html) -->
+      <div id="game-container">
+        <canvas
+          id="gameCanvas"
+          role="img"
+          aria-label="Superhero Duplicator Showdown game area. Control your hero with WASD/Arrows, aim with mouse, shoot with Click/Space, duplicate with E, manage clones with G (Group)/H (Disband/Aggro)/R (Merge & Empower), and pause with P. Level up to increase duplicate limit. Merge clones to gain permanent power."
+        ></canvas>
+        <div id="ui-overlay">
+          <div class="ui-panel ui-top">
+            <div id="player-health-ui">HP: <span>100</span></div>
+            <div id="player-level-ui">
+              Lvl: <span id="level-value">1</span>
+              <div id="xp-bar-container">
+                <div class="xp-bar">
+                  <span class="fill" id="xp-fill"></span>
+                </div>
+                <span
+                  id="xp-text"
+                  style="font-size: 0.8em; color: var(--text-muted-color-game)"
+                  >0/100</span
+                >
+              </div>
+            </div>
+            <div
+              id="player-strength-ui"
+              title="Base Damage Multiplier (Increased by Merging)"
+            >
+              ⚡Str: <span>100%</span>
+            </div>
+            <div id="duplicate-info">
+              Dups: <span id="duplicate-count">0 / 3</span>
+              <span
+                class="cooldown-indicator"
+                id="duplicate-cooldown"
+                title="Duplicate Cooldown (E)"
+              >
+                <span class="fill"></span>
+              </span>
+            </div>
+            <div id="shoot-cooldown-ui" title="Shoot Cooldown">
+              <span class="cooldown-indicator" id="shoot-cooldown">
+                <span class="fill"></span>
+              </span>
+            </div>
+            <div id="merge-cooldown-ui" title="Merge Cooldown (R)">
+              <span class="cooldown-indicator" id="merge-cooldown">
+                <span class="fill merge-fill"></span>
+              </span>
+            </div>
+            <div id="score">Score: 0</div>
+            <div id="high-score-ui">Best: 0</div>
+            <div id="wave-info">Wave: 1</div>
+            <div id="powerup-timers"></div>
+            <div id="boss-health-ui" style="display: none">
+              Boss HP: <span></span>
+            </div>
+          </div>
+          <div id="game-message">
+            <p id="message-text">Message Goes Here</p>
+            <button id="start-button">Start Game</button>
+            <button id="restart-button" style="display: none">
+              Restart Game
+            </button>
+          </div>
+          <div class="ui-panel ui-bottom">
+            <div class="controls-area">
+              <span
+                >WASD/▲▼◄►: Move | Mouse: Aim | Click/Spc: Shoot | E: Dup | P:
+                Pause</span
+              >
+              <div class="clone-controls">
+                <button
+                  id="group-button"
+                  class="control-button formation-cooldown"
+                  title="Group Clones Defensively (G)"
+                >
+                  Group<span class="keybind">G</span>
+                  <span class="cooldown-overlay"></span>
+                </button>
+                <button
+                  id="disband-button"
+                  class="control-button disband-cooldown"
+                  title="Disband Clones Aggressively (H)"
+                >
+                  Disband<span class="keybind">H</span>
+                  <span class="cooldown-overlay"></span>
+                </button>
+                <button
+                  id="merge-button"
+                  class="control-button"
+                  title="Merge Clones for Power (R)"
+                >
+                  Merge<span class="keybind">R</span>
+                  <span class="cooldown-overlay"></span>
+                </button>
+              </div>
+            </div>
+            <span
+              id="formation-status"
+              style="font-weight: bold; min-width: 120px; text-align: right"
+              >Mode: Following</span
+            >
+          </div>
+        </div>
+      </div>
+      <!-- End Game Container -->
+      <div
+        id="aria-announcer"
+        class="sr-only"
+        aria-live="polite"
+        aria-atomic="true"
+      ></div>
+    </div>
+    <!-- End Bubble Wrapper -->
+    <footer
+      style="
+        position: fixed; /* Position relative to viewport */
+        bottom: 1rem; /* Distance from bottom */
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 0.8em;
+        color: var(--text-muted-color-game, #94a3b8);
+        padding: 10px;
+        z-index: 5; /* Below bubble content (z-index 10+) but above body */
+        pointer-events: none; /* Allow clicks to pass through if needed */
+      "
+    >
+      <p style="pointer-events: auto">
+        <!-- Allow interaction with text if needed -->
+        Generated by Gemini 2.5 Pro with 5 refinements.<br />
+        Initial Prompt: "create a super hero game where you have powers and have
+        to fight minons and a boss battle at the end, have your powers be
+        duplicate powers like duplikate form invincibles"
+      </p>
+    </footer>
+
+    <script>
+      // Basic Pop Bubble Functionality (Keep this script block)
+      const popButton = document.getElementById("pop-bubble-button");
+      const bubbleWrapper = document.getElementById("bubble-wrapper");
+
+      popButton.addEventListener("click", () => {
+        bubbleWrapper.classList.add("popping-out");
+        // Optional: Redirect or close after animation
+        bubbleWrapper.addEventListener(
+          "animationend",
+          () => {
+            // Example: Go back to the main page or close the window
+            window.location.href = "index.html"; // Or parent.closeBubble(); etc.
+            console.log("Bubble popped!");
+            // Visually remove bubble elements after animation
+            if (bubbleWrapper) bubbleWrapper.style.display = "none";
+            if (popButton) popButton.style.display = "none";
+          },
+          { once: true }
+        );
+      });
+
+      // --- Game Specific Script (from duplicato-showdown1.html) ---
+      /**
+       * Superhero Duplicator Evolved - Merge Power v7
+       *
+       * Refactored & Enhanced based on User Request:
+       * - Merge Mechanic Overhaul:
+       *    - Merging clones now provides a permanent base strength increase (`playerBaseStrengthMultiplier`).
+       *    - Merging also grants a temporary damage boost (`mergeBoostMultiplier`).
+       *    - Newly created duplicates inherit the player's current base strength.
+       * - Leveling System: Confirmed to primarily increase max duplicate count.
+       * - Grouping (G): Clones follow player closely in a defensive formation (existing logic maintained).
+       * - Disbanding (H): Clones enter 'AGGRESSIVE_FOLLOW' state:
+       *    - Prioritize attacking nearby enemies.
+       *    - Wander/seek enemies if none are close.
+       *    - Return to player defensively only if player health drops below 30% (`LOW_HEALTH_THRESHOLD`).
+       * - Automatic Emergency Merge:
+       *    - If player health drops below 10% (`CRITICAL_HEALTH_THRESHOLD`), clones automatically initiate merge (`AUTO_MERGING` state).
+       *    - Auto-merge prioritizes transferring clone's current health to the player.
+       * - UI Enhancements:
+       *    - Added Player Strength indicator.
+       *    - Added Formation Status indicator.
+       *    - Added specific cooldown overlay style for Disband button.
+       *    - Added temporary Strength Boost indicator to powerup timers.
+       * - Visual Cues: Added subtle red tint to duplicates in `AGGRESSIVE_FOLLOW` state. Added particles for state changes.
+       * - Code Structure: Introduced new constants, state logic, and helper functions for clarity.
+       */
+      (function () {
+        // IIFE for encapsulation
+        const canvas = document.getElementById("gameCanvas");
+        // Add null check for canvas context
+        if (!canvas) {
+          console.error("Game canvas not found!");
+          return;
+        }
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          console.error("Could not get 2D context for canvas!");
+          return;
+        }
+        const gameContainer = document.getElementById("game-container");
+        if (!gameContainer) {
+          console.error("Game container not found!");
+          return;
+        }
+
+        // --- Cached UI Elements ---
+        const scoreEl = document.getElementById("score");
+        const highScoreEl = document.getElementById("high-score-ui");
+        const playerHealthUIEl = document.getElementById("player-health-ui"); // Get parent first
+        const playerHealthEl = playerHealthUIEl
+          ? playerHealthUIEl.querySelector("span")
+          : null;
+        const playerStrengthUIEl =
+          document.getElementById("player-strength-ui"); // Get parent first
+        const playerStrengthEl = playerStrengthUIEl
+          ? playerStrengthUIEl.querySelector("span")
+          : null; // NEW
+        const duplicateInfoEl = document.getElementById("duplicate-info");
+        const duplicateCountEl = document.getElementById("duplicate-count");
+        const waveInfoEl = document.getElementById("wave-info");
+        const bossHealthEl = document.getElementById("boss-health-ui");
+        const bossHealthSpan = bossHealthEl
+          ? bossHealthEl.querySelector("span")
+          : null;
+        const gameMessageEl = document.getElementById("game-message");
+        const messageTextEl = document.getElementById("message-text");
+        const startButton = document.getElementById("start-button");
+        const restartButton = document.getElementById("restart-button");
+        const ariaAnnouncer = document.getElementById("aria-announcer");
+        const shootCooldownUIEl = document.getElementById("shoot-cooldown"); // Get parent first
+        const shootCooldownIndicator = shootCooldownUIEl
+          ? shootCooldownUIEl.querySelector(".fill")
+          : null;
+        const duplicateCooldownUIEl =
+          document.getElementById("duplicate-cooldown"); // Get parent first
+        const duplicateCooldownIndicator = duplicateCooldownUIEl
+          ? duplicateCooldownUIEl.querySelector(".fill")
+          : null;
+        const mergeCooldownUIEl = document.getElementById("merge-cooldown"); // Get parent first
+        const mergeCooldownIndicator = mergeCooldownUIEl
+          ? mergeCooldownUIEl.querySelector(".fill")
+          : null;
+        const mergeButton = document.getElementById("merge-button");
+        const mergeButtonCooldownOverlay = mergeButton
+          ? mergeButton.querySelector(".cooldown-overlay")
+          : null;
+        const groupButton = document.getElementById("group-button");
+        const groupButtonCooldownOverlay = groupButton
+          ? groupButton.querySelector(".cooldown-overlay")
+          : null;
+        const disbandButton = document.getElementById("disband-button");
+        const disbandButtonCooldownOverlay = disbandButton
+          ? disbandButton.querySelector(".cooldown-overlay")
+          : null;
+        const powerupTimersContainer =
+          document.getElementById("powerup-timers");
+        const playerLevelUIEl = document.getElementById("player-level-ui"); // Get parent first
+        const playerLevelValueEl = playerLevelUIEl
+          ? playerLevelUIEl.querySelector("#level-value")
+          : null;
+        const xpBarContainerEl = document.getElementById("xp-bar-container"); // Get parent first
+        const xpFillEl = xpBarContainerEl
+          ? xpBarContainerEl.querySelector("#xp-fill")
+          : null;
+        const xpTextEl = xpBarContainerEl
+          ? xpBarContainerEl.querySelector("#xp-text")
+          : null;
+        const formationStatusEl = document.getElementById("formation-status"); // NEW
+
+        // Add checks for essential elements
+        if (
+          !playerHealthEl ||
+          !playerStrengthEl ||
+          !duplicateCountEl ||
+          !waveInfoEl ||
+          !bossHealthSpan ||
+          !gameMessageEl ||
+          !messageTextEl ||
+          !startButton ||
+          !restartButton ||
+          !ariaAnnouncer ||
+          !shootCooldownIndicator ||
+          !duplicateCooldownIndicator ||
+          !mergeCooldownIndicator ||
+          !mergeButtonCooldownOverlay ||
+          !groupButtonCooldownOverlay ||
+          !disbandButtonCooldownOverlay ||
+          !powerupTimersContainer ||
+          !playerLevelValueEl ||
+          !xpFillEl ||
+          !xpTextEl ||
+          !formationStatusEl
+        ) {
+          console.error(
+            "One or more UI elements could not be found. Game cannot start."
+          );
+          if (gameMessageEl && messageTextEl && restartButton) {
+            // Try to show an error message
+            messageTextEl.textContent = "UI Error!";
+            restartButton.style.display = "none";
+            startButton.style.display = "none";
+            gameMessageEl.classList.add("visible");
+          }
+          return;
+        }
+
+        // --- Canvas & Sizing ---
+        let canvasWidth, canvasHeight;
+        function resizeCanvas() {
+          // Adjust sizing relative to the container, not window
+          const containerRect = gameContainer.getBoundingClientRect();
+          canvasWidth = containerRect.width;
+          canvasHeight = containerRect.height;
+          // Ensure canvas dimensions match container dimensions
+          if (canvas.width !== canvasWidth || canvas.height !== canvasHeight) {
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+          }
+          // No need to resize gameContainer style here, it's handled by CSS
+
+          if (
+            player &&
+            gameState !== "START" &&
+            gameState !== "GAME_OVER" &&
+            gameState !== "WIN"
+          ) {
+            player.x = Math.max(
+              player.radius,
+              Math.min(canvasWidth - player.radius, player.x)
+            );
+            player.y = Math.max(
+              player.radius,
+              Math.min(canvasHeight - player.radius, player.y)
+            );
+          }
+          createStarfield(); // Recreate stars for new dimensions
+        }
+
+        // --- Game Constants & Settings ---
+        const PLAYER_SPEED = 5.0;
+        const PLAYER_HEALTH = 100;
+        const PLAYER_SIZE = 25;
+        const PROJECTILE_SPEED = 9.5;
+        const PROJECTILE_SIZE = 7;
+        const PROJECTILE_DAMAGE_BASE = 12; // Base damage before multipliers
+        const SHOOT_COOLDOWN_BASE = 160;
+        const DUPLICATE_COOLDOWN = 3800;
+        const DUPLICATE_BASE_MAX = 3; // Initial max clones
+        const DUPLICATE_HEALTH = 75;
+        const DUPLICATE_SHOOT_COOLDOWN = 450;
+        const DUPLICATE_ATTACK_RANGE = 380;
+        const DUPLICATE_FOLLOW_DISTANCE = 80;
+        const DUPLICATE_FOLLOW_STRENGTH = 0.038;
+        const DUPLICATE_GROUP_DISTANCE = 25;
+        const DUPLICATE_GROUP_ARC_SPREAD = Math.PI / 3;
+        const DUPLICATE_GROUP_STRENGTH = 0.18;
+        const DUPLICATE_GROUP_SHOOT_COOLDOWN_MOD = 1.3;
+        const DUPLICATE_AGGRESSIVE_SEEK_STRENGTH = 0.025;
+        const DUPLICATE_AGGRESSIVE_WANDER_STRENGTH = 0.01;
+        const LOW_HEALTH_THRESHOLD = 0.3; // 30% HP for clones to return
+        const CRITICAL_HEALTH_THRESHOLD = 0.1; // 10% HP for auto-merge
+
+        // Formation/Merge Constants
+        const MERGE_COOLDOWN = 18000;
+        const MERGE_HEALTH_BONUS_FACTOR = 0.3; // Health gain based on *clone max* health
+        const MERGE_STRENGTH_GAIN_PER_CLONE = 0.05; // Permanent base strength increase
+        const MERGE_TEMP_BOOST_PER_CLONE = 0.15; // Temporary damage multiplier bonus
+        const MERGE_BOOST_DURATION = 8000; // Duration of temporary boost
+        const MERGE_PULL_STRENGTH = 0.18;
+        const AUTO_MERGE_PULL_STRENGTH = 0.22; // Slightly stronger pull for emergencies
+        const AUTO_MERGE_HEALTH_FACTOR = 1.8; // Bonus multiplier for health gained in auto-merge (based on clone current health)
+        const FORMATION_CHANGE_COOLDOWN = 750; // Cooldown between Group/Disband actions
+
+        // Enemy, Boss, XP, Particle Constants (mostly unchanged)
+        const MINION_SPEED = 1.9;
+        const MINION_HEALTH = 35;
+        const MINION_SIZE = 21;
+        const MINION_SPAWN_INTERVAL = 1150;
+        const MINION_SCORE_VALUE = 15;
+        const MINION_XP_VALUE = 10;
+        const MINIONS_PER_WAVE_INCREASE = 3;
+        const SHOOTING_MINION_CHANCE = 0.3;
+        const SHOOTING_MINION_COOLDOWN = 1800;
+        const SHOOTING_MINION_PROJECTILE_SPEED = 5.5;
+        const SHOOTING_MINION_PROJECTILE_DAMAGE = 8;
+        const BOSS_HEALTH = 1200;
+        const BOSS_SIZE = 65;
+        const BOSS_SPEED = 1.5;
+        const BOSS_SCORE_VALUE = 500;
+        const BOSS_XP_VALUE = 200;
+        const BOSS_SHOOT_COOLDOWN = 580;
+        const BOSS_WAVE_TRIGGER = 10;
+        const BOSS_LASER_CHARGE_TIME = 2500;
+        const BOSS_LASER_DURATION = 1000;
+        const BOSS_LASER_COOLDOWN = 7500;
+        const BOSS_LASER_DAMAGE_PER_TICK = 1.6;
+        const BOSS_LASER_WIDTH = 20;
+        const XP_BASE_REQ = 100;
+        const XP_INCREASE_FACTOR = 1.55;
+        const PARTICLE_COUNT_HIT = 10;
+        const PARTICLE_COUNT_EXPLOSION = 40;
+        const PARTICLE_COUNT_SHOOT = 4;
+        const PARTICLE_COUNT_LEVELUP = 50;
+        const PARTICLE_COUNT_MERGE = 35;
+        const PARTICLE_COUNT_GROUP = 15;
+        const PARTICLE_COUNT_DISBAND = 20;
+        const PARTICLE_COUNT_STRENGTH = 18; // For strength gain
+        const HIT_FLASH_DURATION = 120;
+        const KNOCKBACK_STRENGTH = 0.65;
+        const POWERUP_DROP_CHANCE = 0.11;
+        const POWERUP_SIZE = 17;
+        const POWERUP_DURATION = { shield: 8000, rapidFire: 10000 };
+        const RAPID_FIRE_MULTIPLIER = 0.4;
+        const STAR_COUNT = 250;
+        const STAR_MAX_SPEED = 0.6;
+        const SCREEN_SHAKE_DECAY = 0.92;
+
+        // --- Game State Variables ---
+        let gameState = "START";
+        let score = 0;
+        let highScore =
+          localStorage.getItem("superheroDuplicatorHighScore") || 0;
+        let wave = 1;
+        let minionsToSpawn = 6;
+        let minionsDefeatedThisWave = 0;
+        let bossActive = false;
+        let keys = {};
+        let mouse = { x: 0, y: 0, down: false };
+        let player;
+        let duplicates = [];
+        let enemies = [];
+        let projectiles = [];
+        let particles = [];
+        let powerups = [];
+        let stars = [];
+        let gameTime = 0;
+
+        let currentShootCooldown = SHOOT_COOLDOWN_BASE;
+        let lastShootTime = 0;
+        let lastDuplicateTime = -DUPLICATE_COOLDOWN;
+        let lastMinionSpawnTime = 0;
+        let minionsSpawnedThisWave = 0;
+        let screenShakeIntensity = 0;
+        let animationFrameId;
+        let activePowerups = { shield: 0, rapidFire: 0 };
+
+        // Formation/Merge State
+        let cloneFormationState = "FOLLOWING"; // FOLLOWING, GROUPED, AGGRESSIVE_FOLLOW, MERGING, AUTO_MERGING
+        let lastMergeTime = -MERGE_COOLDOWN;
+        let mergeBoostTimer = 0; // Timer for temporary merge damage boost
+        let currentMergeBoostMultiplier = 1.0; // Temp multiplier
+        let lastFormationChangeTime = -FORMATION_CHANGE_COOLDOWN;
+        let isFormationChangeOnCooldown = false;
+        let wanderTargetX = canvasWidth / 2; // For aggressive wander
+        let wanderTargetY = canvasHeight / 2;
+        let lastWanderChange = 0;
+
+        // --- Cached CSS Variables & Gradients ---
+        const cssVars = {
+          playerPrimary: getCssVariable("--player-color-primary"),
+          playerSecondary: getCssVariable("--player-color-secondary"),
+          duplicatePrimary: getCssVariable("--duplicate-color-primary"),
+          duplicateSecondary: getCssVariable("--duplicate-color-secondary"),
+          duplicateAggressiveTint: getCssVariable(
+            "--duplicate-aggressive-tint"
+          ),
+          minionPrimary: getCssVariable("--minion-color-primary"),
+          minionSecondary: getCssVariable("--minion-color-secondary"),
+          minionShooterPrimary: getCssVariable("--minion-shooter-primary"),
+          minionShooterSecondary: getCssVariable("--minion-shooter-secondary"),
+          bossPrimary: getCssVariable("--boss-color-primary"),
+          bossSecondary: getCssVariable("--boss-color-secondary"),
+          projectilePlayer: getCssVariable("--projectile-player-color"),
+          projectilePlayerGlow: getCssVariable("--projectile-player-glow"),
+          projectileEnemy: getCssVariable("--projectile-enemy-color"),
+          projectileEnemyGlow: getCssVariable("--projectile-enemy-glow"),
+          projectileEnemyShooter: getCssVariable(
+            "--projectile-enemy-shooter-color"
+          ),
+          projectileEnemyShooterGlow: getCssVariable(
+            "--projectile-enemy-shooter-glow"
+          ),
+          bossLaser: getCssVariable("--boss-laser-color"),
+          healthBarPlayer: getCssVariable("--health-bar-player"),
+          healthBarEnemy: getCssVariable("--health-bar-enemy"),
+          healthBarBg: getCssVariable("--health-bar-background"),
+          xpBarFill: getCssVariable("--xp-bar-fill"),
+          particleHit: getCssVariable("--particle-color-hit"),
+          particleExplosion: getCssVariable("--particle-color-explosion"),
+          particleShoot: getCssVariable("--particle-color-shoot"),
+          particleStar: getCssVariable("--particle-color-star"),
+          particleLevelUp: getCssVariable("--particle-color-levelup"),
+          particleMerge: getCssVariable("--particle-color-merge"),
+          particleGroup: getCssVariable("--particle-color-group"),
+          particleDisband: getCssVariable("--particle-color-disband"),
+          particleStrength: getCssVariable("--particle-color-strength"),
+          hitFlash: getCssVariable("--hit-flash-color"),
+          crosshair: getCssVariable("--crosshair-color"),
+          powerupShieldPrimary: getCssVariable("--powerup-shield-primary"),
+          powerupShieldSecondary: getCssVariable("--powerup-shield-secondary"),
+          powerupRapidFirePrimary: getCssVariable(
+            "--powerup-rapidfire-primary"
+          ),
+          powerupRapidFireSecondary: getCssVariable(
+            "--powerup-rapidfire-secondary"
+          ),
+          powerupHealthPrimary: getCssVariable("--powerup-health-primary"),
+          powerupHealthSecondary: getCssVariable("--powerup-health-secondary"),
+          stackIndicator: getCssVariable("--stack-indicator-color"),
+        };
+        const gradients = {
+          player: ctx.createLinearGradient(
+            0,
+            -PLAYER_SIZE / 2,
+            0,
+            PLAYER_SIZE / 2
+          ),
+          duplicate: ctx.createLinearGradient(
+            0,
+            (-PLAYER_SIZE * 0.85) / 2,
+            0,
+            (PLAYER_SIZE * 0.85) / 2
+          ),
+          minion: ctx.createLinearGradient(
+            0,
+            -MINION_SIZE / 2,
+            0,
+            MINION_SIZE / 2
+          ),
+          minionShooter: ctx.createLinearGradient(
+            0,
+            -MINION_SIZE / 2,
+            0,
+            MINION_SIZE / 2
+          ),
+          boss: ctx.createLinearGradient(0, -BOSS_SIZE / 2, 0, BOSS_SIZE / 2),
+          powerupShield: ctx.createLinearGradient(
+            0,
+            -POWERUP_SIZE / 2,
+            0,
+            POWERUP_SIZE / 2
+          ),
+          powerupRapidFire: ctx.createLinearGradient(
+            0,
+            -POWERUP_SIZE / 2,
+            0,
+            POWERUP_SIZE / 2
+          ),
+          powerupHealth: ctx.createLinearGradient(
+            0,
+            -POWERUP_SIZE / 2,
+            0,
+            POWERUP_SIZE / 2
+          ),
+        };
+        gradients.player.addColorStop(0, cssVars.playerPrimary);
+        gradients.player.addColorStop(1, cssVars.playerSecondary);
+        gradients.duplicate.addColorStop(0, cssVars.duplicatePrimary);
+        gradients.duplicate.addColorStop(1, cssVars.duplicateSecondary);
+        gradients.minion.addColorStop(0, cssVars.minionPrimary);
+        gradients.minion.addColorStop(1, cssVars.minionSecondary);
+        gradients.minionShooter.addColorStop(0, cssVars.minionShooterPrimary);
+        gradients.minionShooter.addColorStop(1, cssVars.minionShooterSecondary);
+        gradients.boss.addColorStop(0, cssVars.bossPrimary);
+        gradients.boss.addColorStop(1, cssVars.bossSecondary);
+        gradients.powerupShield.addColorStop(0, cssVars.powerupShieldPrimary);
+        gradients.powerupShield.addColorStop(1, cssVars.powerupShieldSecondary);
+        gradients.powerupRapidFire.addColorStop(
+          0,
+          cssVars.powerupRapidFirePrimary
+        );
+        gradients.powerupRapidFire.addColorStop(
+          1,
+          cssVars.powerupRapidFireSecondary
+        );
+        gradients.powerupHealth.addColorStop(0, cssVars.powerupHealthPrimary);
+        gradients.powerupHealth.addColorStop(1, cssVars.powerupHealthSecondary);
+
+        // --- Utility Functions ---
+        const degToRad = (deg) => (deg * Math.PI) / 180;
+        const distanceSq = (x1, y1, x2, y2) => (x2 - x1) ** 2 + (y2 - y1) ** 2;
+        const distance = (x1, y1, x2, y2) =>
+          Math.sqrt(distanceSq(x1, y1, x2, y2));
+        const getRandom = (min, max) => Math.random() * (max - min) + min;
+        const announce = (message, important = false) => {
+          if (!ariaAnnouncer) return; // Add null check
+          clearTimeout(announce.timeout);
+          announce.timeout = setTimeout(
+            () => {
+              ariaAnnouncer.textContent = message;
+            },
+            important ? 50 : 300
+          );
+        };
+        announce.timeout = null;
+        function getCssVariable(varName) {
+          // Ensure this runs after styles are applied
+          try {
+            return getComputedStyle(document.documentElement)
+              .getPropertyValue(varName)
+              .trim();
+          } catch (e) {
+            console.warn(
+              `Could not get CSS variable ${varName}, using fallback.`
+            );
+            // Provide fallbacks if needed, though game vars are defined above
+            const fallbacks = {
+              "--player-color-primary": "#00f2a1",
+              "--player-color-secondary": "#00b894",
+              "--duplicate-color-primary": "#7efca9",
+              "--duplicate-color-secondary": "#57b894",
+              "--duplicate-aggressive-tint": "rgba(255,107,107,0.15)",
+              "--minion-color-primary": "#ff6b6b",
+              "--minion-color-secondary": "#d63031",
+              "--minion-shooter-primary": "#feca57",
+              "--minion-shooter-secondary": "#ff9f43",
+              "--boss-color-primary": "#ff9f43",
+              "--boss-color-secondary": "#e17055",
+              "--projectile-player-color": "#ffffff",
+              "--projectile-player-glow": "rgba(255,255,255,0.7)",
+              "--projectile-enemy-color": "#feca57",
+              "--projectile-enemy-glow": "rgba(254,202,87,0.7)",
+              "--projectile-enemy-shooter-color": "#ff6b6b",
+              "--projectile-enemy-shooter-glow": "rgba(255,107,107,0.7)",
+              "--boss-laser-color": "#ff4757",
+              "--health-bar-player": "#00f2a1",
+              "--health-bar-enemy": "#ff6b6b",
+              "--health-bar-background": "#334155",
+              "--xp-bar-fill": "#a855f7",
+              "--particle-color-hit": "#ffffff",
+              "--particle-color-explosion": "#ff9f43",
+              "--particle-color-shoot": "#00b894",
+              "--particle-color-star": "rgba(226,232,240,0.6)",
+              "--particle-color-levelup": "#a855f7",
+              "--particle-color-merge": "#f472b6",
+              "--particle-color-group": "#818cf8",
+              "--particle-color-disband": "#ff6b6b",
+              "--particle-color-strength": "#fde047",
+              "--hit-flash-color": "rgba(255,255,255,0.8)",
+              "--crosshair-color": "rgba(255,255,255,0.7)",
+              "--powerup-shield-primary": "#54a0ff",
+              "--powerup-shield-secondary": "#2e86de",
+              "--powerup-rapidfire-primary": "#ffdd59",
+              "--powerup-rapidfire-secondary": "#ffc312",
+              "--powerup-health-primary": "#1dd1a1",
+              "--powerup-health-secondary": "#10ac84",
+              "--stack-indicator-color": "rgba(255,255,255,0.9)",
+              "--font-family-game": "sans-serif",
+            };
+            return fallbacks[varName] || "#ffffff";
+          }
+        }
+
+        // --- Starfield Background ---
+        function createStarfield() {
+          stars = [];
+          for (let i = 0; i < STAR_COUNT; i++) {
+            stars.push({
+              x: Math.random() * canvasWidth,
+              y: Math.random() * canvasHeight,
+              z: Math.random(),
+              size: getRandom(0.5, 2.2),
+            });
+          }
+        }
+        function drawStarfield(deltaTime) {
+          const timeMultiplier = deltaTime > 0 ? deltaTime / (1000 / 60) : 1;
+          const baseSpeed = 0.12 * timeMultiplier;
+          ctx.fillStyle = cssVars.particleStar || "rgba(226, 232, 240, 0.6)"; // Fallback
+          stars.forEach((star) => {
+            star.y += baseSpeed * (1 + star.z * STAR_MAX_SPEED);
+            if (star.y > canvasHeight + star.size) {
+              star.y = -star.size;
+              star.x = Math.random() * canvasWidth;
+              star.z = Math.random();
+              star.size = getRandom(0.5, 2.2);
+            }
+            ctx.beginPath();
+            ctx.arc(star.x, star.y, star.size * star.z, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
+
+        // --- Custom Crosshair ---
+        function drawCrosshair() {
+          ctx.save();
+          ctx.strokeStyle = cssVars.crosshair || "rgba(255, 255, 255, 0.7)"; // Fallback
+          ctx.lineWidth = 2;
+          ctx.globalAlpha = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(mouse.x - 12, mouse.y);
+          ctx.lineTo(mouse.x - 4, mouse.y);
+          ctx.moveTo(mouse.x + 4, mouse.y);
+          ctx.lineTo(mouse.x + 12, mouse.y);
+          ctx.moveTo(mouse.x, mouse.y - 12);
+          ctx.lineTo(mouse.x, mouse.y - 4);
+          ctx.moveTo(mouse.x, mouse.y + 4);
+          ctx.lineTo(mouse.x, mouse.y + 12);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // --- Entity Classes ---
+        class Entity {
+          constructor(x, y, size, gradient, health) {
+            this.x = x;
+            this.y = y;
+            this.size = size;
+            this.radius = size / 2;
+            this.gradient = gradient;
+            this.maxHealth = health;
+            this.health = health;
+            this.vx = 0;
+            this.vy = 0;
+            this.ix = 0;
+            this.iy = 0;
+            this.impulseDamping = 0.88;
+            this.isAlive = true;
+            this.hitFlashTimer = 0;
+            this.shieldTimer = 0;
+          }
+          drawHealthBar(offsetX = 0, offsetY = -12) {
+            if (this.health < this.maxHealth && this.health > 0) {
+              const barWidth = this.size * 1.5;
+              const barHeight = 6;
+              const barX = this.x - barWidth / 2 + offsetX;
+              const barY = this.y - this.radius + offsetY - barHeight;
+              const healthPercentage = this.health / this.maxHealth;
+              ctx.fillStyle = cssVars.healthBarBg || "#334155"; // Fallback
+              ctx.fillRect(barX, barY, barWidth, barHeight);
+              let fillColor =
+                this instanceof Player || this instanceof Duplicate
+                  ? cssVars.healthBarPlayer || "#00f2a1"
+                  : cssVars.healthBarEnemy || "#ff6b6b"; // Fallbacks
+              ctx.fillStyle = fillColor;
+              ctx.fillRect(barX, barY, barWidth * healthPercentage, barHeight);
+              ctx.strokeStyle = "rgba(0,0,0,0.2)";
+              ctx.lineWidth = 1;
+              ctx.strokeRect(barX, barY, barWidth, barHeight);
+            }
+          }
+          applyImpulse(forceX, forceY) {
+            this.ix += forceX;
+            this.iy += forceY;
+          }
+          draw() {
+            /* Base draw */
+          }
+          update(deltaTime) {
+            const timeMultiplier = deltaTime / (1000 / 60);
+            this.x += this.vx * timeMultiplier;
+            this.y += this.vy * timeMultiplier;
+            this.x += this.ix * timeMultiplier;
+            this.y += this.iy * timeMultiplier;
+            this.ix *= this.impulseDamping;
+            this.iy *= this.impulseDamping;
+            if (Math.abs(this.ix) < 0.1) this.ix = 0;
+            if (Math.abs(this.iy) < 0.1) this.iy = 0;
+            if (this.hitFlashTimer > 0) this.hitFlashTimer -= deltaTime;
+            if (this.shieldTimer > 0) this.shieldTimer -= deltaTime;
+          }
+          takeDamage(amount, sourceX = this.x, sourceY = this.y) {
+            if (!this.isAlive) return;
+            if (
+              this.shieldTimer > 0 &&
+              (this instanceof Player || this instanceof Duplicate)
+            ) {
+              this.hitFlashTimer = HIT_FLASH_DURATION * 0.5;
+              createParticles(
+                this.x,
+                this.y,
+                PARTICLE_COUNT_HIT / 2,
+                cssVars.powerupShieldPrimary || "#54a0ff",
+                2,
+                4
+              ); // Fallback
+              triggerScreenShake(2);
+              return;
+            }
+            this.health -= amount;
+            this.hitFlashTimer = HIT_FLASH_DURATION;
+            createParticles(
+              this.x,
+              this.y,
+              PARTICLE_COUNT_HIT,
+              cssVars.particleHit || "#ffffff",
+              3,
+              7
+            ); // Fallback
+            const angleFromSource = Math.atan2(
+              this.y - sourceY,
+              this.x - sourceX
+            );
+            const knockbackForce =
+              KNOCKBACK_STRENGTH * (1 + Math.random() * 0.5);
+            this.applyImpulse(
+              Math.cos(angleFromSource) * knockbackForce,
+              Math.sin(angleFromSource) * knockbackForce
+            );
+            if (this.health <= 0) {
+              this.health = 0;
+              this.isAlive = false;
+              createParticles(
+                this.x,
+                this.y,
+                PARTICLE_COUNT_EXPLOSION,
+                cssVars.particleExplosion || "#ff9f43",
+                5,
+                22
+              ); // Fallback
+              if (this instanceof Player) {
+                triggerScreenShake(15);
+                announce("Player defeated. Game Over.", true);
+                setGameState("GAME_OVER");
+              } else if (this instanceof Duplicate) {
+                /* Reindexing happens in main loop */
+              } else if (this instanceof Enemy) {
+                score += this.scoreValue || MINION_SCORE_VALUE;
+                if (player && player.isAlive) {
+                  player.addXp(this.xpValue || MINION_XP_VALUE);
+                }
+                minionsDefeatedThisWave++;
+                if (minionsDefeatedThisWave % 15 === 0)
+                  announce(`Score ${score}`);
+                triggerScreenShake(this instanceof Boss ? 20 : 4);
+                if (this instanceof Minion || this instanceof ShootingMinion) {
+                  if (Math.random() < POWERUP_DROP_CHANCE)
+                    spawnPowerup(this.x, this.y);
+                } else if (this instanceof Boss) {
+                  announce(`Boss defeated! Score ${score}`, true);
+                  for (let i = 0; i < 3; i++)
+                    spawnPowerup(
+                      this.x + getRandom(-40, 40),
+                      this.y + getRandom(-40, 40)
+                    );
+                  setGameState("WIN");
+                }
+              }
+            } else {
+              if (this instanceof Player || this instanceof Boss)
+                triggerScreenShake(5);
+            }
+          }
+        }
+
+        class Player extends Entity {
+          constructor(x, y) {
+            super(x, y, PLAYER_SIZE, gradients.player, PLAYER_HEALTH);
+            this.level = 1;
+            this.xp = 0;
+            this.xpToNextLevel = XP_BASE_REQ;
+            this.maxDuplicatesBonus = 0;
+            this.levelUpEffectTimer = 0;
+            this.baseMaxHealth = PLAYER_HEALTH;
+            this.playerBaseStrengthMultiplier = 1.0;
+          }
+          getCurrentMaxDuplicates() {
+            return DUPLICATE_BASE_MAX + this.maxDuplicatesBonus;
+          }
+          getCurrentDamage() {
+            return (
+              PROJECTILE_DAMAGE_BASE *
+              this.playerBaseStrengthMultiplier *
+              currentMergeBoostMultiplier
+            );
+          }
+          addXp(amount) {
+            if (!this.isAlive) return;
+            this.xp += amount;
+            while (this.xp >= this.xpToNextLevel) this.levelUp();
+            updateUI(performance.now());
+          }
+          levelUp() {
+            this.xp -= this.xpToNextLevel;
+            this.level++;
+            this.xpToNextLevel = Math.floor(
+              XP_BASE_REQ * XP_INCREASE_FACTOR ** (this.level - 1)
+            );
+            this.maxDuplicatesBonus++;
+            this.maxHealth = this.baseMaxHealth + this.level * 5;
+            this.health = this.maxHealth;
+            this.levelUpEffectTimer = 500;
+            createParticles(
+              this.x,
+              this.y,
+              PARTICLE_COUNT_LEVELUP,
+              cssVars.particleLevelUp || "#a855f7",
+              6,
+              25
+            ); // Fallback
+            triggerScreenShake(10);
+            announce(
+              `Level Up! Level ${
+                this.level
+              }. Max duplicates: ${this.getCurrentMaxDuplicates()}. HP restored.`,
+              true
+            );
+            updateUI(performance.now());
+          }
+          draw() {
+            ctx.save();
+            if (mergeBoostTimer > 0) {
+              const mergeRatio = mergeBoostTimer / MERGE_BOOST_DURATION;
+              const pulseSize = 8 * mergeRatio * Math.sin(gameTime * 0.02);
+              const pulseAlpha = 0.3 + 0.4 * mergeRatio;
+              ctx.fillStyle = `rgba(244, 114, 182, ${pulseAlpha})`;
+              ctx.beginPath();
+              ctx.arc(
+                this.x,
+                this.y,
+                this.radius + pulseSize + 4,
+                0,
+                Math.PI * 2
+              );
+              ctx.fill();
+            }
+            ctx.shadowColor = cssVars.playerPrimary || "#00f2a1"; // Fallback
+            ctx.shadowBlur = 22;
+            if (this.levelUpEffectTimer > 0) {
+              const effectAlpha =
+                Math.sin((1 - this.levelUpEffectTimer / 500) * Math.PI) * 0.6;
+              ctx.fillStyle = `rgba(168, 85, 247, ${effectAlpha})`;
+              ctx.beginPath();
+              ctx.arc(
+                this.x,
+                this.y,
+                this.radius + 15 * (1 - this.levelUpEffectTimer / 500),
+                0,
+                Math.PI * 2
+              );
+              ctx.fill();
+            }
+            ctx.fillStyle = this.gradient;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+            ctx.beginPath();
+            ctx.arc(
+              this.x - this.radius * 0.2,
+              this.y - this.radius * 0.2,
+              this.radius * 0.7,
+              0,
+              Math.PI * 2
+            );
+            ctx.fill();
+            if (this.shieldTimer > 0) {
+              const shieldAlpha = Math.min(
+                1,
+                0.3 + (this.shieldTimer / POWERUP_DURATION.shield) * 0.7
+              );
+              ctx.strokeStyle = `rgba(84, 160, 255, ${shieldAlpha})`;
+              ctx.lineWidth = 3 + Math.sin(gameTime * 0.012) * 1.5;
+              ctx.beginPath();
+              ctx.arc(
+                this.x,
+                this.y,
+                this.radius + 7 + Math.sin(gameTime * 0.012) * 2,
+                0,
+                Math.PI * 2
+              );
+              ctx.stroke();
+            }
+            ctx.shadowColor = "transparent";
+            ctx.shadowBlur = 0;
+            ctx.restore();
+            if (this.hitFlashTimer > 0 && this.shieldTimer <= 0) {
+              const alpha = this.hitFlashTimer / HIT_FLASH_DURATION;
+              ctx.fillStyle = `rgba(255, 255, 255, ${0.8 * alpha})`;
+              ctx.globalAlpha = alpha;
+              ctx.beginPath();
+              ctx.arc(this.x, this.y, this.radius + 3, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.globalAlpha = 1;
+            }
+            this.drawHealthBar(0, -18);
+          }
+          update(currentTime, deltaTime) {
+            currentShootCooldown =
+              activePowerups.rapidFire > 0
+                ? SHOOT_COOLDOWN_BASE * RAPID_FIRE_MULTIPLIER
+                : SHOOT_COOLDOWN_BASE;
+            this.shieldTimer = activePowerups.shield;
+            if (this.levelUpEffectTimer > 0)
+              this.levelUpEffectTimer -= deltaTime;
+            if (mergeBoostTimer > 0) {
+              mergeBoostTimer -= deltaTime;
+              if (mergeBoostTimer <= 0) this.resetMergeBoost();
+            }
+            this.vx = 0;
+            this.vy = 0;
+            if (keys["w"] || keys["ArrowUp"]) this.vy = -PLAYER_SPEED;
+            if (keys["s"] || keys["ArrowDown"]) this.vy = PLAYER_SPEED;
+            if (keys["a"] || keys["ArrowLeft"]) this.vx = -PLAYER_SPEED;
+            if (keys["d"] || keys["ArrowRight"]) this.vx = PLAYER_SPEED;
+            if (this.vx !== 0 && this.vy !== 0) {
+              const factor = Math.sqrt(2) / 2;
+              this.vx *= factor;
+              this.vy *= factor;
+            }
+            super.update(deltaTime);
+            this.x = Math.max(
+              this.radius,
+              Math.min(canvasWidth - this.radius, this.x)
+            );
+            this.y = Math.max(
+              this.radius,
+              Math.min(canvasHeight - this.radius, this.y)
+            );
+            if (
+              (keys[" "] || mouse.down) &&
+              currentTime - lastShootTime > currentShootCooldown
+            ) {
+              this.shoot();
+              lastShootTime = currentTime;
+            }
+            if (
+              keys["e"] &&
+              currentTime - lastDuplicateTime > DUPLICATE_COOLDOWN &&
+              duplicates.length < this.getCurrentMaxDuplicates()
+            ) {
+              this.createDuplicate(currentTime);
+              lastDuplicateTime = currentTime;
+            }
+            if (keys["g"]) trySetCloneFormation("GROUPED", currentTime);
+            if (keys["h"])
+              trySetCloneFormation("AGGRESSIVE_FOLLOW", currentTime);
+            if (
+              keys["r"] &&
+              currentTime - lastMergeTime > MERGE_COOLDOWN &&
+              duplicates.length > 0
+            ) {
+              this.startMerge(currentTime);
+              lastMergeTime = currentTime;
+            }
+            if (
+              this.isAlive &&
+              this.health / this.maxHealth <= CRITICAL_HEALTH_THRESHOLD &&
+              duplicates.length > 0 &&
+              cloneFormationState !== "MERGING" &&
+              cloneFormationState !== "AUTO_MERGING"
+            ) {
+              this.startAutoMerge(currentTime);
+            }
+          }
+          shoot() {
+            const angle = Math.atan2(mouse.y - this.y, mouse.x - this.x);
+            const speed = PROJECTILE_SPEED;
+            const projX = this.x + Math.cos(angle) * (this.radius + 5);
+            const projY = this.y + Math.sin(angle) * (this.radius + 5);
+            const currentDamage = this.getCurrentDamage();
+            projectiles.push(
+              new Projectile(
+                projX,
+                projY,
+                PROJECTILE_SIZE,
+                cssVars.projectilePlayer || "#ffffff",
+                cssVars.projectilePlayerGlow || "rgba(255,255,255,0.7)",
+                Math.cos(angle) * speed,
+                Math.sin(angle) * speed,
+                true,
+                currentDamage
+              )
+            ); // Fallbacks
+            createParticles(
+              projX,
+              projY,
+              PARTICLE_COUNT_SHOOT,
+              cssVars.particleShoot || "#00b894",
+              2,
+              5
+            ); // Fallback
+          }
+          createDuplicate(currentTime) {
+            const duplicate = new Duplicate(
+              this.x + getRandom(-20, 20),
+              this.y + getRandom(-20, 20),
+              duplicates.length
+            );
+            if (activePowerups.shield > 0)
+              duplicate.shieldTimer = activePowerups.shield;
+            duplicates.push(duplicate);
+            announce(
+              `Duplicate created (${
+                duplicates.length
+              }/${this.getCurrentMaxDuplicates()})`
+            );
+            createParticles(
+              this.x,
+              this.y,
+              20,
+              cssVars.duplicatePrimary || "#7efca9",
+              4,
+              10
+            ); // Fallback
+          }
+          activatePowerup(type) {
+            switch (type) {
+              case "shield":
+                activePowerups.shield = POWERUP_DURATION.shield;
+                announce("Shield activated!", true);
+                break;
+              case "rapidFire":
+                activePowerups.rapidFire = POWERUP_DURATION.rapidFire;
+                announce("Rapid fire!", true);
+                break;
+              case "health":
+                this.health = Math.min(
+                  this.maxHealth,
+                  this.health + this.baseMaxHealth * 0.4
+                );
+                createParticles(
+                  this.x,
+                  this.y,
+                  25,
+                  cssVars.powerupHealthPrimary || "#1dd1a1",
+                  3,
+                  15
+                ); // Fallback
+                announce("Health restored!", true);
+                updateUI(performance.now());
+                break;
+            }
+          }
+          startMerge(currentTime) {
+            if (
+              duplicates.length === 0 ||
+              cloneFormationState === "MERGING" ||
+              cloneFormationState === "AUTO_MERGING"
+            )
+              return;
+            cloneFormationState = "MERGING";
+            announce(
+              `Merging ${duplicates.length} clones! Power increasing!`,
+              true
+            );
+            triggerScreenShake(5);
+            createParticles(
+              this.x,
+              this.y,
+              PARTICLE_COUNT_MERGE * 0.5,
+              cssVars.particleMerge || "#f472b6",
+              4,
+              12
+            ); // Fallback
+          }
+          startAutoMerge(currentTime) {
+            if (
+              duplicates.length === 0 ||
+              cloneFormationState === "MERGING" ||
+              cloneFormationState === "AUTO_MERGING"
+            )
+              return;
+            cloneFormationState = "AUTO_MERGING";
+            announce(
+              "WARNING: Critical health! Clones merging to assist!",
+              true
+            );
+            triggerScreenShake(8);
+            createParticles(
+              this.x,
+              this.y,
+              PARTICLE_COUNT_MERGE * 0.7,
+              cssVars.particleMerge || "#f472b6",
+              5,
+              14
+            ); // Fallback
+          }
+          absorbClone(clone, isAutoMerge = false) {
+            if (!clone || !clone.isAlive) return;
+            const numClonesBeingMerged = duplicates.filter(
+              (d) =>
+                d.isAlive &&
+                (cloneFormationState === "MERGING" ||
+                  cloneFormationState === "AUTO_MERGING")
+            ).length;
+            let healthGain = 0;
+            if (isAutoMerge) {
+              healthGain = Math.max(
+                10,
+                clone.health * AUTO_MERGE_HEALTH_FACTOR
+              );
+            } else {
+              healthGain = clone.maxHealth * MERGE_HEALTH_BONUS_FACTOR;
+              this.playerBaseStrengthMultiplier +=
+                MERGE_STRENGTH_GAIN_PER_CLONE;
+              createParticles(
+                this.x,
+                this.y,
+                PARTICLE_COUNT_STRENGTH,
+                cssVars.particleStrength || "#fde047",
+                4,
+                8
+              ); // Fallback
+            }
+            this.health = Math.min(this.maxHealth, this.health + healthGain);
+            if (!isAutoMerge) {
+              currentMergeBoostMultiplier =
+                1.0 + numClonesBeingMerged * MERGE_TEMP_BOOST_PER_CLONE;
+              mergeBoostTimer = MERGE_BOOST_DURATION;
+            }
+            createParticles(
+              this.x,
+              this.y,
+              PARTICLE_COUNT_MERGE * (isAutoMerge ? 0.8 : 1),
+              cssVars.particleMerge || "#f472b6",
+              5,
+              15
+            ); // Fallback
+            triggerScreenShake(isAutoMerge ? 4 : 3);
+            clone.isAlive = false;
+            let mergeMessage = `Merged! HP +${Math.round(healthGain)}.`;
+            if (!isAutoMerge)
+              mergeMessage += ` Base Str: ${Math.round(
+                this.playerBaseStrengthMultiplier * 100
+              )}%. Temp Boost: ${Math.round(
+                currentMergeBoostMultiplier * 100
+              )}%.`;
+            announce(mergeMessage, false);
+            updateUI(performance.now());
+          }
+          resetMergeBoost() {
+            if (mergeBoostTimer > 0) {
+              announce("Merge boost ended.");
+              mergeBoostTimer = 0;
+              currentMergeBoostMultiplier = 1.0;
+              updateUI(performance.now());
+            }
+          }
+        }
+
+        class Duplicate extends Entity {
+          constructor(x, y, index) {
+            super(
+              x,
+              y,
+              PLAYER_SIZE * 0.85,
+              gradients.duplicate,
+              DUPLICATE_HEALTH
+            );
+            this.lastShootTime = 0;
+            this.attackRangeSq =
+              DUPLICATE_ATTACK_RANGE * DUPLICATE_ATTACK_RANGE;
+            this.baseShootCooldown =
+              DUPLICATE_SHOOT_COOLDOWN + getRandom(-50, 50);
+            this.currentShootCooldown = this.baseShootCooldown;
+            this.index = index;
+            this.groupWobbleOffsetX = 0;
+            this.groupWobbleOffsetY = 0;
+          }
+          getCurrentDamage() {
+            return (
+              PROJECTILE_DAMAGE_BASE * 0.8 * player.playerBaseStrengthMultiplier
+            );
+          }
+          draw() {
+            if (!this.isAlive) return;
+            ctx.save();
+            let drawAlpha = 0.9;
+            let drawX = this.x;
+            let drawY = this.y;
+            ctx.shadowColor = cssVars.duplicatePrimary || "#7efca9";
+            ctx.shadowBlur = 14; // Fallback
+            if (cloneFormationState === "GROUPED") {
+              drawAlpha = 0.75 - this.index * 0.08;
+              drawX += this.groupWobbleOffsetX;
+              drawY += this.groupWobbleOffsetY;
+            } else if (
+              cloneFormationState === "MERGING" ||
+              cloneFormationState === "AUTO_MERGING"
+            ) {
+              drawAlpha = 0.5;
+            } else if (cloneFormationState === "AGGRESSIVE_FOLLOW") {
+              ctx.fillStyle =
+                cssVars.duplicateAggressiveTint || "rgba(255,107,107,0.15)"; // Fallback
+              ctx.beginPath();
+              ctx.arc(drawX, drawY, this.radius + 3, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            ctx.globalAlpha = Math.max(0.15, drawAlpha);
+            ctx.fillStyle = this.gradient;
+            ctx.beginPath();
+            ctx.arc(drawX, drawY, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            if (this.shieldTimer > 0) {
+              const shieldAlpha = Math.min(
+                1,
+                0.3 + (this.shieldTimer / POWERUP_DURATION.shield) * 0.7
+              );
+              ctx.strokeStyle = `rgba(84, 160, 255, ${shieldAlpha})`;
+              ctx.lineWidth = 2 + Math.sin(gameTime * 0.01) * 1;
+              ctx.beginPath();
+              ctx.arc(
+                drawX,
+                drawY,
+                this.radius + 5 + Math.sin(gameTime * 0.01) * 1,
+                0,
+                Math.PI * 2
+              );
+              ctx.stroke();
+            }
+            ctx.restore();
+            if (this.hitFlashTimer > 0 && this.shieldTimer <= 0) {
+              const alpha = this.hitFlashTimer / HIT_FLASH_DURATION;
+              ctx.save();
+              ctx.fillStyle = `rgba(255, 255, 255, ${0.7 * alpha})`;
+              ctx.globalAlpha = alpha;
+              ctx.beginPath();
+              ctx.arc(drawX, drawY, this.radius + 2, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.restore();
+            }
+            this.drawHealthBar(0, -14);
+          }
+          update(currentTime, deltaTime) {
+            super.update(deltaTime);
+            if (!player || !player.isAlive) {
+              this.vx *= 0.95;
+              this.vy *= 0.95;
+              this.x = Math.max(
+                this.radius,
+                Math.min(canvasWidth - this.radius, this.x)
+              );
+              this.y = Math.max(
+                this.radius,
+                Math.min(canvasHeight - this.radius, this.y)
+              );
+              return;
+            }
+            let targetX = player.x,
+              targetY = player.y;
+            let strength = DUPLICATE_FOLLOW_STRENGTH;
+            let shouldShoot = true;
+            this.currentShootCooldown = this.baseShootCooldown;
+            switch (cloneFormationState) {
+              case "FOLLOWING":
+                const distSqToPlayer = distanceSq(
+                  this.x,
+                  this.y,
+                  player.x,
+                  player.y
+                );
+                const angleToPlayer = Math.atan2(
+                  player.y - this.y,
+                  player.x - this.x
+                );
+                if (
+                  distSqToPlayer > (DUPLICATE_FOLLOW_DISTANCE * 1.2) ** 2 ||
+                  distSqToPlayer < (DUPLICATE_FOLLOW_DISTANCE * 0.8) ** 2
+                ) {
+                  targetX =
+                    player.x -
+                    Math.cos(angleToPlayer) * DUPLICATE_FOLLOW_DISTANCE;
+                  targetY =
+                    player.y -
+                    Math.sin(angleToPlayer) * DUPLICATE_FOLLOW_DISTANCE;
+                } else {
+                  targetX = this.x;
+                  targetY = this.y;
+                  strength = 0;
+                }
+                break;
+              case "GROUPED":
+                const totalClones = duplicates.length;
+                const angleStep =
+                  totalClones > 1
+                    ? DUPLICATE_GROUP_ARC_SPREAD / (totalClones - 1)
+                    : 0;
+                const baseAngle = Math.PI;
+                const targetAngleOffset =
+                  (this.index - (totalClones - 1) / 2) * angleStep;
+                const finalAngle = baseAngle + targetAngleOffset;
+                targetX =
+                  player.x + Math.cos(finalAngle) * DUPLICATE_GROUP_DISTANCE;
+                targetY =
+                  player.y + Math.sin(finalAngle) * DUPLICATE_GROUP_DISTANCE;
+                strength = DUPLICATE_GROUP_STRENGTH;
+                this.currentShootCooldown =
+                  this.baseShootCooldown * DUPLICATE_GROUP_SHOOT_COOLDOWN_MOD;
+                this.groupWobbleOffsetX =
+                  Math.sin(gameTime * 0.005 + this.index * 0.7) * 2.5;
+                this.groupWobbleOffsetY =
+                  Math.cos(gameTime * 0.005 + this.index * 0.7) * 2.5;
+                break;
+              case "AGGRESSIVE_FOLLOW":
+                if (player.health / player.maxHealth < LOW_HEALTH_THRESHOLD) {
+                  const distSqP = distanceSq(
+                    this.x,
+                    this.y,
+                    player.x,
+                    player.y
+                  );
+                  const angleP = Math.atan2(
+                    player.y - this.y,
+                    player.x - this.x
+                  );
+                  if (
+                    distSqP > (DUPLICATE_FOLLOW_DISTANCE * 1.1) ** 2 ||
+                    distSqP < (DUPLICATE_FOLLOW_DISTANCE * 0.7) ** 2
+                  ) {
+                    targetX =
+                      player.x - Math.cos(angleP) * DUPLICATE_FOLLOW_DISTANCE;
+                    targetY =
+                      player.y - Math.sin(angleP) * DUPLICATE_FOLLOW_DISTANCE;
+                    strength = DUPLICATE_FOLLOW_STRENGTH * 1.5;
+                  } else {
+                    targetX = this.x;
+                    targetY = this.y;
+                    strength = 0;
+                  }
+                  shouldShoot = true;
+                } else {
+                  let nearestEnemy = null;
+                  let minDistSq = this.attackRangeSq * 1.5;
+                  for (const enemy of enemies) {
+                    if (!enemy.isAlive) continue;
+                    const dSq = distanceSq(this.x, this.y, enemy.x, enemy.y);
+                    if (dSq < minDistSq) {
+                      minDistSq = dSq;
+                      nearestEnemy = enemy;
+                    }
+                  }
+                  if (nearestEnemy) {
+                    targetX = nearestEnemy.x;
+                    targetY = nearestEnemy.y;
+                    strength = DUPLICATE_AGGRESSIVE_SEEK_STRENGTH;
+                  } else {
+                    if (
+                      currentTime - lastWanderChange > 2000 ||
+                      distanceSq(this.x, this.y, wanderTargetX, wanderTargetY) <
+                        100 ** 2
+                    ) {
+                      wanderTargetX =
+                        this.x +
+                        getRandom(-canvasWidth * 0.3, canvasWidth * 0.3);
+                      wanderTargetY =
+                        this.y +
+                        getRandom(-canvasHeight * 0.3, canvasHeight * 0.3);
+                      wanderTargetX = Math.max(
+                        this.radius,
+                        Math.min(canvasWidth - this.radius, wanderTargetX)
+                      );
+                      wanderTargetY = Math.max(
+                        this.radius,
+                        Math.min(canvasHeight - this.radius, wanderTargetY)
+                      );
+                      lastWanderChange = currentTime;
+                    }
+                    targetX = wanderTargetX;
+                    targetY = wanderTargetY;
+                    strength = DUPLICATE_AGGRESSIVE_WANDER_STRENGTH;
+                  }
+                  shouldShoot = true;
+                }
+                break;
+              case "MERGING":
+                targetX = player.x;
+                targetY = player.y;
+                strength = MERGE_PULL_STRENGTH;
+                shouldShoot = false;
+                const mergeDistSq = (this.radius + player.radius - 5) ** 2;
+                if (
+                  distanceSq(this.x, this.y, player.x, player.y) < mergeDistSq
+                ) {
+                  player.absorbClone(this, false);
+                }
+                break;
+              case "AUTO_MERGING":
+                targetX = player.x;
+                targetY = player.y;
+                strength = AUTO_MERGE_PULL_STRENGTH;
+                shouldShoot = false;
+                const autoMergeDistSq = (this.radius + player.radius - 3) ** 2;
+                if (
+                  distanceSq(this.x, this.y, player.x, player.y) <
+                  autoMergeDistSq
+                ) {
+                  player.absorbClone(this, true);
+                }
+                break;
+            }
+            if (strength > 0) {
+              this.vx += (targetX - this.x) * strength;
+              this.vy += (targetY - this.y) * strength;
+            }
+            this.vx *= 0.91;
+            this.vy *= 0.91;
+            if (shouldShoot) {
+              let nearestEnemy = null;
+              let minDistSqShoot = this.attackRangeSq;
+              for (const enemy of enemies) {
+                if (!enemy.isAlive) continue;
+                const dSq = distanceSq(this.x, this.y, enemy.x, enemy.y);
+                if (dSq < minDistSqShoot) {
+                  minDistSqShoot = dSq;
+                  nearestEnemy = enemy;
+                }
+              }
+              if (
+                nearestEnemy &&
+                currentTime - this.lastShootTime > this.currentShootCooldown
+              ) {
+                this.shoot(nearestEnemy);
+                this.lastShootTime = currentTime;
+              }
+            }
+            this.x = Math.max(
+              this.radius,
+              Math.min(canvasWidth - this.radius, this.x)
+            );
+            this.y = Math.max(
+              this.radius,
+              Math.min(canvasHeight - this.radius, this.y)
+            );
+          }
+          shoot(target) {
+            const angle = Math.atan2(target.y - this.y, target.x - this.x);
+            const speed = PROJECTILE_SPEED * 0.9;
+            const projX = this.x + Math.cos(angle) * this.radius;
+            const projY = this.y + Math.sin(angle) * this.radius;
+            const currentDamage = this.getCurrentDamage();
+            projectiles.push(
+              new Projectile(
+                projX,
+                projY,
+                PROJECTILE_SIZE * 0.9,
+                cssVars.duplicatePrimary || "#7efca9",
+                (cssVars.duplicatePrimary || "#7efca9") + "AA",
+                Math.cos(angle) * speed,
+                Math.sin(angle) * speed,
+                true,
+                currentDamage
+              )
+            ); // Fallbacks
+            createParticles(
+              projX,
+              projY,
+              PARTICLE_COUNT_SHOOT - 1,
+              cssVars.duplicateSecondary || "#57b894",
+              1.5,
+              4
+            ); // Fallback
+          }
+        }
+
+        // --- Enemy Classes ---
+        class Enemy extends Entity {
+          constructor(
+            x,
+            y,
+            size,
+            gradient,
+            health,
+            speed,
+            scoreValue,
+            xpValue
+          ) {
+            super(x, y, size, gradient, health);
+            this.speed = speed;
+            this.scoreValue = scoreValue;
+            this.xpValue = xpValue;
+          }
+          draw() {
+            ctx.save();
+            ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetX = 3;
+            ctx.shadowOffsetY = 3;
+            ctx.fillStyle = this.gradient;
+            ctx.fillRect(
+              this.x - this.radius,
+              this.y - this.radius,
+              this.size,
+              this.size
+            );
+            ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(
+              this.x - this.radius,
+              this.y - this.radius,
+              this.size,
+              this.size
+            );
+            ctx.restore();
+            if (this.hitFlashTimer > 0) {
+              const alpha = this.hitFlashTimer / HIT_FLASH_DURATION;
+              ctx.fillStyle = `rgba(255, 255, 255, ${0.8 * alpha})`;
+              ctx.globalAlpha = alpha;
+              ctx.fillRect(
+                this.x - this.radius,
+                this.y - this.radius,
+                this.size,
+                this.size
+              );
+              ctx.globalAlpha = 1.0;
+            }
+            this.drawHealthBar();
+          }
+          update(currentTime, deltaTime) {
+            if (player && player.isAlive) {
+              const angle = Math.atan2(player.y - this.y, player.x - this.x);
+              this.vx = Math.cos(angle) * this.speed;
+              this.vy = Math.sin(angle) * this.speed;
+            } else {
+              this.vx *= 0.98;
+              this.vy *= 0.98;
+            }
+            super.update(deltaTime);
+            if (player && player.isAlive && this instanceof Minion) {
+              const touchDistSq = (this.radius + player.radius) ** 2;
+              if (
+                distanceSq(this.x, this.y, player.x, player.y) < touchDistSq
+              ) {
+                player.takeDamage(
+                  0.4 * (deltaTime / (1000 / 60)),
+                  this.x,
+                  this.y
+                );
+              }
+            }
+            const margin = this.size * 2.5;
+            this.x = Math.max(-margin, Math.min(canvasWidth + margin, this.x));
+            this.y = Math.max(-margin, Math.min(canvasHeight + margin, this.y));
+          }
+        }
+        class Minion extends Enemy {
+          constructor(x, y) {
+            super(
+              x,
+              y,
+              MINION_SIZE,
+              gradients.minion,
+              MINION_HEALTH,
+              MINION_SPEED,
+              MINION_SCORE_VALUE,
+              MINION_XP_VALUE
+            );
+          }
+        }
+        class ShootingMinion extends Enemy {
+          constructor(x, y) {
+            super(
+              x,
+              y,
+              MINION_SIZE,
+              gradients.minionShooter,
+              MINION_HEALTH * 0.8,
+              MINION_SPEED * 0.7,
+              MINION_SCORE_VALUE,
+              MINION_XP_VALUE
+            );
+            this.shootCooldown =
+              SHOOTING_MINION_COOLDOWN + getRandom(-200, 200);
+            this.lastShootTime = 0;
+            this.preferredRangeSq = (250 + getRandom(-50, 50)) ** 2;
+          }
+          draw() {
+            ctx.save();
+            ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetX = 3;
+            ctx.shadowOffsetY = 3;
+            ctx.fillStyle = this.gradient;
+            ctx.beginPath();
+            let angleToPlayer =
+              player && player.isAlive
+                ? Math.atan2(player.y - this.y, player.x - this.x)
+                : 0;
+            const angleOffset = Math.PI / 2;
+            ctx.moveTo(
+              this.x + Math.cos(angleToPlayer) * this.radius * 1.2,
+              this.y + Math.sin(angleToPlayer) * this.radius * 1.2
+            );
+            ctx.lineTo(
+              this.x +
+                Math.cos(angleToPlayer + angleOffset + Math.PI * 0.8) *
+                  this.radius,
+              this.y +
+                Math.sin(angleToPlayer + angleOffset + Math.PI * 0.8) *
+                  this.radius
+            );
+            ctx.lineTo(
+              this.x +
+                Math.cos(angleToPlayer - angleOffset - Math.PI * 0.8) *
+                  this.radius,
+              this.y +
+                Math.sin(angleToPlayer - angleOffset - Math.PI * 0.8) *
+                  this.radius
+            );
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.restore();
+            if (this.hitFlashTimer > 0) {
+              const alpha = this.hitFlashTimer / HIT_FLASH_DURATION;
+              ctx.fillStyle = `rgba(255, 255, 255, ${0.8 * alpha})`;
+              ctx.globalAlpha = alpha;
+              ctx.fill();
+              ctx.globalAlpha = 1.0;
+            }
+            this.drawHealthBar(0, -this.radius - 5);
+          }
+          update(currentTime, deltaTime) {
+            if (player && player.isAlive) {
+              const angle = Math.atan2(player.y - this.y, player.x - this.x);
+              const distSq = distanceSq(this.x, this.y, player.x, player.y);
+              let speedMultiplier =
+                distSq < this.preferredRangeSq * 0.8
+                  ? -0.6
+                  : distSq > this.preferredRangeSq * 1.2
+                  ? 1
+                  : 0.3;
+              this.vx = Math.cos(angle) * this.speed * speedMultiplier;
+              this.vy = Math.sin(angle) * this.speed * speedMultiplier;
+              if (currentTime - this.lastShootTime > this.shootCooldown) {
+                this.shoot(angle);
+                this.lastShootTime = currentTime;
+              }
+            } else {
+              this.vx *= 0.98;
+              this.vy *= 0.98;
+            }
+            const timeMultiplier = deltaTime / (1000 / 60);
+            this.x += this.vx * timeMultiplier;
+            this.y += this.vy * timeMultiplier;
+            this.x += this.ix * timeMultiplier;
+            this.y += this.iy * timeMultiplier;
+            this.ix *= this.impulseDamping;
+            this.iy *= this.impulseDamping;
+            if (Math.abs(this.ix) < 0.1) this.ix = 0;
+            if (Math.abs(this.iy) < 0.1) this.iy = 0;
+            if (this.hitFlashTimer > 0) this.hitFlashTimer -= deltaTime;
+            const margin = this.size * 2.5;
+            this.x = Math.max(-margin, Math.min(canvasWidth + margin, this.x));
+            this.y = Math.max(-margin, Math.min(canvasHeight + margin, this.y));
+          }
+          shoot(angle) {
+            const speed = SHOOTING_MINION_PROJECTILE_SPEED;
+            const projX = this.x + Math.cos(angle) * this.radius;
+            const projY = this.y + Math.sin(angle) * this.radius;
+            projectiles.push(
+              new Projectile(
+                projX,
+                projY,
+                PROJECTILE_SIZE * 0.8,
+                cssVars.projectileEnemyShooter || "#ff6b6b",
+                cssVars.projectileEnemyShooterGlow || "rgba(255,107,107,0.7)",
+                Math.cos(angle) * speed,
+                Math.sin(angle) * speed,
+                false,
+                SHOOTING_MINION_PROJECTILE_DAMAGE
+              )
+            ); // Fallbacks
+            createParticles(
+              projX,
+              projY,
+              3,
+              cssVars.minionShooterSecondary || "#ff9f43",
+              1,
+              3
+            ); // Fallback
+          }
+        }
+        class Boss extends Enemy {
+          constructor(x, y) {
+            super(
+              x,
+              y,
+              BOSS_SIZE,
+              gradients.boss,
+              BOSS_HEALTH,
+              BOSS_SPEED,
+              BOSS_SCORE_VALUE,
+              BOSS_XP_VALUE
+            );
+            this.shootCooldown = BOSS_SHOOT_COOLDOWN;
+            this.lastShootTime = 0;
+            this.phase = 1;
+            this.laserState = "IDLE";
+            this.laserChargeTimer = 0;
+            this.laserFireTimer = 0;
+            this.lastLaserTime = -BOSS_LASER_COOLDOWN;
+            this.laserTargetX = 0;
+            this.laserTargetY = 0;
+            this.laserAngle = 0;
+          }
+          draw() {
+            ctx.save();
+            ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
+            ctx.shadowBlur = 18;
+            ctx.shadowOffsetX = 5;
+            ctx.shadowOffsetY = 5;
+            ctx.fillStyle = this.gradient;
+            ctx.beginPath();
+            const sides = 7;
+            const rotationSpeed = 0.0008;
+            ctx.moveTo(
+              this.x + this.radius * Math.cos(0),
+              this.y + this.radius * Math.sin(0)
+            );
+            for (let i = 1; i <= sides; i++) {
+              const angle =
+                (i * 2 * Math.PI) / sides + gameTime * rotationSpeed;
+              ctx.lineTo(
+                this.x + this.radius * Math.cos(angle),
+                this.y + this.radius * Math.sin(angle)
+              );
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            if (this.laserState === "CHARGING") {
+              const chargeRatio =
+                this.laserChargeTimer / BOSS_LASER_CHARGE_TIME;
+              const telegraphWidth = BOSS_LASER_WIDTH * chargeRatio * 0.8;
+              const telegraphAlpha = 0.2 + chargeRatio * 0.4;
+              ctx.beginPath();
+              ctx.moveTo(this.x, this.y);
+              ctx.lineTo(
+                this.x + Math.cos(this.laserAngle) * canvasWidth * 1.5,
+                this.y + Math.sin(this.laserAngle) * canvasWidth * 1.5
+              );
+              ctx.strokeStyle = `rgba(255, 71, 87, ${telegraphAlpha})`;
+              ctx.lineWidth = telegraphWidth;
+              ctx.lineCap = "round";
+              ctx.stroke();
+            } else if (this.laserState === "FIRING") {
+              const fireRatio = this.laserFireTimer / BOSS_LASER_DURATION;
+              const currentWidth =
+                BOSS_LASER_WIDTH * (1 + Math.sin(fireRatio * Math.PI) * 0.2);
+              const beamAlpha = 0.8 + Math.sin(fireRatio * Math.PI) * 0.2;
+              ctx.beginPath();
+              ctx.moveTo(this.x, this.y);
+              ctx.lineTo(
+                this.x + Math.cos(this.laserAngle) * canvasWidth * 1.5,
+                this.y + Math.sin(this.laserAngle) * canvasWidth * 1.5
+              );
+              ctx.strokeStyle = `rgba(255, 255, 255, ${beamAlpha * 0.8})`;
+              ctx.lineWidth = currentWidth * 0.4;
+              ctx.lineCap = "butt";
+              ctx.stroke();
+              ctx.strokeStyle = `rgba(255, 71, 87, ${beamAlpha})`;
+              ctx.lineWidth = currentWidth;
+              ctx.lineCap = "round";
+              ctx.stroke();
+            }
+            ctx.restore();
+            if (this.hitFlashTimer > 0) {
+              const alpha = this.hitFlashTimer / HIT_FLASH_DURATION;
+              ctx.fillStyle = `rgba(255, 255, 255, ${0.8 * alpha})`;
+              ctx.globalAlpha = alpha;
+              ctx.fill();
+              ctx.globalAlpha = 1.0;
+            }
+            this.drawHealthBar(0, -this.radius - 12);
+          }
+          update(currentTime, deltaTime) {
+            super.update(currentTime, deltaTime);
+            if (
+              player &&
+              player.isAlive &&
+              this.laserState === "IDLE" &&
+              currentTime - this.lastShootTime > this.shootCooldown
+            ) {
+              this.shoot();
+              this.lastShootTime = currentTime;
+            }
+            if (player && player.isAlive) {
+              if (
+                this.laserState === "IDLE" &&
+                currentTime - this.lastLaserTime > BOSS_LASER_COOLDOWN
+              ) {
+                this.laserState = "CHARGING";
+                this.laserChargeTimer = BOSS_LASER_CHARGE_TIME;
+                this.laserAngle = Math.atan2(
+                  player.y - this.y,
+                  player.x - this.x
+                );
+                announce("Boss is charging a powerful attack!", true);
+                triggerScreenShake(3);
+              } else if (this.laserState === "CHARGING") {
+                this.laserChargeTimer -= deltaTime;
+                if (this.laserChargeTimer <= 0) {
+                  this.laserState = "FIRING";
+                  this.laserFireTimer = BOSS_LASER_DURATION;
+                  announce("Boss firing laser!", true);
+                  triggerScreenShake(12);
+                }
+              } else if (this.laserState === "FIRING") {
+                this.laserFireTimer -= deltaTime;
+                this.checkLaserCollision(deltaTime);
+                if (this.laserFireTimer <= 0) {
+                  this.laserState = "IDLE";
+                  this.lastLaserTime = currentTime;
+                }
+              }
+            } else {
+              if (this.laserState !== "IDLE") {
+                this.laserState = "IDLE";
+                this.laserChargeTimer = 0;
+                this.laserFireTimer = 0;
+              }
+            }
+          }
+          shoot() {
+            const angleToPlayer = Math.atan2(
+              player.y - this.y,
+              player.x - this.x
+            );
+            const spreadAngle = degToRad(22);
+            const numProjectiles = 5;
+            const baseSpeed = PROJECTILE_SPEED * 0.8;
+            for (
+              let i = -(numProjectiles - 1) / 2;
+              i <= (numProjectiles - 1) / 2;
+              i++
+            ) {
+              const angle =
+                angleToPlayer + i * spreadAngle + getRandom(-0.06, 0.06);
+              const speed = baseSpeed + getRandom(-0.6, 0.6);
+              const projX = this.x + Math.cos(angle) * this.radius;
+              const projY = this.y + Math.sin(angle) * this.radius;
+              projectiles.push(
+                new Projectile(
+                  projX,
+                  projY,
+                  PROJECTILE_SIZE * 1.25,
+                  cssVars.projectileEnemy || "#feca57",
+                  cssVars.projectileEnemyGlow || "rgba(254,202,87,0.7)",
+                  Math.cos(angle) * speed,
+                  Math.sin(angle) * speed,
+                  false,
+                  PROJECTILE_DAMAGE_BASE * 1.2
+                )
+              ); // Fallbacks
+            }
+            if (Math.random() < 0.2) announce("Boss attacking");
+            createParticles(
+              this.x,
+              this.y,
+              12,
+              cssVars.projectileEnemy || "#feca57",
+              4,
+              8
+            ); // Fallback
+          }
+          checkLaserCollision(deltaTime) {
+            const beamCos = Math.cos(this.laserAngle);
+            const beamSin = Math.sin(this.laserAngle);
+            const laserWidthSq = (BOSS_LASER_WIDTH / 2) ** 2;
+            const damageThisTick =
+              BOSS_LASER_DAMAGE_PER_TICK * (deltaTime / (1000 / 60));
+            const checkEntity = (entity) => {
+              if (!entity || !entity.isAlive) return;
+              const dx = entity.x - this.x;
+              const dy = entity.y - this.y;
+              const perpDistSq = (dx * beamSin - dy * beamCos) ** 2;
+              const dotProduct = dx * beamCos + dy * beamSin;
+              if (
+                dotProduct > 0 &&
+                perpDistSq < laserWidthSq + entity.radius ** 2
+              ) {
+                entity.takeDamage(
+                  damageThisTick,
+                  this.x + beamCos * 100,
+                  this.y + beamSin * 100
+                );
+                createParticles(
+                  entity.x,
+                  entity.y,
+                  2,
+                  cssVars.bossLaser || "#ff4757",
+                  1,
+                  3
+                ); // Fallback
+              }
+            };
+            checkEntity(player);
+            duplicates.forEach(checkEntity);
+          }
+        }
+
+        // --- Projectile, Particle, PowerUp Classes ---
+        class Projectile {
+          constructor(
+            x,
+            y,
+            size,
+            color,
+            glowColor,
+            vx,
+            vy,
+            isPlayerProjectile,
+            damage
+          ) {
+            this.x = x;
+            this.y = y;
+            this.radius = size / 2;
+            this.color = color;
+            this.glowColor = glowColor;
+            this.vx = vx;
+            this.vy = vy;
+            this.isPlayerProjectile = isPlayerProjectile;
+            this.damage = damage;
+            this.collided = false;
+            this.life = 2500;
+          }
+          draw() {
+            ctx.save();
+            ctx.shadowColor = this.glowColor;
+            ctx.shadowBlur = 10 + this.radius * 1.5;
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+          update(deltaTime) {
+            const speedMultiplier = deltaTime / (1000 / 60);
+            this.x += this.vx * speedMultiplier;
+            this.y += this.vy * speedMultiplier;
+            this.life -= deltaTime;
+            if (this.life <= 0) this.collided = true;
+          }
+          isOutOfBounds() {
+            const margin = 100;
+            return (
+              this.x < -margin ||
+              this.x > canvasWidth + margin ||
+              this.y < -margin ||
+              this.y > canvasHeight + margin
+            );
+          }
+        }
+        class Particle {
+          constructor(x, y, size, color, vx, vy, life) {
+            this.x = x;
+            this.y = y;
+            this.size = size;
+            this.color = color;
+            this.vx = vx;
+            this.vy = vy;
+            this.life = life;
+            this.initialLife = life;
+            this.alpha = 1;
+            this.gravity = 0.07;
+            this.friction = 0.975;
+          }
+          draw() {
+            ctx.save();
+            ctx.globalAlpha = this.alpha * 0.85;
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, Math.max(0, this.size), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+          update(deltaTime) {
+            const timeMultiplier = deltaTime / (1000 / 60);
+            this.x += this.vx * timeMultiplier;
+            this.y += this.vy * timeMultiplier;
+            this.vy += this.gravity * timeMultiplier;
+            this.vx *= this.friction;
+            this.vy *= this.friction;
+            this.life -= deltaTime;
+            this.alpha = Math.max(0, this.life / this.initialLife);
+            this.size *= 0.965;
+          }
+        }
+        function createParticles(x, y, count, color, speedRange, sizeRange) {
+          if (particles.length > 700) return;
+          for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = getRandom(1, speedRange);
+            const size = getRandom(1.8, sizeRange);
+            const life = getRandom(450, 950);
+            particles.push(
+              new Particle(
+                x,
+                y,
+                size,
+                color,
+                Math.cos(angle) * speed,
+                Math.sin(angle) * speed - Math.random() * speed * 0.4,
+                life
+              )
+            );
+          }
+        }
+        class PowerUp {
+          constructor(x, y, type) {
+            this.x = x;
+            this.y = y;
+            this.type = type;
+            this.size = POWERUP_SIZE;
+            this.radius = this.size / 2;
+            this.bobOffset = Math.random() * Math.PI * 2;
+            this.bobSpeed = 0.06;
+            this.life = 11000;
+            this.isAlive = true;
+            switch (type) {
+              case "shield":
+                this.gradient = gradients.powerupShield;
+                this.icon = "🛡️";
+                break;
+              case "rapidFire":
+                this.gradient = gradients.powerupRapidFire;
+                this.icon = "⚡";
+                break;
+              case "health":
+                this.gradient = gradients.powerupHealth;
+                this.icon = "➕";
+                break;
+            }
+          }
+          draw() {
+            if (!this.isAlive) return;
+            ctx.save();
+            const currentY = this.y + Math.sin(this.bobOffset) * 4;
+            const scale = 1 + Math.sin(this.bobOffset * 1.6) * 0.06;
+            const alpha = Math.min(1, this.life / 3000);
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = this.gradient;
+            ctx.beginPath();
+            const radius = this.radius * scale;
+            ctx.moveTo(this.x - radius + 5, currentY - radius);
+            ctx.arcTo(
+              this.x + radius,
+              currentY - radius,
+              this.x + radius,
+              currentY + radius,
+              6
+            );
+            ctx.arcTo(
+              this.x + radius,
+              currentY + radius,
+              this.x - radius,
+              currentY + radius,
+              6
+            );
+            ctx.arcTo(
+              this.x - radius,
+              currentY + radius,
+              this.x - radius,
+              currentY - radius,
+              6
+            );
+            ctx.arcTo(
+              this.x - radius,
+              currentY - radius,
+              this.x + radius,
+              currentY - radius,
+              6
+            );
+            ctx.closePath();
+            ctx.fill();
+            ctx.shadowColor = this.gradient.colors?.[0]?.color || "#fff";
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
+            ctx.font = `${this.size * 0.85 * scale}px sans-serif`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(this.icon, this.x, currentY + 1);
+            ctx.restore();
+          }
+          update(deltaTime) {
+            this.bobOffset += this.bobSpeed * (deltaTime / (1000 / 60));
+            this.life -= deltaTime;
+            if (this.life <= 0) this.isAlive = false;
+          }
+        }
+        function spawnPowerup(x, y) {
+          const types = ["shield", "rapidFire", "health"];
+          const type = types[Math.floor(Math.random() * types.length)];
+          powerups.push(new PowerUp(x, y, type));
+        }
+
+        // --- Game Logic Functions ---
+        function initGame() {
+          console.log("Initializing game (Evolved - Merge Power v7)...");
+          score = 0;
+          wave = 1;
+          minionsToSpawn = 6;
+          minionsDefeatedThisWave = 0;
+          minionsSpawnedThisWave = 0;
+          bossActive = false;
+          highScore = localStorage.getItem("superheroDuplicatorHighScore") || 0;
+          player = new Player(canvasWidth / 2, canvasHeight * 0.8);
+          duplicates = [];
+          enemies = [];
+          projectiles = [];
+          particles = [];
+          powerups = [];
+          activePowerups = { shield: 0, rapidFire: 0 };
+          keys = {};
+          mouse.down = false;
+          lastShootTime = -SHOOT_COOLDOWN_BASE;
+          lastDuplicateTime = -DUPLICATE_COOLDOWN;
+          lastMinionSpawnTime = 0;
+          lastMergeTime = -MERGE_COOLDOWN;
+          lastFormationChangeTime = -FORMATION_CHANGE_COOLDOWN;
+          isFormationChangeOnCooldown = false;
+          mergeBoostTimer = 0;
+          currentMergeBoostMultiplier = 1.0;
+          if (player) {
+            player.playerBaseStrengthMultiplier = 1.0;
+            player.maxHealth = player.baseMaxHealth;
+            player.health = player.maxHealth;
+          }
+          screenShakeIntensity = 0;
+          currentShootCooldown = SHOOT_COOLDOWN_BASE;
+          cloneFormationState = "FOLLOWING";
+          if (bossHealthEl) bossHealthEl.style.display = "none"; // Null check
+          updateUI(0);
+          announce("Game initialized. Ready to start.", true);
+        }
+
+        function setGameState(newState) {
+          console.log(`Changing game state from ${gameState} to ${newState}`);
+          const oldState = gameState;
+          gameState = newState;
+          if (gameMessageEl) gameMessageEl.classList.remove("visible"); // Null check
+          if (restartButton) restartButton.style.display = "none"; // Null check
+          if (startButton) startButton.style.display = "none"; // Null check
+          setTimeout(() => {
+            // Add null checks for UI elements inside switch
+            switch (newState) {
+              case "START":
+                if (messageTextEl)
+                  messageTextEl.textContent = "Duplicator Evolved!";
+                if (startButton) startButton.style.display = "block";
+                if (gameMessageEl) gameMessageEl.classList.add("visible");
+                if (startButton) startButton.focus();
+                break;
+              case "PLAYING":
+                if (oldState !== "PAUSED") {
+                  announce(
+                    `Wave ${wave} starting. Enemies: ${minionsToSpawn}`,
+                    true
+                  );
+                  minionsSpawnedThisWave = 0;
+                  minionsDefeatedThisWave = 0;
+                  lastMinionSpawnTime = performance.now();
+                }
+                if (canvas) canvas.focus();
+                break;
+              case "BOSS_FIGHT":
+                if (oldState !== "PAUSED") {
+                  announce("Warning! Boss approaching!", true);
+                  spawnBoss();
+                  if (bossHealthEl) bossHealthEl.style.display = "flex";
+                  updateUI(performance.now());
+                }
+                if (canvas) canvas.focus();
+                break;
+              case "PAUSED":
+                if (messageTextEl) messageTextEl.textContent = "Paused";
+                if (gameMessageEl) gameMessageEl.classList.add("visible");
+                break;
+              case "GAME_OVER":
+                if (score > highScore) {
+                  highScore = score;
+                  localStorage.setItem(
+                    "superheroDuplicatorHighScore",
+                    highScore
+                  );
+                  if (messageTextEl)
+                    messageTextEl.textContent = `New High Score: ${score}!`;
+                  announce(
+                    `Game Over. Level ${
+                      player?.level || 1
+                    }. Base Str: ${Math.round(
+                      (player?.playerBaseStrengthMultiplier || 1) * 100
+                    )}%. New High Score: ${score}!`,
+                    true
+                  );
+                } // Null checks for player
+                else {
+                  if (messageTextEl)
+                    messageTextEl.textContent = `Game Over! Score: ${score}`;
+                  announce(
+                    `Game Over. Level ${
+                      player?.level || 1
+                    }. Base Str: ${Math.round(
+                      (player?.playerBaseStrengthMultiplier || 1) * 100
+                    )}%. Final Score: ${score}. High Score: ${highScore}`,
+                    true
+                  );
+                } // Null checks for player
+                if (restartButton) restartButton.style.display = "block";
+                if (gameMessageEl) gameMessageEl.classList.add("visible");
+                if (restartButton) restartButton.focus();
+                break;
+              case "WIN":
+                if (score > highScore) {
+                  highScore = score;
+                  localStorage.setItem(
+                    "superheroDuplicatorHighScore",
+                    highScore
+                  );
+                  if (messageTextEl)
+                    messageTextEl.textContent = `Victory! New High Score: ${score}!`;
+                  announce(
+                    `Victory! Reached Level ${
+                      player?.level || 1
+                    }. Base Str: ${Math.round(
+                      (player?.playerBaseStrengthMultiplier || 1) * 100
+                    )}%. New High Score: ${score}!`,
+                    true
+                  );
+                } // Null checks for player
+                else {
+                  if (messageTextEl)
+                    messageTextEl.textContent = `You Win! Final Score: ${score}`;
+                  announce(
+                    `Victory! Reached Level ${
+                      player?.level || 1
+                    }. Base Str: ${Math.round(
+                      (player?.playerBaseStrengthMultiplier || 1) * 100
+                    )}%. Final Score: ${score}. High Score: ${highScore}`,
+                    true
+                  );
+                } // Null checks for player
+                if (restartButton) restartButton.style.display = "block";
+                if (gameMessageEl) gameMessageEl.classList.add("visible");
+                if (restartButton) restartButton.focus();
+                break;
+            }
+          }, 50);
+        }
+
+        function trySetCloneFormation(newState, currentTime) {
+          if (
+            cloneFormationState === "MERGING" ||
+            cloneFormationState === "AUTO_MERGING" ||
+            cloneFormationState === newState
+          ) {
+            return;
+          }
+          const isDifferentFormation =
+            (newState === "GROUPED" &&
+              cloneFormationState === "AGGRESSIVE_FOLLOW") ||
+            (newState === "AGGRESSIVE_FOLLOW" &&
+              cloneFormationState === "GROUPED");
+          if (
+            !isDifferentFormation &&
+            currentTime - lastFormationChangeTime < FORMATION_CHANGE_COOLDOWN
+          ) {
+            announce("Formation change cooling down...", false);
+            return;
+          }
+          console.log(
+            `Attempting formation change from ${cloneFormationState} to ${newState}`
+          );
+          lastFormationChangeTime = currentTime;
+          isFormationChangeOnCooldown = true;
+          setTimeout(() => {
+            isFormationChangeOnCooldown = false;
+            updateUI(performance.now());
+          }, FORMATION_CHANGE_COOLDOWN);
+          const oldState = cloneFormationState;
+          cloneFormationState = newState;
+          let stateName = newState
+            .replace("_", " ")
+            .toLowerCase()
+            .replace(/\b\w/g, (l) => l.toUpperCase());
+          announce(`Clones: ${stateName} Mode`, true);
+          if (newState === "GROUPED")
+            createParticles(
+              player.x,
+              player.y,
+              PARTICLE_COUNT_GROUP,
+              cssVars.particleGroup || "#818cf8",
+              3,
+              8
+            );
+          // Fallback
+          else if (newState === "AGGRESSIVE_FOLLOW")
+            createParticles(
+              player.x,
+              player.y,
+              PARTICLE_COUNT_DISBAND,
+              cssVars.particleDisband || "#ff6b6b",
+              5,
+              10
+            ); // Fallback
+          updateUI(currentTime);
+        }
+
+        function spawnMinion() {
+          const edgeMargin = 100;
+          const edge = Math.floor(Math.random() * 4);
+          let spawnX, spawnY;
+          switch (edge) {
+            case 0:
+              spawnX = Math.random() * canvasWidth;
+              spawnY = -edgeMargin;
+              break;
+            case 1:
+              spawnX = canvasWidth + edgeMargin;
+              spawnY = Math.random() * canvasHeight;
+              break;
+            case 2:
+              spawnX = Math.random() * canvasWidth;
+              spawnY = canvasHeight + edgeMargin;
+              break;
+            case 3:
+              spawnX = -edgeMargin;
+              spawnY = Math.random() * canvasHeight;
+              break;
+          }
+          if (Math.random() < SHOOTING_MINION_CHANCE)
+            enemies.push(new ShootingMinion(spawnX, spawnY));
+          else enemies.push(new Minion(spawnX, spawnY));
+          minionsSpawnedThisWave++;
+        }
+        function spawnBoss() {
+          enemies.push(new Boss(canvasWidth / 2, -BOSS_SIZE * 2));
+          bossActive = true;
+        }
+        function handleCollisions() {
+          for (let i = projectiles.length - 1; i >= 0; i--) {
+            const proj = projectiles[i];
+            if (proj.collided) continue;
+            if (proj.isPlayerProjectile) {
+              for (let j = enemies.length - 1; j >= 0; j--) {
+                const enemy = enemies[j];
+                if (!enemy.isAlive) continue;
+                const collisionDistSq = (proj.radius + enemy.radius) ** 2;
+                if (
+                  distanceSq(proj.x, proj.y, enemy.x, enemy.y) < collisionDistSq
+                ) {
+                  enemy.takeDamage(proj.damage, proj.x, proj.y);
+                  proj.collided = true;
+                  break;
+                }
+              }
+            } else {
+              if (player && player.isAlive) {
+                // Null check
+                const collisionDistSq = (proj.radius + player.radius) ** 2;
+                if (
+                  distanceSq(proj.x, proj.y, player.x, player.y) <
+                  collisionDistSq
+                ) {
+                  player.takeDamage(proj.damage, proj.x, proj.y);
+                  proj.collided = true;
+                  continue;
+                }
+              }
+              for (let j = duplicates.length - 1; j >= 0; j--) {
+                const dup = duplicates[j];
+                if (!dup.isAlive) continue;
+                const collisionDistSq = (proj.radius + dup.radius) ** 2;
+                if (
+                  distanceSq(proj.x, proj.y, dup.x, dup.y) < collisionDistSq
+                ) {
+                  dup.takeDamage(proj.damage * 0.9, proj.x, proj.y);
+                  proj.collided = true;
+                  break;
+                }
+              }
+            }
+          }
+          if (player && player.isAlive) {
+            // Null check
+            for (let i = powerups.length - 1; i >= 0; i--) {
+              const powerup = powerups[i];
+              if (!powerup.isAlive) continue;
+              const collectionDistSq =
+                (player.radius + powerup.radius * 1.8) ** 2;
+              if (
+                distanceSq(player.x, player.y, powerup.x, powerup.y) <
+                collectionDistSq
+              ) {
+                player.activatePowerup(powerup.type);
+                powerup.isAlive = false;
+                createParticles(powerup.x, powerup.y, 18, "#ffffff", 3.5, 9);
+              }
+            }
+          }
+        }
+        function updatePowerups(deltaTime) {
+          let changed = false;
+          if (activePowerups.shield > 0) {
+            activePowerups.shield -= deltaTime;
+            if (activePowerups.shield <= 0) {
+              activePowerups.shield = 0;
+              announce("Shield expired.");
+              changed = true;
+            }
+          }
+          if (activePowerups.rapidFire > 0) {
+            activePowerups.rapidFire -= deltaTime;
+            if (activePowerups.rapidFire <= 0) {
+              activePowerups.rapidFire = 0;
+              announce("Rapid fire ended.");
+              changed = true;
+            }
+          }
+          return changed;
+        }
+
+        function updateUI(currentTime) {
+          // Add null checks for all UI elements accessed here
+          if (scoreEl) scoreEl.textContent = `Score: ${score}`;
+          if (highScoreEl) highScoreEl.textContent = `Best: ${highScore}`;
+          if (player && player.isAlive) {
+            if (playerHealthEl)
+              playerHealthEl.textContent = Math.max(
+                0,
+                Math.ceil(player.health)
+              );
+            if (playerStrengthEl)
+              playerStrengthEl.textContent = `${Math.round(
+                player.playerBaseStrengthMultiplier * 100
+              )}%`;
+            if (playerLevelValueEl)
+              playerLevelValueEl.textContent = player.level;
+            const xpRatio = player.xp / player.xpToNextLevel;
+            if (xpFillEl)
+              xpFillEl.style.width = `${Math.min(1, xpRatio) * 100}%`;
+            if (xpTextEl)
+              xpTextEl.textContent = `${Math.floor(player.xp)}/${
+                player.xpToNextLevel
+              }`;
+            if (duplicateCountEl)
+              duplicateCountEl.textContent = `${
+                duplicates.length
+              } / ${player.getCurrentMaxDuplicates()}`;
+          } else {
+            if (playerHealthEl) playerHealthEl.textContent = "0";
+            if (playerStrengthEl) playerStrengthEl.textContent = "100%";
+            if (duplicateCountEl)
+              duplicateCountEl.textContent = `0 / ${DUPLICATE_BASE_MAX}`;
+            if (playerLevelValueEl) playerLevelValueEl.textContent = "1";
+            if (xpFillEl) xpFillEl.style.width = "0%";
+            if (xpTextEl) xpTextEl.textContent = `0/${XP_BASE_REQ}`;
+          }
+          if (waveInfoEl) waveInfoEl.textContent = `Wave: ${wave}`;
+          const shootProgress = Math.min(
+            1,
+            (currentTime - lastShootTime) / currentShootCooldown
+          );
+          if (shootCooldownIndicator)
+            shootCooldownIndicator.style.width = `${shootProgress * 100}%`;
+          const duplicateProgress = Math.min(
+            1,
+            (currentTime - lastDuplicateTime) / DUPLICATE_COOLDOWN
+          );
+          if (duplicateCooldownIndicator)
+            duplicateCooldownIndicator.style.width = `${
+              duplicateProgress * 100
+            }%`;
+          const mergeProgress = Math.min(
+            1,
+            (currentTime - lastMergeTime) / MERGE_COOLDOWN
+          );
+          if (mergeCooldownIndicator)
+            mergeCooldownIndicator.style.width = `${mergeProgress * 100}%`;
+          const formationProgress = isFormationChangeOnCooldown
+            ? Math.min(
+                1,
+                (currentTime - lastFormationChangeTime) /
+                  FORMATION_CHANGE_COOLDOWN
+              )
+            : 1;
+          const formationCooldownTransform = `translateY(${
+            (1 - formationProgress) * 100
+          }%)`;
+          if (groupButtonCooldownOverlay)
+            groupButtonCooldownOverlay.style.transform =
+              formationCooldownTransform;
+          if (disbandButtonCooldownOverlay)
+            disbandButtonCooldownOverlay.style.transform =
+              formationCooldownTransform;
+          const canChangeFormation =
+            player &&
+            player.isAlive &&
+            duplicates.length > 0 &&
+            cloneFormationState !== "MERGING" &&
+            cloneFormationState !== "AUTO_MERGING";
+          if (groupButton)
+            groupButton.disabled =
+              !canChangeFormation ||
+              cloneFormationState === "GROUPED" ||
+              isFormationChangeOnCooldown;
+          if (disbandButton)
+            disbandButton.disabled =
+              !canChangeFormation ||
+              cloneFormationState === "AGGRESSIVE_FOLLOW" ||
+              isFormationChangeOnCooldown;
+          if (mergeButton)
+            mergeButton.disabled =
+              !canChangeFormation ||
+              mergeProgress < 1 ||
+              cloneFormationState === "MERGING" ||
+              cloneFormationState === "AUTO_MERGING";
+          if (mergeButtonCooldownOverlay)
+            mergeButtonCooldownOverlay.style.transform = `translateY(${
+              (1 - mergeProgress) * 100
+            }%)`;
+          let statusText =
+            "Mode: " +
+            cloneFormationState
+              .replace("_", " ")
+              .toLowerCase()
+              .replace(/\b\w/g, (l) => l.toUpperCase());
+          if (
+            cloneFormationState === "AGGRESSIVE_FOLLOW" &&
+            player &&
+            player.health / player.maxHealth < LOW_HEALTH_THRESHOLD
+          ) {
+            statusText += " (Defending)";
+          } else if (cloneFormationState === "AUTO_MERGING") {
+            statusText = "Mode: Emergency Merge!";
+          }
+          if (formationStatusEl) {
+            formationStatusEl.textContent = statusText;
+            formationStatusEl.style.color =
+              cloneFormationState === "AGGRESSIVE_FOLLOW"
+                ? cssVars.minionPrimary || "#ff6b6b"
+                : cloneFormationState === "GROUPED"
+                ? cssVars.powerupShieldPrimary || "#54a0ff"
+                : cloneFormationState === "MERGING" ||
+                  cloneFormationState === "AUTO_MERGING"
+                ? cssVars.particleMerge || "#f472b6"
+                : cssVars.textMutedColorGame || "#94a3b8"; // Fallbacks
+          }
+          if (powerupTimersContainer) powerupTimersContainer.innerHTML = ""; // Clear existing timers
+          if (activePowerups.shield > 0) {
+            const timerEl = document.createElement("div");
+            timerEl.className = "powerup-timer shield";
+            timerEl.innerHTML = `🛡️ <span>${(
+              activePowerups.shield / 1000
+            ).toFixed(1)}s</span>`;
+            if (powerupTimersContainer)
+              powerupTimersContainer.appendChild(timerEl);
+          }
+          if (activePowerups.rapidFire > 0) {
+            const timerEl = document.createElement("div");
+            timerEl.className = "powerup-timer rapid-fire";
+            timerEl.innerHTML = `⚡ <span>${(
+              activePowerups.rapidFire / 1000
+            ).toFixed(1)}s</span>`;
+            if (powerupTimersContainer)
+              powerupTimersContainer.appendChild(timerEl);
+          }
+          if (mergeBoostTimer > 0 && player && player.isAlive) {
+            const timerEl = document.createElement("div");
+            timerEl.className = "powerup-timer merge-boost";
+            timerEl.innerHTML = `⚔️ Boost ${Math.round(
+              currentMergeBoostMultiplier * 100
+            )}% <span>(${(mergeBoostTimer / 1000).toFixed(1)}s)</span>`;
+            if (powerupTimersContainer)
+              powerupTimersContainer.appendChild(timerEl);
+          }
+          if (
+            player &&
+            player.isAlive &&
+            player.playerBaseStrengthMultiplier > 1.01
+          ) {
+            const strengthEl = document.createElement("div");
+            strengthEl.className = "powerup-timer strength-boost";
+            strengthEl.innerHTML = `💪 Base ${Math.round(
+              player.playerBaseStrengthMultiplier * 100
+            )}%`;
+            if (powerupTimersContainer)
+              powerupTimersContainer.appendChild(strengthEl);
+          }
+          if (
+            bossActive &&
+            (gameState === "BOSS_FIGHT" || gameState === "WIN")
+          ) {
+            const boss = enemies.find((e) => e instanceof Boss);
+            if (boss) {
+              if (bossHealthSpan)
+                bossHealthSpan.textContent = Math.max(
+                  0,
+                  Math.ceil(boss.health)
+                );
+              if (bossHealthEl) bossHealthEl.style.display = "flex";
+            } else {
+              if (bossHealthEl) bossHealthEl.style.display = "none";
+            }
+          } else {
+            if (bossHealthEl) bossHealthEl.style.display = "none";
+          }
+        }
+
+        function triggerScreenShake(intensity) {
+          screenShakeIntensity = Math.max(screenShakeIntensity, intensity);
+        }
+        function applyScreenShake() {
+          if (screenShakeIntensity > 0.1) {
+            const shakeX = (Math.random() - 0.5) * 2 * screenShakeIntensity;
+            const shakeY = (Math.random() - 0.5) * 2 * screenShakeIntensity;
+            ctx.translate(shakeX, shakeY);
+            screenShakeIntensity *= SCREEN_SHAKE_DECAY;
+          } else {
+            screenShakeIntensity = 0;
+          }
+        }
+        function drawStackIndicator() {
+          if (
+            player &&
+            player.isAlive &&
+            cloneFormationState === "GROUPED" &&
+            duplicates.length > 0
+          ) {
+            const count = duplicates.length + 1;
+            const indicatorAngle = Math.PI;
+            const indicatorRadius =
+              player.radius + DUPLICATE_GROUP_DISTANCE + 15;
+            const indicatorX =
+              player.x + Math.cos(indicatorAngle) * indicatorRadius;
+            const indicatorY =
+              player.y + Math.sin(indicatorAngle) * indicatorRadius;
+            ctx.save();
+            ctx.font =
+              "bold 18px " +
+              (getCssVariable("--font-family-game") || "sans-serif"); // Fallback
+            ctx.fillStyle = cssVars.stackIndicator || "rgba(255,255,255,0.9)"; // Fallback
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.shadowColor = "rgba(0,0,0,0.8)";
+            ctx.shadowBlur = 5;
+            ctx.shadowOffsetX = 1;
+            ctx.shadowOffsetY = 1;
+            ctx.fillText(`x${count}`, indicatorX, indicatorY);
+            ctx.restore();
+          }
+        }
+
+        let lastTime = 0;
+        let timeSinceLastUIUpdate = 0;
+        const UI_UPDATE_INTERVAL = 80;
+
+        function gameLoop(currentTime) {
+          animationFrameId = requestAnimationFrame(gameLoop);
+          const deltaTime = currentTime - lastTime;
+          if (deltaTime < 8) {
+            lastTime = currentTime;
+            return;
+          }
+          const cappedDeltaTime = Math.min(deltaTime, 35);
+          lastTime = currentTime;
+          gameTime = currentTime;
+          if (gameState === "PAUSED") {
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            drawStarfield(0);
+            powerups.forEach((p) => p.draw());
+            particles.forEach((p) => p.draw());
+            duplicates.forEach((dup) => dup.draw());
+            if (player && player.isAlive) player.draw();
+            enemies.forEach((enemy) => enemy.draw());
+            projectiles.forEach((proj) => proj.draw());
+            drawCrosshair();
+            drawStackIndicator();
+            return;
+          }
+          let shouldUpdateUI = false;
+          if (gameState === "PLAYING" || gameState === "BOSS_FIGHT") {
+            if (updatePowerups(cappedDeltaTime)) shouldUpdateUI = true;
+            if (player && player.isAlive)
+              player.update(currentTime, cappedDeltaTime);
+            const initialDupCount = duplicates.length;
+            let removedCount = 0;
+            duplicates = duplicates.filter((dup) => {
+              if (dup.isAlive) {
+                dup.update(currentTime, cappedDeltaTime);
+                if (!dup.isAlive) removedCount++;
+                return dup.isAlive;
+              }
+              return false;
+            });
+            if (removedCount > 0) {
+              duplicates.forEach((d, idx) => (d.index = idx));
+              shouldUpdateUI = true;
+              if (
+                duplicates.length === 0 &&
+                (cloneFormationState === "MERGING" ||
+                  cloneFormationState === "AUTO_MERGING")
+              ) {
+                console.log(
+                  "All duplicates merged, resetting formation to FOLLOWING"
+                );
+                cloneFormationState = "FOLLOWING";
+                if (cloneFormationState === "MERGING") player.resetMergeBoost();
+              }
+            }
+            if (
+              player &&
+              !player.isAlive &&
+              duplicates.length > 0 &&
+              cloneFormationState !== "FOLLOWING"
+            ) {
+              cloneFormationState = "FOLLOWING";
+              shouldUpdateUI = true;
+            }
+            if (gameState === "PLAYING" && !bossActive) {
+              if (
+                minionsSpawnedThisWave < minionsToSpawn &&
+                currentTime - lastMinionSpawnTime > MINION_SPAWN_INTERVAL
+              ) {
+                spawnMinion();
+                lastMinionSpawnTime = currentTime;
+              }
+              const activeMinions = enemies.some(
+                (e) =>
+                  (e instanceof Minion || e instanceof ShootingMinion) &&
+                  e.isAlive
+              );
+              if (
+                minionsDefeatedThisWave >= minionsToSpawn &&
+                !activeMinions &&
+                minionsSpawnedThisWave >= minionsToSpawn
+              ) {
+                wave++;
+                minionsToSpawn += MINIONS_PER_WAVE_INCREASE;
+                minionsDefeatedThisWave = 0;
+                minionsSpawnedThisWave = 0;
+                shouldUpdateUI = true;
+                if (wave >= BOSS_WAVE_TRIGGER && !bossActive)
+                  setGameState("BOSS_FIGHT");
+                else setGameState("PLAYING");
+              }
+            }
+            enemies = enemies.filter((enemy) => {
+              if (!enemy.isAlive) return false;
+              enemy.update(currentTime, cappedDeltaTime);
+              return enemy.isAlive;
+            });
+            projectiles = projectiles.filter((proj) => {
+              if (proj.collided) return false;
+              proj.update(cappedDeltaTime);
+              return !proj.isOutOfBounds();
+            });
+            particles = particles.filter((p) => {
+              p.update(cappedDeltaTime);
+              return p.life > 0 && p.alpha > 0.01 && p.size > 0.1;
+            });
+            powerups = powerups.filter((p) => {
+              if (!p.isAlive) return false;
+              p.update(cappedDeltaTime);
+              return p.isAlive;
+            });
+            handleCollisions();
+          }
+          timeSinceLastUIUpdate += cappedDeltaTime;
+          if (shouldUpdateUI || timeSinceLastUIUpdate >= UI_UPDATE_INTERVAL) {
+            updateUI(currentTime);
+            timeSinceLastUIUpdate = 0;
+          }
+          ctx.save();
+          ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+          drawStarfield(cappedDeltaTime);
+          applyScreenShake();
+          powerups.forEach((p) => p.draw());
+          particles.forEach((p) => p.draw());
+          if (player && player.isAlive) player.draw();
+          duplicates.forEach((dup) => dup.draw());
+          enemies.forEach((enemy) => enemy.draw());
+          projectiles.forEach((proj) => proj.draw());
+          drawStackIndicator();
+          if (
+            gameState === "PLAYING" ||
+            gameState === "BOSS_FIGHT" ||
+            gameState === "PAUSED"
+          )
+            drawCrosshair();
+          ctx.restore();
+        }
+
+        // --- Event Listeners ---
+        function handleKeyDown(e) {
+          const keyLower = e.key.toLowerCase();
+          keys[keyLower] = true;
+          if (
+            [
+              " ",
+              "arrowup",
+              "arrowdown",
+              "arrowleft",
+              "arrowright",
+              "w",
+              "a",
+              "s",
+              "d",
+              "e",
+              "p",
+              "g",
+              "h",
+              "r",
+            ].includes(keyLower)
+          )
+            e.preventDefault();
+          if (keyLower === "p") {
+            if (gameState === "PLAYING" || gameState === "BOSS_FIGHT") {
+              setGameState("PAUSED");
+              announce("Game paused.", true);
+            } else if (gameState === "PAUSED") {
+              setGameState(bossActive ? "BOSS_FIGHT" : "PLAYING");
+              announce("Game resumed.", true);
+              lastTime = performance.now();
+            }
+          }
+        }
+        function handleKeyUp(e) {
+          keys[e.key.toLowerCase()] = false;
+        }
+        function handleMouseMove(e) {
+          const rect = canvas.getBoundingClientRect();
+          mouse.x = e.clientX - rect.left;
+          mouse.y = e.clientY - rect.top;
+        }
+        function handleMouseDown(e) {
+          if (e.button === 0) {
+            mouse.down = true;
+            if (
+              (gameState === "PLAYING" || gameState === "BOSS_FIGHT") &&
+              player &&
+              player.isAlive
+            ) {
+              const currentTime = performance.now();
+              if (currentTime - lastShootTime > currentShootCooldown) {
+                player.shoot();
+                lastShootTime = currentTime;
+                updateUI(currentTime);
+              }
+            }
+          }
+        }
+        function handleMouseUp(e) {
+          if (e.button === 0) mouse.down = false;
+        }
+        function handleResize() {
+          resizeCanvas();
+        }
+        function startGame() {
+          initGame();
+          setGameState("PLAYING");
+          if (animationFrameId) cancelAnimationFrame(animationFrameId);
+          lastTime = performance.now();
+          gameLoop(lastTime);
+        }
+
+        // Attach Event Listeners (with null checks)
+        window.addEventListener("keydown", handleKeyDown);
+        window.addEventListener("keyup", handleKeyUp);
+        if (canvas) {
+          canvas.addEventListener("mousemove", handleMouseMove);
+          canvas.addEventListener("mousedown", handleMouseDown);
+          canvas.addEventListener("mouseup", handleMouseUp);
+          canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+        }
+        window.addEventListener("resize", handleResize);
+        if (startButton) startButton.addEventListener("click", startGame);
+        if (restartButton) restartButton.addEventListener("click", startGame);
+        if (groupButton)
+          groupButton.addEventListener("click", () => {
+            if (player) trySetCloneFormation("GROUPED", performance.now());
+          });
+        if (disbandButton)
+          disbandButton.addEventListener("click", () => {
+            if (player)
+              trySetCloneFormation("AGGRESSIVE_FOLLOW", performance.now());
+          });
+        if (mergeButton)
+          mergeButton.addEventListener("click", () => {
+            if (
+              player &&
+              player.isAlive &&
+              performance.now() - lastMergeTime > MERGE_COOLDOWN &&
+              duplicates.length > 0 &&
+              cloneFormationState !== "MERGING" &&
+              cloneFormationState !== "AUTO_MERGING"
+            ) {
+              player.startMerge(performance.now());
+              lastMergeTime = performance.now();
+              updateUI(performance.now());
+            }
+          });
+
+        // --- Initial Setup ---
+        console.log(
+          "Superhero Duplicator Evolved - Merge Power v7 Initializing..."
+        );
+        resizeCanvas(); // Initial resize
+        setGameState("START");
+      })(); // End IIFE
+    </script>
+  </body>
+</html>
